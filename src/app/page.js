@@ -1,65 +1,99 @@
-import Image from "next/image";
+'use client';
+
+import dynamic from 'next/dynamic';
+import { milestones } from '../data/milestones';
+import CustomCursor from '../components/CustomCursor';
+import HeroSection from '../components/HeroSection';
+
+const getMilestoneOffset = (index, total) => {
+  if (index === total - 1) return 1.0;
+  return (index + 1) / (total + 1);
+};
+
+// Dynamically import the 3D Canvas component with SSR disabled
+const SatyadevTimeline = dynamic(() => import('../components/SatyadevTimeline'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-screen bg-black flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-t-amber-500 border-zinc-800 rounded-full animate-spin"></div>
+        <p className="text-zinc-500 text-sm font-mono tracking-widest uppercase animate-pulse">
+          Loading 3D Engine...
+        </p>
+      </div>
+    </div>
+  ),
+});
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="relative w-full h-screen bg-black overflow-hidden font-sans select-none" style={{ cursor: 'none' }}>
+
+      {/* Dynamic 3D Scene */}
+      <div className="absolute inset-0 w-full h-full z-0">
+        <SatyadevTimeline />
+      </div>
+
+      {/* Hero Section */}
+      <div id="hero-section" className="absolute inset-0 w-full h-full pointer-events-none z-30 will-change-transform">
+        <HeroSection />
+      </div>
+
+      {/* Cinematic Ambient Overlay Gradient (Vignette) */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.85)_90%)] z-20" />
+
+      {/* --- HUD LAYER (All Interactive UI panels) --- */}
+
+
+
+
+
+      {/* 3. Bottom Progress Bar with Year Nodes */}
+      <div id="timeline-container" className="absolute bottom-8 left-16 right-16 z-20 opacity-0 pointer-events-none transition-opacity duration-1000">
+        <div className="relative w-full h-[3px] bg-zinc-800/40 rounded-full backdrop-blur-sm">
+          {/* Progress Fill */}
+          <div
+            id="timeline-progress-fill"
+            className="absolute top-0 left-0 h-full w-0 bg-gradient-to-r from-amber-500 to-red-600 transition-all duration-100 ease-out rounded-full"
+          />
+
+          {/* Year Tick Marks and Labels */}
+          {milestones.map((m, index) => {
+            const percentage = getMilestoneOffset(index, milestones.length) * 100;
+            return (
+              <div
+                key={index}
+                className="absolute top-1/2 -translate-y-1/2"
+                style={{ left: `${percentage}%` }}
+              >
+                {/* Visual Tick Dot */}
+                <div
+                  id={`progress-tick-${index}`}
+                  className="absolute w-2 h-2 rounded-full bg-zinc-700 -translate-x-1/2 -translate-y-1/2 border border-black transition-all duration-300"
+                />
+
+                {/* Floating Year Label */}
+                <span
+                  id={`progress-year-${index}`}
+                  className="absolute left-0 text-[10px] font-mono font-bold tracking-tighter text-zinc-500 opacity-60 transition-all duration-300 pointer-events-none select-none"
+                  style={{
+                    transform: 'translate(-50%, -20px)',
+                  }}
+                >
+                  {m.year}
+                </span>
+              </div>
+            );
+          })}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+
+
+
+
+
+      {/* Hardware-independent HTML custom cursor rendering */}
+      <CustomCursor />
+    </main>
   );
 }
