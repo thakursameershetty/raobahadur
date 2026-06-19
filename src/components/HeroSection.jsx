@@ -150,7 +150,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       className="relative w-full h-full flex justify-center items-center overflow-hidden bg-[#030807] pointer-events-none"
     >
       <img
-        src="/layers/last.png"
+        src={isMobile ? "/mobile-layers/last.png" : "/layers/last.png"}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.02"
         alt="Background"
@@ -160,7 +160,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       />
 
       <img
-        src="/layers/fourth.png"
+        src={isMobile ? "/mobile-layers/fourth.png" : "/layers/fourth.png"}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.035"
         alt="Background"
@@ -170,7 +170,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       />
 
       <img
-        src="/layers/third.png"
+        src={isMobile ? "/mobile-layers/third.png" : "/layers/third.png"}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.05"
         alt="Feathers"
@@ -180,7 +180,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       />
 
       <img
-        src="/layers/second.png"
+        src={isMobile ? "/mobile-layers/second.png" : "/layers/second.png"}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.08"
         alt="Back Elements"
@@ -190,7 +190,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       />
 
       <img
-        src="/layers/top.png"
+        src={isMobile ? "/mobile-layers/top.png" : "/layers/top.png"}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.12"
         alt="Satyadev"
@@ -273,7 +273,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
 
       {/* Bottom Center: Show the Love Button */}
       {!isWallOpen && (
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 pointer-events-auto flex flex-col items-center">
+        <div className="absolute bottom-20 md:bottom-12 left-1/2 -translate-x-1/2 z-50 pointer-events-auto flex flex-col items-center">
           <button
             onClick={onOpenWall}
             className="group relative overflow-hidden px-6 py-2.5 text-xs md:px-8 md:py-3.5 md:text-sm tracking-[0.25em] uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap"

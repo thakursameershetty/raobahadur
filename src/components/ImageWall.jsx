@@ -1,9 +1,72 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 export default function ImageWall({ onBack }) {
   const iframeRef = useRef(null);
+  const desktopLayerRef = useRef(null);
+  const tabletLayerRef = useRef(null);
+  const mobileLayerRef = useRef(null);
+
+  useEffect(() => {
+    let currentScrollY = 0;
+    let currentMouse = { x: 0, y: 0 };
+    let targetMouse = { x: 0, y: 0 };
+    let rafId = null;
+
+    const updateStyles = () => {
+      // Smoothly interpolate mouse coords for extra buttery parallax
+      currentMouse.x += (targetMouse.x - currentMouse.x) * 0.08;
+      currentMouse.y += (targetMouse.y - currentMouse.y) * 0.08;
+
+      // Apply parallax offsets: scrollY * -offset multiplier, mouse * -range px
+      if (desktopLayerRef.current) {
+        const tx = currentMouse.x * -25;
+        const ty = currentMouse.y * -25 + currentScrollY * -12;
+        desktopLayerRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.08)`;
+      }
+      if (tabletLayerRef.current) {
+        const tx = currentMouse.x * -20;
+        const ty = currentMouse.y * -20 + currentScrollY * -10;
+        tabletLayerRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.08)`;
+      }
+      if (mobileLayerRef.current) {
+        const tx = currentMouse.x * -15;
+        const ty = currentMouse.y * -15 + currentScrollY * -8;
+        mobileLayerRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.08)`;
+      }
+
+      rafId = requestAnimationFrame(updateStyles);
+    };
+
+    rafId = requestAnimationFrame(updateStyles);
+
+    const handleMessage = (event) => {
+      if (!event.data) return;
+      if (event.data.type === 'WALL_SCROLL') {
+        currentScrollY = event.data.scrollY;
+      } else if (event.data.type === 'WALL_MOUSEMOVE') {
+        targetMouse.x = event.data.nx;
+        targetMouse.y = event.data.ny;
+      }
+    };
+
+    const handleMouseMove = (e) => {
+      const nx = (e.clientX / window.innerWidth) - 0.5;
+      const ny = (e.clientY / window.innerHeight) - 0.5;
+      targetMouse.x = nx;
+      targetMouse.y = ny;
+    };
+
+    window.addEventListener('message', handleMessage);
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   const triggerUploadModal = () => {
     if (iframeRef.current) {
@@ -101,6 +164,34 @@ export default function ImageWall({ onBack }) {
         allow="camera"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       />
+
+      {/* Responsive Parallax Overlays */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 5 }}>
+        {/* Desktop Layer */}
+        <img
+          ref={desktopLayerRef}
+          src="/wall-layers/wall-layer-desktop.png"
+          alt=""
+          className="hidden md:block absolute inset-0 w-full h-full object-cover will-change-transform"
+          style={{ transform: 'scale(1.08)', opacity: 0.95 }}
+        />
+        {/* Tablet Layer */}
+        <img
+          ref={tabletLayerRef}
+          src="/wall-layers/wall-layer-tablet.png"
+          alt=""
+          className="hidden sm:block md:hidden absolute inset-0 w-full h-full object-cover will-change-transform"
+          style={{ transform: 'scale(1.08)', opacity: 0.95 }}
+        />
+        {/* Mobile Layer */}
+        <img
+          ref={mobileLayerRef}
+          src="/wall-layers/wall-layer-mobile.png"
+          alt=""
+          className="block sm:hidden absolute inset-0 w-full h-full object-cover will-change-transform"
+          style={{ transform: 'scale(1.08)', opacity: 0.95 }}
+        />
+      </div>
 
       {/* Vertical gold divider accent on the left edge */}
       <div className="absolute top-0 left-0 bottom-0 w-[1px] z-20 pointer-events-none"

@@ -952,6 +952,7 @@
     let scrollY = 0;
     let scrollYTarget = 0;
     let maxScrollY = 0;
+    let lastSentScrollY = -9999;
     const SCROLL_SMOOTH = 0.09;
 
     function computeMaxScroll() {
@@ -1128,6 +1129,12 @@
       const camWorldY = -scrollY;
       camera.position.y = camWorldY;
       camera.lookAt(0, camWorldY, 0);
+
+      // Post scroll updates to the parent window for parallax calculation
+      if (Math.abs(scrollY - lastSentScrollY) > 0.005) {
+        window.parent.postMessage({ type: 'WALL_SCROLL', scrollY }, '*');
+        lastSentScrollY = scrollY;
+      }
 
       // Lights track camera vertically
       keyLight.position.set(3, camWorldY + 7, 11);
@@ -1557,13 +1564,19 @@
       }
     });
 
-    /* ── Resize ── */
     window.addEventListener('resize', () => {
       const w = innerWidth, h = innerHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       recalcGridLayout();
+    });
+
+    /* ── Mouse Move for Parallax ── */
+    window.addEventListener('mousemove', e => {
+      const nx = (e.clientX / window.innerWidth) - 0.5;
+      const ny = (e.clientY / window.innerHeight) - 0.5;
+      window.parent.postMessage({ type: 'WALL_MOUSEMOVE', nx, ny }, '*');
     });
   </script>
 </body>
