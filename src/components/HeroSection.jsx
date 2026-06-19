@@ -151,51 +151,51 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
     >
       <img
         src="/layers/last.png"
-        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.02"
         alt="Background"
         style={{
-          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 20vh)), 0) scale(${isMobile ? 0.95 : 1.0})`
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 20vh)), 0)'
         }}
       />
 
       <img
         src="/layers/fourth.png"
-        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.035"
         alt="Background"
         style={{
-          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 50vh)), 0) scale(${isMobile ? 0.85 : 1.0})`
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 50vh)), 0)'
         }}
       />
 
       <img
         src="/layers/third.png"
-        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.05"
         alt="Feathers"
         style={{
-          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 90vh)), 0) scale(${isMobile ? 0.80 : 1.0})`
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 90vh)), 0)'
         }}
       />
 
       <img
         src="/layers/second.png"
-        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.08"
         alt="Back Elements"
         style={{
-          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 140vh)), 0) scale(${isMobile ? 0.76 : 1.0})`
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 140vh)), 0)'
         }}
       />
 
       <img
         src="/layers/top.png"
-        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.12"
         alt="Satyadev"
         style={{
-          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 200vh)), 0) scale(${isMobile ? 0.72 : 1.0})`
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 200vh)), 0)'
         }}
       />
 
@@ -217,9 +217,8 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
 
       {/* The Parallax Title Layer */}
       <div
-        className={`absolute flex flex-col parallax-layer pointer-events-none z-30 transition-all duration-300 ${
-          isMobile ? 'bottom-[24%] left-1/2 items-center' : 'top-[8%] left-[5%] items-start'
-        }`}
+        className={`absolute flex flex-col parallax-layer pointer-events-none z-30 transition-all duration-300 ${isMobile ? 'bottom-[24%] left-1/2 items-center' : 'top-[8%] left-[5%] items-start'
+          }`}
         data-speed="0.15"
         style={{
           transform: isMobile
@@ -242,31 +241,31 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
           </p>
           <TimberText
             text="RAO"
-            fontSize={isMobile ? 48 : 60}
-            tracking={isMobile ? 4 : 6}
+            fontSize={isMobile ? 32 : 60}
+            tracking={isMobile ? 3 : 6}
             glow={true}
             className={isMobile ? 'mb-1 !justify-center' : 'mb-1 !justify-start'}
           />
           <TimberText
             text="BAHADUR"
-            fontSize={isMobile ? 48 : 60}
-            tracking={isMobile ? 4 : 6}
+            fontSize={isMobile ? 32 : 60}
+            tracking={isMobile ? 3 : 6}
             glow={true}
             className={isMobile ? '!justify-center' : '!justify-start'}
           />
         </div>
       </div>
 
-      {/* Top-right: Visitor Count */}
-      <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50 flex flex-col items-end pointer-events-auto">
+      {/* Top Center (Mobile) / Top-right (Desktop): Visitor Count */}
+      <div className="absolute top-4 left-0 right-0 md:left-auto md:right-8 md:top-8 z-50 flex flex-col items-center md:items-end pointer-events-auto">
         <h2
-          className="text-amber-500 text-xl md:text-3xl mb-1 tracking-wider drop-shadow-md"
+          className="text-amber-500 text-lg md:text-3xl mb-0.5 tracking-wider drop-shadow-md text-center"
           style={{ fontFamily: 'var(--font-raobahadur), serif' }}
         >
           I root for Satyadev
         </h2>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-white/90 font-mono text-[10px] md:text-sm tracking-widest uppercase drop-shadow-md">
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="text-white/90 font-mono text-[9px] md:text-sm tracking-widest uppercase drop-shadow-md text-center">
             Total Visits: <span className="font-bold text-white">{visitorCount !== null ? visitorCount.toLocaleString() : '...'}</span>
           </span>
         </div>
@@ -277,7 +276,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 pointer-events-auto flex flex-col items-center">
           <button
             onClick={onOpenWall}
-            className="group relative overflow-hidden px-8 py-3.5 text-sm tracking-[0.25em] uppercase font-semibold transition-all duration-500 ease-out"
+            className="group relative overflow-hidden px-6 py-2.5 text-xs md:px-8 md:py-3.5 md:text-sm tracking-[0.25em] uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               border: '1px solid rgba(201,162,76,0.6)',

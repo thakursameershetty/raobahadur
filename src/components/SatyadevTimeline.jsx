@@ -249,9 +249,10 @@ function CameraRig() {
       return;
     }
 
-    // On mobile, scale down camera path's X offset to remain closer to center runway
+    // On mobile, keep the camera centered in the 3D space and shifted slightly back
     if (isMobile) {
-      pointOnCurve.x *= 0.5;
+      pointOnCurve.x = 0;
+      pointOnCurve.z += 1.6;
     }
 
     // Set the camera position directly to the eased point (already smoothed)
@@ -264,7 +265,8 @@ function CameraRig() {
     }
 
     if (isMobile) {
-      lookAtPoint.x *= 0.5;
+      lookAtPoint.x = 0;
+      lookAtPoint.z += 1.6;
     }
 
     // Calculate new target rotation matrix if eye and target are not identical
@@ -446,15 +448,15 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
 
   // Responsive Layout Scaling Logic
   const isLeftSide = position[0] < 0;
-  
+
   let textXOffset, textYOffset, textZOffset, textAnchor, textAlign;
   let backdropXOffset, backdropYOffset, backdropWidth, backdropHeight;
   let borderScale, posterScale;
-  
+
   if (isMobile) {
     posterScale = [2.4, 3.3, 1];
     borderScale = [2.48, 3.38, 1];
-    
+
     if (isClimax) {
       // Center the text below the poster for climax on mobile
       textXOffset = 0;
@@ -462,7 +464,7 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
       textZOffset = 0.05;
       textAnchor = 'center';
       textAlign = 'center';
-      
+
       backdropXOffset = 0;
       backdropYOffset = -0.4;
       backdropWidth = 2.8;
@@ -474,7 +476,7 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
       textZOffset = 0.05;
       textAnchor = isLeftSide ? 'left' : 'right';
       textAlign = isLeftSide ? 'left' : 'right';
-      
+
       backdropXOffset = isLeftSide ? 1.3 : -1.3;
       backdropYOffset = 0.2;
       backdropWidth = 2.5;
@@ -484,13 +486,13 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
     // Desktop layout (existing code)
     posterScale = [4, 5.5, 1];
     borderScale = [4.1, 5.6, 1];
-    
+
     textXOffset = isLeftSide ? 2.6 : -2.6;
     textYOffset = 0;
     textZOffset = 0.05;
     textAnchor = isLeftSide ? 'left' : 'right';
     textAlign = isLeftSide ? 'left' : 'right';
-    
+
     backdropXOffset = isLeftSide ? 1.6 : -1.6;
     backdropYOffset = 0.4;
     backdropWidth = 3.8;
@@ -559,8 +561,8 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
           {/* Year badge */}
           <Text
             position={[
-              isClimax && isMobile ? 0 : (isLeftSide ? 0.18 : -0.18), 
-              isClimax && isMobile ? 0.4 : 1.1, 
+              isClimax && isMobile ? 0 : (isLeftSide ? 0.18 : -0.18),
+              isClimax && isMobile ? 0.4 : 1.1,
               0
             ]}
             fontSize={isMobile ? 0.2 : 0.3}
@@ -576,8 +578,8 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
           {/* Title */}
           <Text
             position={[
-              isClimax && isMobile ? 0 : (isLeftSide ? 0.18 : -0.18), 
-              isClimax && isMobile ? 0.0 : 0.52, 
+              isClimax && isMobile ? 0 : (isLeftSide ? 0.18 : -0.18),
+              isClimax && isMobile ? 0.0 : 0.52,
               0
             ]}
             fontSize={isMobile ? 0.2 : 0.3}
@@ -595,8 +597,8 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
           {/* Description */}
           <Text
             position={[
-              isClimax && isMobile ? 0 : (isLeftSide ? 0.18 : -0.18), 
-              isClimax && isMobile ? -0.3 : -0.3, 
+              isClimax && isMobile ? 0 : (isLeftSide ? 0.18 : -0.18),
+              isClimax && isMobile ? -0.3 : -0.3,
               0
             ]}
             fontSize={isMobile ? 0.11 : 0.15}
