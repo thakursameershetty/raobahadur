@@ -53,7 +53,7 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.85)_90%)] z-20" />
 
         {/* Bottom Progress Bar with Year Nodes */}
-        <div id="timeline-container" className="absolute bottom-8 left-16 right-16 z-20 opacity-0 pointer-events-none transition-opacity duration-1000">
+        <div id="timeline-container" className="absolute bottom-8 left-6 right-6 md:left-16 md:right-16 z-20 opacity-0 pointer-events-none transition-opacity duration-1000">
           <div className="relative w-full h-[3px] bg-zinc-800/40 rounded-full backdrop-blur-sm">
             {/* Progress Fill */}
             <div

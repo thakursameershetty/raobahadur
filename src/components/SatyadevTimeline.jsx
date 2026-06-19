@@ -186,6 +186,8 @@ function CameraRig() {
   const scroll = useScroll();
   const curve = useMemo(() => new THREE.CatmullRomCurve3(PATH_POINTS), []);
   const easedOffsetRef = useRef(0);
+  const { size } = useThree();
+  const isMobile = size.width < 768;
 
   // Smooth scroll listener for clicking sidebar navigation items
   useEffect(() => {
@@ -208,6 +210,15 @@ function CameraRig() {
   }, [scroll]);
 
   useFrame((state) => {
+    // Dynamic FOV adjustment to prevent horizontal clipping on portrait viewports
+    const aspect = state.size.width / state.size.height;
+    if (aspect < 1.0) {
+      state.camera.fov = Math.min(85, 60 + (1.0 - aspect) * 40);
+    } else {
+      state.camera.fov = 60;
+    }
+    state.camera.updateProjectionMatrix();
+
     // Self-recovery block: Reset camera if coordinates or quaternion become NaN
     if (isNaN(state.camera.position.x) || isNaN(state.camera.position.y) || isNaN(state.camera.position.z)) {
       state.camera.position.set(0, 0, 5);
@@ -238,6 +249,11 @@ function CameraRig() {
       return;
     }
 
+    // On mobile, scale down camera path's X offset to remain closer to center runway
+    if (isMobile) {
+      pointOnCurve.x *= 0.5;
+    }
+
     // Set the camera position directly to the eased point (already smoothed)
     state.camera.position.copy(pointOnCurve);
 
@@ -245,6 +261,10 @@ function CameraRig() {
     const lookAtPoint = curve.getPoint(Math.min(easedOffsetRef.current + 0.04, 1));
     if (!lookAtPoint || isNaN(lookAtPoint.x) || isNaN(lookAtPoint.y) || isNaN(lookAtPoint.z)) {
       return;
+    }
+
+    if (isMobile) {
+      lookAtPoint.x *= 0.5;
     }
 
     // Calculate new target rotation matrix if eye and target are not identical
@@ -342,10 +362,21 @@ function CameraRig() {
   return null;
 }
 
-function Milestone({ year, title, desc, position, rotation, image, isClimax }) {
+function Milestone({ year, title, desc, position: rawPosition, rotation, image, isClimax }) {
   const scroll = useScroll();
   const easedOffsetRef = useRef(0);
   const prevOffsetRef = useRef(0);
+
+  const { size } = useThree();
+  const isMobile = size.width < 768;
+
+  // Dynamically shift normal milestones closer to the runway center on mobile
+  const position = useMemo(() => {
+    if (!isMobile || isClimax) return rawPosition;
+    const adjusted = [...rawPosition];
+    adjusted[0] = rawPosition[0] > 0 ? 1.4 : -1.4;
+    return adjusted;
+  }, [rawPosition, isMobile, isClimax]);
 
   // Load the texture using useTexture hook
   const texture = useTexture(image);
@@ -413,13 +444,58 @@ function Milestone({ year, title, desc, position, rotation, image, isClimax }) {
     );
   });
 
-  // Determine which side text goes based on poster's world X position
-  // Left-side poster (negative X) → text goes right (+X)
-  // Right-side poster (positive X) → text goes left (−X)
+  // Responsive Layout Scaling Logic
   const isLeftSide = position[0] < 0;
-  const textXOffset = isLeftSide ? 2.6 : -2.6;
-  const textAnchor = isLeftSide ? 'left' : 'right';
-  const textAlign = isLeftSide ? 'left' : 'right';
+  
+  let textXOffset, textYOffset, textZOffset, textAnchor, textAlign;
+  let backdropXOffset, backdropYOffset, backdropWidth, backdropHeight;
+  let borderScale, posterScale;
+  
+  if (isMobile) {
+    posterScale = [2.4, 3.3, 1];
+    borderScale = [2.48, 3.38, 1];
+    
+    if (isClimax) {
+      // Center the text below the poster for climax on mobile
+      textXOffset = 0;
+      textYOffset = -2.4;
+      textZOffset = 0.05;
+      textAnchor = 'center';
+      textAlign = 'center';
+      
+      backdropXOffset = 0;
+      backdropYOffset = -0.4;
+      backdropWidth = 2.8;
+      backdropHeight = 1.6;
+    } else {
+      // Normal milestone on mobile
+      textXOffset = isLeftSide ? 1.55 : -1.55;
+      textYOffset = 0;
+      textZOffset = 0.05;
+      textAnchor = isLeftSide ? 'left' : 'right';
+      textAlign = isLeftSide ? 'left' : 'right';
+      
+      backdropXOffset = isLeftSide ? 1.3 : -1.3;
+      backdropYOffset = 0.2;
+      backdropWidth = 2.5;
+      backdropHeight = 2.5;
+    }
+  } else {
+    // Desktop layout (existing code)
+    posterScale = [4, 5.5, 1];
+    borderScale = [4.1, 5.6, 1];
+    
+    textXOffset = isLeftSide ? 2.6 : -2.6;
+    textYOffset = 0;
+    textZOffset = 0.05;
+    textAnchor = isLeftSide ? 'left' : 'right';
+    textAlign = isLeftSide ? 'left' : 'right';
+    
+    backdropXOffset = isLeftSide ? 1.6 : -1.6;
+    backdropYOffset = 0.4;
+    backdropWidth = 3.8;
+    backdropHeight = 4.0;
+  }
 
   return (
     <group
@@ -429,7 +505,7 @@ function Milestone({ year, title, desc, position, rotation, image, isClimax }) {
       <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.3}>
         {/* Poster Image using cloth shader material */}
         <mesh
-          scale={[4, 5.5, 1]}
+          scale={posterScale}
           material={material}
         >
           <planeGeometry args={[1, 1, 32, 32]} />
@@ -438,7 +514,7 @@ function Milestone({ year, title, desc, position, rotation, image, isClimax }) {
         {/* 3D Border Glow using synchronized bending material */}
         <mesh
           position={[0, 0, -0.01]}
-          scale={[4.1, 5.6, 1]}
+          scale={borderScale}
           material={borderMaterial}
         >
           <planeGeometry args={[1, 1, 32, 32]} />
@@ -460,31 +536,37 @@ function Milestone({ year, title, desc, position, rotation, image, isClimax }) {
         )}
 
         {/* 3D Text Labels — beside the poster in 3D space */}
-        <group position={[textXOffset, 0, 0.05]}>
+        <group position={[textXOffset, textYOffset, textZOffset]}>
           {/* Dark glass backdrop panel — sits behind all text */}
-          <mesh position={[isLeftSide ? 1.6 : -1.6, 0.4, -0.08]}>
-            <planeGeometry args={[3.8, 4.0]} />
+          <mesh position={[backdropXOffset, backdropYOffset, -0.08]}>
+            <planeGeometry args={[backdropWidth, backdropHeight]} />
             <meshBasicMaterial color="#050505" transparent opacity={0.72} />
           </mesh>
           {/* Soft edge glow panel slightly behind for depth */}
-          <mesh position={[isLeftSide ? 1.6 : -1.6, 0.4, -0.12]}>
-            <planeGeometry args={[4.2, 4.4]} />
+          <mesh position={[backdropXOffset, backdropYOffset, -0.12]}>
+            <planeGeometry args={[backdropWidth + 0.4, backdropHeight + 0.4]} />
             <meshBasicMaterial color="#0a0a0a" transparent opacity={0.4} />
           </mesh>
 
           {/* Thin decorative rule line */}
-          <mesh position={[isLeftSide ? -0.05 : 0.05, 0, 0]}>
-            <planeGeometry args={[0.02, 3.2]} />
-            <meshBasicMaterial color={isClimax ? '#ef4444' : '#f59e0b'} transparent opacity={0.9} />
-          </mesh>
+          {!isClimax && (
+            <mesh position={[isLeftSide ? -0.05 : 0.05, 0, 0]}>
+              <planeGeometry args={[isMobile ? 0.015 : 0.02, isMobile ? 2.0 : 3.2]} />
+              <meshBasicMaterial color={isClimax ? '#ef4444' : '#f59e0b'} transparent opacity={0.9} />
+            </mesh>
+          )}
 
           {/* Year badge */}
           <Text
-            position={[isLeftSide ? 0.18 : -0.18, 1.1, 0]}
-            fontSize={0.3}
+            position={[
+              isClimax && isMobile ? 0 : (isLeftSide ? 0.18 : -0.18), 
+              isClimax && isMobile ? 0.4 : 1.1, 
+              0
+            ]}
+            fontSize={isMobile ? 0.2 : 0.3}
             color={isClimax ? '#ef4444' : '#f59e0b'}
             font="/fonts/Inter-Bold.ttf"
-            anchorX={textAnchor}
+            anchorX={isClimax && isMobile ? 'center' : textAnchor}
             anchorY="middle"
             letterSpacing={0.1}
           >
@@ -493,14 +575,18 @@ function Milestone({ year, title, desc, position, rotation, image, isClimax }) {
 
           {/* Title */}
           <Text
-            position={[isLeftSide ? 0.18 : -0.18, 0.52, 0]}
-            fontSize={0.3}
+            position={[
+              isClimax && isMobile ? 0 : (isLeftSide ? 0.18 : -0.18), 
+              isClimax && isMobile ? 0.0 : 0.52, 
+              0
+            ]}
+            fontSize={isMobile ? 0.2 : 0.3}
             color="#ffffff"
             font="/fonts/Inter-Bold.ttf"
-            anchorX={textAnchor}
+            anchorX={isClimax && isMobile ? 'center' : textAnchor}
             anchorY="middle"
-            maxWidth={3.2}
-            textAlign={textAlign}
+            maxWidth={isMobile ? (isClimax ? 2.6 : 2.2) : 3.2}
+            textAlign={isClimax && isMobile ? 'center' : textAlign}
             letterSpacing={0.02}
           >
             {title.toUpperCase()}
@@ -508,15 +594,19 @@ function Milestone({ year, title, desc, position, rotation, image, isClimax }) {
 
           {/* Description */}
           <Text
-            position={[isLeftSide ? 0.18 : -0.18, -0.3, 0]}
-            fontSize={0.15}
+            position={[
+              isClimax && isMobile ? 0 : (isLeftSide ? 0.18 : -0.18), 
+              isClimax && isMobile ? -0.3 : -0.3, 
+              0
+            ]}
+            fontSize={isMobile ? 0.11 : 0.15}
             color="#d4d4d8"
             font="/fonts/Inter-Regular.ttf"
-            anchorX={textAnchor}
+            anchorX={isClimax && isMobile ? 'center' : textAnchor}
             anchorY="top"
-            maxWidth={3.2}
-            textAlign={textAlign}
-            lineHeight={1.6}
+            maxWidth={isMobile ? (isClimax ? 2.6 : 2.2) : 3.2}
+            textAlign={isClimax && isMobile ? 'center' : textAlign}
+            lineHeight={isMobile ? 1.4 : 1.6}
           >
             {desc}
           </Text>

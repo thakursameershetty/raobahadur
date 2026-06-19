@@ -7,7 +7,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
   const containerRef = useRef(null);
   const requestRef = useRef();
 
-  // Mouse tracking state
+  // Mouse/Gyro tracking state
   const targetX = useRef(0);
   const targetY = useRef(0);
   const currentX = useRef(0);
@@ -15,6 +15,9 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
 
   // Total visitor count state
   const [visitorCount, setVisitorCount] = useState(null);
+
+  // Mobile state detection
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     // Increment and fetch the live visitor count on page mount
@@ -29,13 +32,23 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
   }, []);
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const layers = container.querySelectorAll('.parallax-layer');
+    let gyroActive = false;
 
     const handleMouseMove = (e) => {
-      // Use container's own bounding rect so parallax stays correct at 50% width
+      if (gyroActive) return; // Skip mouse parallax if gyroscope is active
       const rect = container.getBoundingClientRect();
       const xPos = e.clientX - rect.left;
       const yPos = e.clientY - rect.top;
@@ -43,13 +56,66 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       targetY.current = rect.height / 2 - yPos;
     };
 
+    const handleOrientation = (e) => {
+      if (e.beta !== null && e.gamma !== null) {
+        gyroActive = true;
+        const beta = e.beta;
+        const gamma = e.gamma;
+
+        // Neutral position: phone held at a standard ~70 degree tilt relative to ground
+        const neutralBeta = 70;
+        const neutralGamma = 0;
+
+        let diffBeta = beta - neutralBeta;
+        let diffGamma = gamma - neutralGamma;
+
+        // Clamp tilt values to prevent excessive shifting
+        diffBeta = Math.max(-30, Math.min(30, diffBeta));
+        diffGamma = Math.max(-30, Math.min(30, diffGamma));
+
+        // Gamma maps to horizontal (X), Beta maps to vertical (Y)
+        targetX.current = diffGamma * 12;
+        targetY.current = diffBeta * 12;
+      }
+    };
+
     const handleResize = () => {
-      targetX.current = 0;
-      targetY.current = 0;
+      if (!gyroActive) {
+        targetX.current = 0;
+        targetY.current = 0;
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('resize', handleResize);
+    window.addEventListener('deviceorientation', handleOrientation);
+
+    // iOS WebKit permission requester
+    const requestPermissionAndRegister = async () => {
+      if (
+        typeof window !== 'undefined' &&
+        typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function'
+      ) {
+        try {
+          const state = await DeviceOrientationEvent.requestPermission();
+          if (state === 'granted') {
+            window.addEventListener('deviceorientation', handleOrientation);
+          }
+        } catch (err) {
+          console.warn('Orientation permission request failed:', err);
+        }
+      }
+    };
+
+    const triggerPermission = () => {
+      requestPermissionAndRegister();
+      window.removeEventListener('click', triggerPermission);
+      window.removeEventListener('touchstart', triggerPermission);
+    };
+
+    window.addEventListener('click', triggerPermission);
+    window.addEventListener('touchstart', triggerPermission);
 
     const animate = () => {
       currentX.current += (targetX.current - currentX.current) * 0.08;
@@ -71,6 +137,9 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('deviceorientation', handleOrientation);
+      window.removeEventListener('click', triggerPermission);
+      window.removeEventListener('touchstart', triggerPermission);
       cancelAnimationFrame(requestRef.current);
     };
   }, []);
@@ -82,42 +151,52 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
     >
       <img
         src="/layers/last.png"
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.02"
         alt="Background"
-        style={{ transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 20vh)), 0)' }}
+        style={{
+          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 20vh)), 0) scale(${isMobile ? 0.95 : 1.0})`
+        }}
       />
 
       <img
         src="/layers/fourth.png"
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.035"
         alt="Background"
-        style={{ transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 50vh)), 0)' }}
+        style={{
+          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 50vh)), 0) scale(${isMobile ? 0.85 : 1.0})`
+        }}
       />
 
       <img
         src="/layers/third.png"
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.05"
         alt="Feathers"
-        style={{ transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 90vh)), 0)' }}
+        style={{
+          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 90vh)), 0) scale(${isMobile ? 0.80 : 1.0})`
+        }}
       />
 
       <img
         src="/layers/second.png"
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.08"
         alt="Back Elements"
-        style={{ transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 140vh)), 0)' }}
+        style={{
+          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 140vh)), 0) scale(${isMobile ? 0.76 : 1.0})`
+        }}
       />
 
       <img
         src="/layers/top.png"
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
+        className="absolute top-[-5%] left-[-15%] w-[130%] h-[110%] md:left-[0%] md:w-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.12"
         alt="Satyadev"
-        style={{ transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 200vh)), 0)' }}
+        style={{
+          transform: `translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 200vh)), 0) scale(${isMobile ? 0.72 : 1.0})`
+        }}
       />
 
       {/* Vignette */}
@@ -138,28 +217,56 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
 
       {/* The Parallax Title Layer */}
       <div
-        className="absolute top-[8%] left-[5%] flex flex-col items-start parallax-layer pointer-events-none z-30"
+        className={`absolute flex flex-col parallax-layer pointer-events-none z-30 transition-all duration-300 ${
+          isMobile ? 'bottom-[24%] left-1/2 items-center' : 'top-[8%] left-[5%] items-start'
+        }`}
         data-speed="0.15"
-        style={{ transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 250vh)), 0)' }}
+        style={{
+          transform: isMobile
+            ? 'translate3d(calc(var(--x, 0) * 1px - 50%), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 250vh)), 0)'
+            : 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 250vh)), 0)'
+        }}
       >
-        <div className="flex flex-col items-start drop-shadow-2xl">
-          <h3 className="font-serif text-[18px] tracking-[0.45em] text-[#e5d4ab] uppercase drop-shadow-lg mb-1 ml-1" style={{ fontFamily: '"Cormorant Garamond", serif' }}>Satyadev</h3>
-          <p className="font-serif text-[10px] tracking-[0.3em] text-[#c9b282] uppercase mb-4 ml-1" style={{ fontFamily: '"Cormorant Garamond", serif' }}>In & As</p>
-          <TimberText text="RAO" fontSize={60} tracking={6} glow={true} className="mb-1 !justify-start" />
-          <TimberText text="BAHADUR" fontSize={60} tracking={6} glow={true} className="!justify-start" />
+        <div className={`flex flex-col drop-shadow-2xl ${isMobile ? 'items-center text-center' : 'items-start text-left'}`}>
+          <h3
+            className={`font-serif text-[18px] tracking-[0.45em] text-[#e5d4ab] uppercase drop-shadow-lg mb-1 ${isMobile ? '' : 'ml-1'}`}
+            style={{ fontFamily: '"Cormorant Garamond", serif' }}
+          >
+            Satyadev
+          </h3>
+          <p
+            className={`font-serif text-[10px] tracking-[0.3em] text-[#c9b282] uppercase mb-4 ${isMobile ? '' : 'ml-1'}`}
+            style={{ fontFamily: '"Cormorant Garamond", serif' }}
+          >
+            In & As
+          </p>
+          <TimberText
+            text="RAO"
+            fontSize={isMobile ? 48 : 60}
+            tracking={isMobile ? 4 : 6}
+            glow={true}
+            className={isMobile ? 'mb-1 !justify-center' : 'mb-1 !justify-start'}
+          />
+          <TimberText
+            text="BAHADUR"
+            fontSize={isMobile ? 48 : 60}
+            tracking={isMobile ? 4 : 6}
+            glow={true}
+            className={isMobile ? '!justify-center' : '!justify-start'}
+          />
         </div>
       </div>
 
       {/* Top-right: Visitor Count */}
-      <div className="absolute top-8 right-8 z-50 flex flex-col items-end pointer-events-auto">
+      <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50 flex flex-col items-end pointer-events-auto">
         <h2
-          className="text-amber-500 text-3xl mb-1 tracking-wider drop-shadow-md"
+          className="text-amber-500 text-xl md:text-3xl mb-1 tracking-wider drop-shadow-md"
           style={{ fontFamily: 'var(--font-raobahadur), serif' }}
         >
           I root for Satyadev
         </h2>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-white/90 font-mono text-sm tracking-widest uppercase drop-shadow-md">
+          <span className="text-white/90 font-mono text-[10px] md:text-sm tracking-widest uppercase drop-shadow-md">
             Total Visits: <span className="font-bold text-white">{visitorCount !== null ? visitorCount.toLocaleString() : '...'}</span>
           </span>
         </div>

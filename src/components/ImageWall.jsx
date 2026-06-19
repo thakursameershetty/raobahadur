@@ -14,12 +14,12 @@ export default function ImageWall({ onBack }) {
   return (
     <div className="w-full h-full relative bg-[#07161b] overflow-hidden">
       {/* Header strip */}
-      <div className="absolute top-0 left-0 right-0 z-10 px-6 pt-5 pb-3 pointer-events-none flex justify-between items-start"
+      <div className="absolute top-0 left-0 right-0 z-10 px-4 md:px-6 pt-4 md:pt-5 pb-3 pointer-events-none flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0"
         style={{ background: 'linear-gradient(to bottom, rgba(7,22,27,0.95) 0%, transparent 100%)' }}
       >
         <div>
           <h2
-            className="text-[22px] font-semibold tracking-[0.3em] uppercase"
+            className="text-lg md:text-[22px] font-semibold tracking-[0.3em] uppercase"
             style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               background: 'linear-gradient(105deg, #9c7a35 0%, #f0d693 35%, #c9a24c 55%, #f6e4a8 70%, #9c7a35 100%)',
@@ -30,12 +30,12 @@ export default function ImageWall({ onBack }) {
           >
             Wall of Love
           </h2>
-          <p className="text-[11px] tracking-[0.2em] uppercase mt-1" style={{ color: 'rgba(201,162,76,0.5)', fontFamily: "'Cormorant Garamond', serif" }}>
+          <p className="text-[10px] md:text-[11px] tracking-[0.2em] uppercase mt-1" style={{ color: 'rgba(201,162,76,0.5)', fontFamily: "'Cormorant Garamond', serif" }}>
             Upload · Snap · Pin your tribute
           </p>
         </div>
 
-        <div className="flex flex-col items-end gap-3 pointer-events-auto mt-1">
+        <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-3 pointer-events-auto mt-1 flex-wrap justify-end">
           {onBack && (
             <button
               onClick={onBack}
