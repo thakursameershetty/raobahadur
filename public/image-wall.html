@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Gallery Wall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #07161b;
+      --bg2: #0c2128;
+      --ink: #061317;
+      --gold: #c9a24c;
+      --gold-lt: #e7c879;
+      --gold-dk: #9c7a35;
+      --cream: #efe2c4;
+      --foil: linear-gradient(105deg, #9c7a35 0%, #f0d693 32%, #c9a24c 50%, #f6e4a8 66%, #9c7a35 100%);
+    }
+
+    body {
+      background: #000000;
+      overflow: hidden;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      background:
+        radial-gradient(120% 85% at 50% 38%, transparent 42%, rgba(0, 0, 0, .55) 78%, rgba(0, 0, 0, .92) 100%),
+        radial-gradient(60% 45% at 50% 28%, rgba(255, 208, 138, .10), transparent 70%);
+    }
+
+    .foil {
+      background: var(--foil);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    #dropOverlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      background: radial-gradient(80% 80% at 50% 45%, rgba(10, 28, 33, .82), rgba(4, 12, 15, .93));
+      backdrop-filter: blur(6px);
+      transition: opacity .4s;
+    }
+
+    #dropOverlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .dropBox {
+      position: relative;
+      width: 380px;
+      text-align: center;
+      cursor: pointer;
+      padding: 54px 40px;
+      border-radius: 4px;
+      border: 1px solid rgba(201, 162, 76, .45);
+      box-shadow: 0 0 0 1px rgba(201, 162, 76, .18) inset, 0 0 60px rgba(0, 0, 0, .5);
+      background: linear-gradient(180deg, rgba(201, 162, 76, .05), rgba(201, 162, 76, .01));
+      transition: border-color .25s, box-shadow .25s, background .25s;
+    }
+
+    .dropBox::before {
+      content: '\2756';
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--gold);
+      font-size: 18px;
+      background: #0a1c20;
+      padding: 0 10px;
+    }
+
+    .dropBox:hover,
+    .dropBox.over {
+      border-color: var(--gold-lt);
+      box-shadow: 0 0 0 1px rgba(231, 200, 121, .35) inset, 0 0 70px rgba(201, 162, 76, .18);
+      background: linear-gradient(180deg, rgba(201, 162, 76, .09), rgba(201, 162, 76, .02));
+    }
+
+    .dropBox svg {
+      margin-bottom: 16px;
+      opacity: .85;
+    }
+
+    .dropBox h2 {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 21px;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .dropBox p {
+      color: rgba(239, 226, 196, .6);
+      font-size: 16px;
+      line-height: 1.55;
+      font-weight: 500;
+    }
+
+    .dropBox .sub {
+      margin-top: 16px;
+      color: rgba(201, 162, 76, .7);
+      font-size: 12.5px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-family: 'Cinzel', serif;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    #bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 15;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 14px 20px 18px;
+      background: linear-gradient(to top, rgba(4, 12, 15, .97) 50%, transparent);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .4s;
+    }
+
+    #bar.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .btn {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      transition: transform .12s, box-shadow .12s, filter .12s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 18px rgba(0, 0, 0, .55);
+      filter: brightness(1.06);
+    }
+
+    .btn:active {
+      transform: scale(.96);
+    }
+
+    #btnUpload {
+      background: linear-gradient(180deg, #f0d693, #c9a24c 55%, #9c7a35);
+      color: #2a1d05;
+      box-shadow: 0 0 0 1px rgba(120, 90, 35, .6);
+    }
+
+    #btnClear,
+    #btnCamera {
+      background: rgba(201, 162, 76, .07);
+      color: var(--gold);
+      border: 1px solid rgba(201, 162, 76, .4);
+    }
+
+    #queue {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      max-width: 42vw;
+      overflow-x: auto;
+      padding: 3px 2px;
+    }
+
+    .qthumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 2px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(201, 162, 76, .4);
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .qthumb.active {
+      border-color: var(--gold-lt);
+      box-shadow: 0 0 0 2px rgba(201, 162, 76, .3);
+    }
+
+    #scrollHint {
+      position: fixed;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity .6s;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #scrollHint.show {
+      opacity: 1;
+    }
+
+    .sArrow {
+      color: rgba(201, 162, 76, .55);
+      font-size: 16px;
+      animation: bob 1.5s ease-in-out infinite;
+    }
+
+    .sArrow:nth-child(2) {
+      animation-delay: .22s;
+    }
+
+    .sArrow:nth-child(3) {
+      animation-delay: .44s;
+    }
+
+    @keyframes bob {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(6px)
+      }
+    }
+
+    #scrollHint span {
+      color: rgba(201, 162, 76, .35);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+      margin-top: 6px;
+      font-family: 'Cinzel', serif;
+    }
+
+    #status {
+      position: fixed;
+      top: 16px;
+      right: 18px;
+      z-index: 10;
+      background: rgba(201, 162, 76, .1);
+      border: 1px solid rgba(201, 162, 76, .3);
+      color: var(--gold-lt);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      padding: 6px 15px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      font-family: 'Cinzel', serif;
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+
+    #status.show {
+      opacity: 1;
+    }
+
+    #imgCount {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      z-index: 10;
+      color: rgba(201, 162, 76, .5);
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      font-family: 'Cinzel', serif;
+      text-transform: uppercase;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .4s;
+    }
+
+    #imgCount.show {
+      opacity: 1;
+    }
+
+    /* camera */
+    #dropCam {
+      margin-top: 20px;
+      padding: 12px 24px;
+      border-radius: 9999px;
+      cursor: pointer;
+      border: 1px solid rgba(201, 162, 76, .45);
+      background: rgba(201, 162, 76, .07);
+      color: var(--gold);
+      font-family: 'Cinzel', serif;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: background .2s, transform .12s;
+    }
+
+    #dropCam:hover {
+      background: rgba(201, 162, 76, .16);
+      transform: translateY(-1px);
+    }
+
+    #dropCam:active {
+      transform: scale(.96);
+    }
+
+    #camOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(80% 80% at 50% 45%, rgba(8, 20, 24, .96), rgba(3, 9, 11, .98));
+      backdrop-filter: blur(5px);
+      transition: opacity .3s;
+    }
+
+    #camOverlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .camStage {
+      position: relative;
+      min-width: 280px;
+      min-height: 160px;
+      max-width: 92vw;
+      max-height: 70vh;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(201, 162, 76, .5);
+      box-shadow: 0 0 0 1px rgba(201, 162, 76, .2) inset, 0 0 50px rgba(0, 0, 0, .6);
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #camVideo {
+      display: block;
+      max-width: 92vw;
+      max-height: 70vh;
+    }
+
+    #camError {
+      color: var(--gold);
+      font-size: 15px;
+      line-height: 1.6;
+      text-align: center;
+      max-width: 340px;
+      padding: 34px 24px;
+      font-weight: 500;
+    }
+
+    .camControls {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-top: 28px;
+    }
+
+    #camShoot {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid var(--gold);
+      background: radial-gradient(circle at 50% 35%, #fff, #efe2c4);
+      box-shadow: 0 0 0 3px rgba(201, 162, 76, .3), 0 0 22px rgba(201, 162, 76, .3);
+      transition: transform .12s;
+    }
+
+    #camShoot:hover {
+      transform: scale(1.06);
+    }
+
+    #camShoot:active {
+      transform: scale(.92);
+    }
+
+    .camBtn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid rgba(201, 162, 76, .4);
+      background: rgba(201, 162, 76, .08);
+      color: var(--gold);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s, transform .12s;
+    }
+
+    .camBtn:hover {
+      background: rgba(201, 162, 76, .18);
+    }
+
+    .camBtn:active {
+      transform: scale(.9);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="vignette"></div>
+
+  <div id="dropOverlay">
+    <div class="dropBox" id="dropBox">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#c9a24c" stroke-width="1.2">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21,15 16,10 5,21" />
+      </svg>
+      <h2 class="foil">Curate your gallery</h2>
+      <p>Drop in your photographs and watch each one<br>flutter onto the wall, framed and pinned in gold.</p>
+      <p class="sub">click · drag &amp; drop · multiple welcome</p>
+    </div>
+    <button id="dropCam">📷 Take a photo</button>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" multiple>
+
+  <div id="camOverlay" class="hidden">
+    <div class="camStage">
+      <video id="camVideo" autoplay playsinline muted></video>
+      <div id="camError"></div>
+    </div>
+    <div class="camControls">
+      <button class="camBtn" id="camFlip" title="Switch camera">⟲</button>
+      <button id="camShoot" title="Take photo"></button>
+      <button class="camBtn" id="camClose" title="Close">✕</button>
+    </div>
+  </div>
+
+  <div id="bar">
+    <div id="queue"></div>
+    <button class="btn" id="btnUpload">＋ Add Photos</button>
+    <button class="btn" id="btnCamera">📷 Camera</button>
+    <button class="btn" id="btnClear">✕ Clear Wall</button>
+  </div>
+
+  <div id="scrollHint">
+    <div class="sArrow">↓</div>
+    <div class="sArrow">↓</div>
+    <div class="sArrow">↓</div>
+    <span>scroll</span>
+  </div>
+  <div id="status"></div>
+  <div id="imgCount"></div>
+
+  <script type="importmap">
+{ "imports": { "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js" } }
+</script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    /* ══════════════════════════════════════════════
+       RENDERER / SCENE / CAMERA
+    ══════════════════════════════════════════════ */
+    const W = innerWidth, H = innerHeight;
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(W, H);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.04;
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+
+    /* ── Warm environment so gold reflects something rich ── */
+    (function buildEnv() {
+      const cv = document.createElement('canvas'); cv.width = 16; cv.height = 256;
+      const ctx = cv.getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, 0, 256);
+      g.addColorStop(0.00, '#3a2c12');   // warm gold "sky"
+      g.addColorStop(0.38, '#1b282c');
+      g.addColorStop(1.00, '#040d10');   // deep teal "floor"
+      ctx.fillStyle = g; ctx.fillRect(0, 0, 16, 256);
+      const eqt = new THREE.CanvasTexture(cv);
+      eqt.mapping = THREE.EquirectangularReflectionMapping;
+      eqt.encoding = THREE.sRGBEncoding;
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromEquirectangular(eqt).texture;
+      eqt.dispose(); pmrem.dispose();
+    })();
+
+    // Shared gold material for the per-photo frames
+    const photoFrameMat = new THREE.MeshStandardMaterial({ color: 0xc9a24c, metalness: 0.92, roughness: 0.3 });
+
+    const camera = new THREE.PerspectiveCamera(48, W / H, 0.1, 200);
+    camera.position.set(0, 0, 11);
+
+    /* ── Lights ── */
+    scene.add(new THREE.AmbientLight(0xffedd0, 0.40));
+    const keyLight = new THREE.SpotLight(0xffe6bd, 3.6, 48, Math.PI / 4.6, 0.45, 1);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.bias = -0.0004;
+    scene.add(keyLight);
+    scene.add(keyLight.target);
+    // Teal fill tints the shadows like the poster
+    const fillLight = new THREE.DirectionalLight(0x1f5e6b, 0.34);
+    scene.add(fillLight);
+    // Warm rim from the upper-right for a cinematic edge
+    const rimLight = new THREE.DirectionalLight(0xffcf8a, 0.22);
+    scene.add(rimLight);
+
+    /* ══════════════════════════════════════════════
+       CORK BOARD  (tall, extends downward on demand)
+    ══════════════════════════════════════════════ */
+    function makeDamaskTex() {
+      const S = 512;
+      const cv = document.createElement('canvas'); cv.width = cv.height = S;
+      const ctx = cv.getContext('2d');
+
+      // Deep teal ground with a soft vertical sheen
+      const bg = ctx.createLinearGradient(0, 0, 0, S);
+      bg.addColorStop(0, '#0c2026'); bg.addColorStop(.5, '#0a191e'); bg.addColorStop(1, '#081317');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, S, S);
+
+      // One ornate flourish, mirrored into 4 quadrants (gold filigree)
+      function flourish(cx, cy, s, a) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = `rgba(201,162,76,${a})`;
+        ctx.fillStyle = `rgba(201,162,76,${a * 0.5})`;
+        ctx.lineWidth = 2.2;
+        ctx.shadowColor = `rgba(231,200,121,${a * 0.7})`;
+        ctx.shadowBlur = 6;
+        for (let m = 0; m < 4; m++) {
+          ctx.save();
+          ctx.scale(m & 1 ? -1 : 1, m & 2 ? -1 : 1);
+          // central ogee leaf
+          ctx.beginPath();
+          ctx.moveTo(0, -2 * s);
+          ctx.bezierCurveTo(.9 * s, -1.6 * s, 1.0 * s, -.6 * s, 0, 0);
+          ctx.bezierCurveTo(-.2 * s, -.6 * s, -.25 * s, -1.4 * s, 0, -2 * s);
+          ctx.fill(); ctx.stroke();
+          // scroll arm
+          ctx.beginPath();
+          ctx.moveTo(.15 * s, -.2 * s);
+          ctx.bezierCurveTo(1.1 * s, -.3 * s, 1.5 * s, .6 * s, .85 * s, 1.15 * s);
+          ctx.bezierCurveTo(.6 * s, 1.35 * s, .35 * s, 1.1 * s, .55 * s, .85 * s);
+          ctx.stroke();
+          // bud
+          ctx.beginPath(); ctx.arc(.95 * s, .55 * s, .12 * s, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+        ctx.beginPath(); ctx.arc(0, 0, .16 * s, 0, Math.PI * 2); ctx.fill();   // center bead
+        ctx.restore();
+      }
+
+      const s = 46;
+      flourish(S * .5, S * .5, s, .5);                                            // center
+      flourish(0, 0, s, .5); flourish(S, 0, s, .5);                              // corners (seam)
+      flourish(0, S, s, .5); flourish(S, S, s, .5);
+      flourish(0, S * .5, s * .7, .32); flourish(S, S * .5, s * .7, .32);        // edge mids
+      flourish(S * .5, 0, s * .7, .32); flourish(S * .5, S, s * .7, .32);
+
+      // faint diamond lattice tying the medallions together
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(201,162,76,.10)'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(0, S * .5); ctx.lineTo(S * .5, 0); ctx.lineTo(S, S * .5); ctx.lineTo(S * .5, S); ctx.closePath();
+      ctx.stroke();
+
+      // fine grain
+      for (let i = 0; i < 4000; i++) {
+        ctx.fillStyle = `rgba(0,0,0,${Math.random() * .05})`;
+        ctx.fillRect(Math.random() * S, Math.random() * S, 1, 1);
+      }
+
+      const tex = new THREE.CanvasTexture(cv);
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.encoding = THREE.sRGBEncoding;
+      tex.anisotropy = 4;
+      return tex;
+    }
+
+    function makeMoldingTex() {
+      const w = 64, h = 64;
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      const ctx = cv.getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, w, 0);
+      g.addColorStop(0, '#6e531f'); g.addColorStop(.5, '#e7c879');
+      g.addColorStop(.75, '#b8924f'); g.addColorStop(1, '#5a431a');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      const tex = new THREE.CanvasTexture(cv);
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.encoding = THREE.sRGBEncoding;
+      tex.repeat.set(1, 60);
+      return tex;
+    }
+
+    const TILE_WORLD = 8.5;            // world units per damask tile (keeps motifs square)
+    const damaskTex = makeDamaskTex();
+    damaskTex.repeat.set(17 / TILE_WORLD, 80 / TILE_WORLD);
+    const boardMat = new THREE.MeshStandardMaterial({ map: damaskTex, roughness: 0.92, metalness: 0.0 });
+    let boardH = 80;
+    const boardMesh = new THREE.Mesh(new THREE.BoxGeometry(17, boardH, 0.3), boardMat);
+    boardMesh.position.set(0, -(boardH / 2) + 4.5, -1.2);
+    boardMesh.receiveShadow = true;
+    // scene.add(boardMesh); // Remove wood background
+
+    // Ornate gold side moldings
+    const moldTex = makeMoldingTex();
+    const frameMat = new THREE.MeshStandardMaterial({ map: moldTex, color: 0xc9a24c, metalness: 0.85, roughness: 0.32 });
+    [-8.65, 8.65].forEach(fx => {
+      const s = new THREE.Mesh(new THREE.BoxGeometry(0.55, 300, 0.42), frameMat);
+      s.position.set(fx, -120, -1.18);
+      s.castShadow = true;
+      // scene.add(s); // Remove side moldings
+    });
+
+    function ensureBoardCovers(worldY) {
+      const boardBottom = boardMesh.position.y - boardH / 2;
+      if (worldY > boardBottom + 6) return;
+      boardH += 50;
+      boardMesh.geometry.dispose();
+      boardMesh.geometry = new THREE.BoxGeometry(17, boardH, 0.3);
+      boardMesh.position.y = -(boardH / 2) + 4.5;
+      damaskTex.repeat.set(17 / TILE_WORLD, boardH / TILE_WORLD);
+      damaskTex.needsUpdate = true;
+    }
+
+    /* ══════════════════════════════════════════════
+       PUSH PIN
+    ══════════════════════════════════════════════ */
+    const GEM_COLORS = [0x9b1c2e, 0x14463f, 0x16314f, 0x6a2151, 0xece6d2]; // ruby, emerald, sapphire, amethyst, pearl
+    function makePushPin(gem) {
+      const g = new THREE.Group();
+      // gold collar
+      const collar = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.085, 0.105, 0.05, 18),
+        new THREE.MeshStandardMaterial({ color: 0xc9a24c, metalness: 0.95, roughness: 0.25 })
+      );
+      collar.rotation.x = Math.PI / 2; collar.position.z = 0.05;
+      g.add(collar);
+      // faceted gem
+      const isPearl = gem === 0xece6d2;
+      const gemMesh = new THREE.Mesh(
+        new THREE.OctahedronGeometry(0.07, 0),
+        new THREE.MeshStandardMaterial({
+          color: gem, metalness: isPearl ? 0.1 : 0.35, roughness: isPearl ? 0.25 : 0.18,
+          emissive: gem, emissiveIntensity: 0.18, flatShading: true
+        })
+      );
+      gemMesh.position.z = 0.10; gemMesh.scale.set(1, 1, 0.8);
+      g.add(gemMesh);
+      // gold needle
+      const needle = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.012, 0.004, 0.22, 6),
+        new THREE.MeshStandardMaterial({ color: 0xd9c184, metalness: 0.95, roughness: 0.2 })
+      );
+      needle.rotation.x = Math.PI / 2; needle.position.z = -0.05;
+      g.add(needle);
+      return g;
+    }
+
+    /* ══════════════════════════════════════════════
+       ROW-FIRST GRID LAYOUT  — responsive to viewport
+       Columns are calculated from how many CELL_W units
+       fit inside the camera's visible world width.
+    ══════════════════════════════════════════════ */
+    let CAM_Z = 11;            // camera z (mutable for responsive scale-down)
+    const BOARD_Z = -1.2;        // board centre z
+    let CAM_DIST = CAM_Z - BOARD_Z;   // units
+    const FOV_RAD = (48 * Math.PI) / 180;
+    let GAP_X = 0.4;           // horizontal gap between images
+    let GAP_Y = 0.55;          // vertical gap between rows
+    let START_Y = 3.2;           // world y where first row top edge sits
+    let CELL_MARGIN = 0.15;        // breathing room at left & right edges
+
+    // Mutable grid config — recalculated on every resize
+    let COLS, CELL_W, IMG_W, BOARD_LEFT;
+
+    function recalcGridLayout() {
+      const w = window.innerWidth;
+      const aspect = innerWidth / innerHeight;
+
+      // Determine columns and scale parameters based on viewport width
+      if (w >= 1024) {
+        // Average desktop view
+        COLS = 4;
+        CAM_Z = 11;
+        GAP_X = 0.4;
+        GAP_Y = 0.55;
+        START_Y = 3.2;
+      } else if (w >= 768) {
+        // Average tablet view
+        COLS = 3;
+        CAM_Z = 11.5;
+        GAP_X = 0.38;
+        GAP_Y = 0.50;
+        START_Y = 3.3;
+      } else if (w >= 480) {
+        // Average mobile view: 2 columns, slightly scaled down
+        COLS = 2;
+        CAM_Z = 13.8;
+        GAP_X = 0.34;
+        GAP_Y = 0.44;
+        START_Y = 3.8;
+      } else {
+        // Smallest mobile: 2 columns, scaled down even more
+        COLS = 2;
+        CAM_Z = 16.5;
+        GAP_X = 0.28;
+        GAP_Y = 0.38;
+        START_Y = 4.4;
+      }
+
+      CAM_DIST = CAM_Z - BOARD_Z;
+      if (typeof camera !== 'undefined' && camera) {
+        camera.position.z = CAM_Z;
+        camera.updateProjectionMatrix();
+      }
+
+      // Visible world height & width at the board's depth
+      const visH = 2 * Math.tan(FOV_RAD / 2) * CAM_DIST;
+      const visW = visH * aspect;
+
+      // Determine max grid width in world units based on viewport size to leave nice margin on the edges (scaled 1.2x)
+      let gridW;
+      if (w >= 1024) {
+        gridW = Math.min(13.0, visW * 0.84);
+      } else if (w >= 768) {
+        gridW = Math.min(9.8, visW * 0.86);
+      } else if (w >= 480) {
+        gridW = Math.min(5.8, visW * 0.90);
+      } else {
+        gridW = Math.min(4.8, visW * 0.93);
+      }
+
+      CELL_W = gridW / COLS;
+      IMG_W = CELL_W - GAP_X;
+      BOARD_LEFT = -(COLS * CELL_W) / 2 + CELL_W / 2;
+    }
+
+    recalcGridLayout();
+
+    // Grid state
+    let gridCol = 0;           // next column to place into (0‥COLS-1)
+    let rowTopY = START_Y;     // y of current row's top edge
+    let rowMaxH = 0;           // tallest image in the current row so far
+
+    function nextSlot(imgNaturalW, imgNaturalH) {
+      // Compute display size preserving aspect, fixed width = IMG_W
+      const scale = IMG_W / imgNaturalW;
+      const w = IMG_W;
+      const h = Math.min(imgNaturalH * scale, 4.0);   // cap height
+
+      // If this image starts a new row, reset row tracking
+      if (gridCol === 0) rowMaxH = 0;
+
+      const x = BOARD_LEFT + gridCol * CELL_W;
+      const y = rowTopY - h / 2;        // center y of this image
+
+      // Update the tallest image in this row
+      if (h > rowMaxH) rowMaxH = h;
+
+      // Advance column; wrap to next row when full
+      gridCol++;
+      if (gridCol >= COLS) {
+        gridCol = 0;
+        rowTopY = rowTopY - rowMaxH - GAP_Y;   // move down by tallest image + gap
+        rowMaxH = 0;
+      }
+
+      return { x, y, w, h };
+    }
+
+    function resetGrid() {
+      gridCol = 0;
+      rowTopY = START_Y;
+      rowMaxH = 0;
+    }
+
+    /* ══════════════════════════════════════════════
+       FIREFLIES (flying glowing dots in the space)
+    ══════════════════════════════════════════════ */
+    function createFireflyTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 32;
+      canvas.height = 32;
+      const ctx = canvas.getContext('2d');
+      const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+      grad.addColorStop(0, 'rgba(231, 200, 121, 1)');
+      grad.addColorStop(0.2, 'rgba(231, 200, 121, 0.8)');
+      grad.addColorStop(0.5, 'rgba(201, 162, 76, 0.3)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 32, 32);
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    const fireflyCount = 120;
+    const fireflyGeo = new THREE.BufferGeometry();
+    const fireflyPos = new Float32Array(fireflyCount * 3);
+    const fireflyVel = [];
+    const fireflyOsc = [];
+
+    for (let i = 0; i < fireflyCount; i++) {
+      fireflyPos[i * 3] = (Math.random() - 0.5) * 16;
+      fireflyPos[i * 3 + 1] = Math.random() * 210 - 200;
+      fireflyPos[i * 3 + 2] = (Math.random() - 0.5) * 3 - 0.5;
+
+      fireflyVel.push({
+        x: (Math.random() - 0.5) * 0.4,
+        y: (Math.random() - 0.5) * 0.4,
+        z: (Math.random() - 0.5) * 0.2
+      });
+
+      fireflyOsc.push({
+        speed: 1.0 + Math.random() * 2.0,
+        phase: Math.random() * Math.PI * 2,
+        baseSize: 0.15 + Math.random() * 0.15
+      });
+    }
+
+    fireflyGeo.setAttribute('position', new THREE.BufferAttribute(fireflyPos, 3));
+
+    const fireflyMat = new THREE.PointsMaterial({
+      color: 0xffe89d,
+      size: 0.28,
+      map: createFireflyTexture(),
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      opacity: 0.85
+    });
+
+    const fireflies = new THREE.Points(fireflyGeo, fireflyMat);
+    scene.add(fireflies);
+
+    /* ══════════════════════════════════════════════
+       FLYING IMAGE MESH  (separate from stuck meshes — no shared geometry)
+    ══════════════════════════════════════════════ */
+    const FLY_SX = 9, FLY_SY = 11;
+
+    // We rebuild flyGeo each time to match the image aspect — keeps origPos in sync
+    let flyGeo = null;
+    let origPos = null;
+
+    // Unlit + tone-map-exempt so the photo shows its true colors.
+    // vertexColors carry a faint flutter shading that returns to pure white (untouched image) when flat.
+    const flyMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, vertexColors: true, toneMapped: false });
+    let flyMesh = null;
+
+    function buildFlyMesh(w, h) {
+      // Dispose old
+      if (flyMesh) { scene.remove(flyMesh); flyMesh.geometry.dispose(); }
+      flyGeo = new THREE.PlaneGeometry(w, h, FLY_SX, FLY_SY);
+      origPos = new Float32Array(flyGeo.attributes.position.array);
+      const colors = new Float32Array(flyGeo.attributes.position.count * 3).fill(1);
+      flyGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      flyMesh = new THREE.Mesh(flyGeo, flyMat);
+      flyMesh.castShadow = true;
+      flyMesh.visible = false;
+      scene.add(flyMesh);
+    }
+
+    // Initialise with a default size
+    buildFlyMesh(1.6, 2.0);
+
+    /* ── Easing ── */
+    const easeInOutCubic = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    const easeOutBack = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+    const easeOutQuart = x => 1 - Math.pow(1 - x, 4);
+
+    /* ── Flutter (only touches flyGeo, never a stuck mesh) ── */
+    // Subtle shading derived from wave height; at rest (z≈0) every vertex is white → exact image.
+    function shadeFromZ() {
+      const v = flyGeo.attributes.position.array;
+      const col = flyGeo.attributes.color.array;
+      for (let i = 0; i < v.length; i += 3) {
+        const c = Math.max(0.8, Math.min(1.15, 1 + v[i + 2] * 1.5));
+        col[i] = col[i + 1] = col[i + 2] = c;
+      }
+      flyGeo.attributes.color.needsUpdate = true;
+    }
+
+    function flutter(time, intensity) {
+      const v = flyGeo.attributes.position.array;
+      const rws = FLY_SY + 1, cls = FLY_SX + 1;
+      for (let r = 0; r < rws; r++) for (let c = 0; c < cls; c++) {
+        const i = (r * cls + c) * 3;
+        const ox = origPos[i], oy = origPos[i + 1];
+        v[i + 2] = Math.sin(ox * 3 + time * 8) * Math.cos(oy * 2 + time * 5) * intensity
+          + Math.sin(ox * 5 - time * 6) * .3 * intensity;
+      }
+      flyGeo.attributes.position.needsUpdate = true;
+      shadeFromZ();
+    }
+
+    function flattenFly(progress) {
+      const v = flyGeo.attributes.position.array;
+      const f = 1 - easeOutQuart(progress);
+      for (let i = 0; i < v.length; i += 3) v[i + 2] = origPos[i + 2] + (v[i + 2] - origPos[i + 2]) * f;
+      flyGeo.attributes.position.needsUpdate = true;
+      shadeFromZ();
+    }
+
+    /* ══════════════════════════════════════════════
+       ANIMATION STATE
+    ══════════════════════════════════════════════ */
+    let animState = 'idle';
+    let animT = 0;
+    let flyW = 1.6, flyH = 2.0;
+    let totalPinned = 0;
+
+    const flyStartPos = new THREE.Vector3(-6, -4, 7);
+    const flyStartRot = new THREE.Euler(0.3, -0.5, 0.6);
+    const flyTargetPos = new THREE.Vector3();
+    const flyTargetRot = new THREE.Euler(0, 0, 0);
+    const _ctrl = new THREE.Vector3();
+    const _v1 = new THREE.Vector3();
+    const _v2 = new THREE.Vector3();
+
+    const imageQueue = [];
+    let isProcessing = false;
+    const userObjects = [];   // track for clearing
+
+    /* ══════════════════════════════════════════════
+       SCROLL
+    ══════════════════════════════════════════════ */
+    let scrollY = 0;
+    let scrollYTarget = 0;
+    let maxScrollY = 0;
+    const SCROLL_SMOOTH = 0.09;
+
+    function computeMaxScroll() {
+      // Lowest y point on the wall so far
+      let lowestY = rowTopY;  // next row's top = lowest used point (negative means below)
+      // If mid-row, account for images already placed
+      const effectiveBottom = rowTopY - rowMaxH;
+      lowestY = Math.min(lowestY, effectiveBottom);
+      maxScrollY = Math.max(0, -(lowestY - 3.5) - 4.5);
+    }
+
+    function clampScroll() { scrollYTarget = Math.max(0, Math.min(maxScrollY, scrollYTarget)); }
+
+    window.addEventListener('wheel', e => {
+      e.preventDefault();
+      scrollYTarget += e.deltaY * 0.013;
+      clampScroll();
+      refreshScrollHint();
+    }, { passive: false });
+
+    let touchY0 = 0;
+    window.addEventListener('touchstart', e => { touchY0 = e.touches[0].clientY; }, { passive: true });
+    window.addEventListener('touchmove', e => {
+      const dy = touchY0 - e.touches[0].clientY;
+      touchY0 = e.touches[0].clientY;
+      scrollYTarget += dy * 0.022;
+      clampScroll();
+    }, { passive: true });
+
+    function refreshScrollHint() {
+      document.getElementById('scrollHint').classList.toggle('show', maxScrollY > 0.8);
+    }
+
+    /* ══════════════════════════════════════════════
+       LAUNCH NEXT
+    ══════════════════════════════════════════════ */
+    function launchNext() {
+      if (!imageQueue.length || animState === 'flying' || animState === 'landing') return;
+
+      const item = imageQueue[0];
+
+      // Compute slot BEFORE we start (reserves the cell)
+      const slot = nextSlot(item.img.naturalWidth, item.img.naturalHeight);
+      flyW = slot.w;
+      flyH = slot.h;
+
+      // Board front face is at z = -1.05 (center -1.2 + half-depth 0.15).
+      // Land the image clearly IN FRONT of it so the two textures never share
+      // the same depth (otherwise the GPU z-fights and the surface flickers).
+      flyTargetPos.set(slot.x, slot.y, -0.9);
+      flyTargetRot.set(0, 0, (Math.random() - .5) * 0.06);
+
+      // Extend board if new image is near the bottom
+      ensureBoardCovers(slot.y - slot.h / 2 - 2);
+      computeMaxScroll();
+
+      // Auto-scroll camera to keep new image visible
+      const viewBottom = -scrollY - 5.5;
+      if (slot.y < viewBottom + 2.0) {
+        scrollYTarget = Math.max(scrollYTarget, -(slot.y - 2.5));
+        clampScroll();
+      }
+
+      // Rebuild fly mesh with correct aspect (this is key — fresh geometry each time)
+      buildFlyMesh(flyW, flyH);
+
+      // Apply uploaded image as texture
+      const tex = new THREE.Texture(item.img);
+      tex.encoding = THREE.sRGBEncoding;
+      tex.needsUpdate = true;
+      if (flyMat.map) flyMat.map.dispose();
+      flyMat.map = tex;
+      flyMat.needsUpdate = true;
+
+      flyStartPos.set(-7, -scrollY - 4.5, 7);
+      flyMesh.position.copy(flyStartPos);
+      flyMesh.rotation.copy(flyStartRot);
+      flyMesh.visible = true;
+      animState = 'flying';
+      animT = 0;
+
+      showStatus('Flying…');
+    }
+
+    /* ══════════════════════════════════════════════
+       STICK TO WALL  — creates a BRAND NEW flat mesh
+       The fly mesh is never reused; stuck meshes are plain PlaneGeometry (no deformation)
+    ══════════════════════════════════════════════ */
+    function stickToWall() {
+      const item = imageQueue.shift();
+      updateQueueUI();
+      totalPinned++;
+
+      // Gold frame behind the photo (shows as a gilt border)
+      const frame = new THREE.Mesh(
+        new THREE.PlaneGeometry(flyW + 0.22, flyH + 0.22),
+        photoFrameMat
+      );
+      frame.position.set(flyTargetPos.x, flyTargetPos.y, flyTargetPos.z - 0.04);
+      frame.rotation.copy(flyTargetRot);
+      frame.receiveShadow = true;
+      scene.add(frame);
+      userObjects.push(frame);
+
+      // NEW flat geometry for the stuck image — completely independent of flyGeo
+      const geo = new THREE.PlaneGeometry(flyW, flyH);
+      const tex = new THREE.Texture(item.img);
+      tex.encoding = THREE.sRGBEncoding;
+      tex.needsUpdate = true;
+      const mat = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(flyTargetPos);
+      mesh.rotation.copy(flyTargetRot);
+      mesh.castShadow = mesh.receiveShadow = true;
+      scene.add(mesh);
+      userObjects.push(mesh);
+
+      // Soft drop shadow
+      const shMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.32 });
+      const sh = new THREE.Mesh(new THREE.PlaneGeometry(flyW + 0.16, flyH + 0.16), shMat);
+      // Keep the shadow near the cork surface (just off the board face at -1.05),
+      // so it reads as a drop shadow on the wall and sits well behind the image.
+      sh.position.set(flyTargetPos.x + 0.05, flyTargetPos.y - 0.05, -1.0);
+      sh.rotation.copy(flyTargetRot);
+      scene.add(sh);
+      userObjects.push(sh);
+
+      // Push pin
+      const pin = makePushPin(GEM_COLORS[totalPinned % GEM_COLORS.length]);
+      pin.position.set(
+        flyTargetPos.x + (Math.random() - .5) * 0.2,
+        flyTargetPos.y + flyH / 2 - 0.06,
+        flyTargetPos.z + 0.09
+      );
+      scene.add(pin);
+      userObjects.push(pin);
+
+      // Hide flying mesh
+      flyMesh.visible = false;
+
+      computeMaxScroll();
+      refreshScrollHint();
+      updateImgCount();
+      showStatus('Pinned! 📌');
+
+      setTimeout(() => {
+        isProcessing = false;
+        if (imageQueue.length) launchNext();
+        else showStatus('');
+      }, 480);
+    }
+
+    /* ══════════════════════════════════════════════
+       RENDER LOOP
+    ══════════════════════════════════════════════ */
+    const clock = new THREE.Clock();
+
+    (function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta(), el = clock.getElapsedTime();
+
+      // Smooth scroll → camera Y
+      scrollY += (scrollYTarget - scrollY) * SCROLL_SMOOTH;
+      const camWorldY = -scrollY;
+      camera.position.y = camWorldY;
+      camera.lookAt(0, camWorldY, 0);
+
+      // Lights track camera vertically
+      keyLight.position.set(3, camWorldY + 7, 11);
+      keyLight.target.position.set(0, camWorldY, -1.2);
+      keyLight.target.updateMatrixWorld();
+      fillLight.position.set(-6, camWorldY + 4, 6);
+      rimLight.position.set(7, camWorldY + 9, 4);
+
+      // Gentle lateral sway
+      camera.position.x = Math.sin(el * 0.11) * 0.08;
+
+      // Animate fireflies to drift and wrap around the camera viewport
+      const posAttr = fireflyGeo.attributes.position;
+      for (let i = 0; i < fireflyCount; i++) {
+        const vel = fireflyVel[i];
+        const osc = fireflyOsc[i];
+
+        posAttr.array[i * 3] += vel.x * dt + Math.sin(el * osc.speed + osc.phase) * 0.002;
+        posAttr.array[i * 3 + 1] += vel.y * dt + Math.cos(el * osc.speed * 0.8 + osc.phase) * 0.002;
+        posAttr.array[i * 3 + 2] += vel.z * dt;
+
+        // Wrap horizontal bounds
+        if (posAttr.array[i * 3] < -8) posAttr.array[i * 3] = 8;
+        if (posAttr.array[i * 3] > 8) posAttr.array[i * 3] = -8;
+
+        // Wrap vertically relative to scroll position (keeps them near viewport)
+        const diffY = posAttr.array[i * 3 + 1] - camWorldY;
+        if (diffY < -15) {
+          posAttr.array[i * 3 + 1] = camWorldY + 15;
+        } else if (diffY > 15) {
+          posAttr.array[i * 3 + 1] = camWorldY - 15;
+        }
+
+        // Wrap depth
+        if (posAttr.array[i * 3 + 2] < -2.0) posAttr.array[i * 3 + 2] = 1.0;
+        if (posAttr.array[i * 3 + 2] > 1.0) posAttr.array[i * 3 + 2] = -2.0;
+      }
+      posAttr.needsUpdate = true;
+
+      /* ── Flying ── */
+      if (animState === 'flying') {
+        animT += dt * 0.50;
+        const prog = Math.min(animT, 1);
+        const e = easeInOutCubic(prog);
+
+        _ctrl.set(
+          (flyStartPos.x + flyTargetPos.x) * 0.5,
+          Math.max(flyStartPos.y, flyTargetPos.y) + 3.8,
+          4.5
+        );
+        _v1.lerpVectors(flyStartPos, _ctrl, e);
+        _v2.lerpVectors(_ctrl, flyTargetPos, e);
+        flyMesh.position.lerpVectors(_v1, _v2, e);
+
+        const sf = 1 - easeOutQuart(Math.max(0, prog - .60) / .40);
+        flyMesh.rotation.x = THREE.MathUtils.lerp(flyStartRot.x, flyTargetRot.x, easeOutBack(prog)) + Math.sin(el * 7) * .09 * sf;
+        flyMesh.rotation.y = THREE.MathUtils.lerp(flyStartRot.y, flyTargetRot.y, easeOutBack(prog)) + Math.cos(el * 5) * .11 * sf;
+        flyMesh.rotation.z = THREE.MathUtils.lerp(flyStartRot.z, flyTargetRot.z, easeOutBack(prog)) + Math.sin(el * 4) * .15 * sf;
+
+        flutter(el, 0.065 * (1 - easeOutQuart(Math.max(0, prog - .50) / .50)));
+
+        if (prog >= 1) { animState = 'landing'; animT = 0; }
+      }
+
+      /* ── Landing / settling ── */
+      else if (animState === 'landing') {
+        animT += dt * 2.8;
+        const prog = Math.min(animT, 1);
+        flattenFly(prog);
+        if (prog < .5) {
+          flyMesh.rotation.z = flyTargetRot.z + Math.sin(el * 20) * .04 * (1 - prog / .5);
+          flyMesh.rotation.x = flyTargetRot.x + Math.sin(el * 13) * .02 * (1 - prog / .5);
+        } else {
+          flyMesh.rotation.set(flyTargetRot.x, flyTargetRot.y, flyTargetRot.z);
+        }
+        if (prog >= 1) { animState = 'done'; stickToWall(); }
+      }
+
+      renderer.render(scene, camera);
+    })();
+
+    /* ══════════════════════════════════════════════
+       UI HELPERS
+    ══════════════════════════════════════════════ */
+    const queueEl = document.getElementById('queue');
+    const statusEl = document.getElementById('status');
+    const countEl = document.getElementById('imgCount');
+    let statusTimer = null;
+
+    function showStatus(msg) {
+      statusEl.textContent = msg;
+      statusEl.classList.toggle('show', !!msg);
+      clearTimeout(statusTimer);
+      if (msg) statusTimer = setTimeout(() => statusEl.classList.remove('show'), 2800);
+    }
+
+    function updateQueueUI() {
+      queueEl.innerHTML = '';
+      imageQueue.forEach((item, i) => {
+        const t = document.createElement('img');
+        t.src = item.dataURL;
+        t.className = 'qthumb' + (i === 0 ? ' active' : '');
+        t.title = item.name;
+        queueEl.appendChild(t);
+      });
+    }
+
+    function updateImgCount() {
+      countEl.textContent = `${totalPinned} photo${totalPinned !== 1 ? 's' : ''} on wall`;
+      countEl.classList.add('show');
+    }
+
+    /* ══════════════════════════════════════════════
+       FILE HANDLING
+    ══════════════════════════════════════════════ */
+    function loadImg(file) {
+      return new Promise(res => {
+        const r = new FileReader();
+        r.onload = e => {
+          const img = new Image();
+          img.onload = () => res({ dataURL: e.target.result, img, name: file.name });
+          img.src = e.target.result;
+        };
+        r.readAsDataURL(file);
+      });
+    }
+
+    async function handleFiles(files) {
+      const valid = [...files].filter(f => f.type.startsWith('image/'));
+      if (!valid.length) return;
+      document.getElementById('dropOverlay').classList.add('hidden');
+      document.getElementById('bar').classList.add('visible');
+      for (const f of valid) imageQueue.push(await loadImg(f));
+      updateQueueUI();
+      if (!isProcessing) { isProcessing = true; launchNext(); }
+    }
+
+    const fileInput = document.getElementById('fileInput');
+    fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
+    document.getElementById('btnUpload').onclick = () => fileInput.click();
+
+    const dropBox = document.getElementById('dropBox');
+    dropBox.onclick = () => fileInput.click();
+    dropBox.addEventListener('dragover', e => { e.preventDefault(); dropBox.classList.add('over'); });
+    dropBox.addEventListener('dragleave', () => dropBox.classList.remove('over'));
+    dropBox.addEventListener('drop', e => { e.preventDefault(); dropBox.classList.remove('over'); handleFiles(e.dataTransfer.files); });
+    document.addEventListener('dragover', e => e.preventDefault());
+    document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+
+    /* ══════════════════════════════════════════════
+       CAMERA CAPTURE  (feeds the same imageQueue pipeline)
+    ══════════════════════════════════════════════ */
+    const camOverlay = document.getElementById('camOverlay');
+    const camVideo = document.getElementById('camVideo');
+    const camError = document.getElementById('camError');
+    let camStream = null;
+    let camFacing = 'environment';   // 'environment' = back cam, 'user' = front
+    let camMirror = false;
+
+    function revealWall() {
+      document.getElementById('dropOverlay').classList.add('hidden');
+      document.getElementById('bar').classList.add('visible');
+    }
+
+    // Build a queue item from a dataURL and resolve once the image has decoded
+    function enqueueDataURL(dataURL, name) {
+      return new Promise(res => {
+        const img = new Image();
+        img.onload = () => { imageQueue.push({ dataURL, img, name }); res(); };
+        img.src = dataURL;
+      });
+    }
+
+    function stopStream() {
+      if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+      camVideo.srcObject = null;
+    }
+
+    async function startStream() {
+      stopStream();
+      camError.textContent = '';
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        camError.textContent = 'Camera unavailable here. Open this page over https:// or http://localhost — most browsers block the camera on plain file:// pages.';
+        return;
+      }
+      try {
+        camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: camFacing }, audio: false });
+        camVideo.srcObject = camStream;
+        camMirror = (camFacing === 'user');                       // mirror selfies so preview = capture
+        camVideo.style.transform = camMirror ? 'scaleX(-1)' : 'none';
+      } catch (err) {
+        camError.textContent = 'Could not access the camera: ' + (err && err.message ? err.message : err) + '. Make sure you granted permission.';
+      }
+    }
+
+    function openCamera() { camOverlay.classList.remove('hidden'); startStream(); }
+    function closeCamera() { stopStream(); camOverlay.classList.add('hidden'); }
+
+    async function capturePhoto() {
+      const vw = camVideo.videoWidth, vh = camVideo.videoHeight;
+      if (!vw || !vh) return;                       // stream not ready yet
+      const cv = document.createElement('canvas');
+      cv.width = vw; cv.height = vh;
+      const ctx = cv.getContext('2d');
+      if (camMirror) { ctx.translate(vw, 0); ctx.scale(-1, 1); }   // match the mirrored preview
+      ctx.drawImage(camVideo, 0, 0, vw, vh);
+      const dataURL = cv.toDataURL('image/jpeg', 0.92);
+
+      await enqueueDataURL(dataURL, `photo-${Date.now()}.jpg`);
+      updateQueueUI();
+      closeCamera();
+      revealWall();
+      if (!isProcessing) { isProcessing = true; launchNext(); }
+    }
+
+    document.getElementById('btnCamera').onclick = openCamera;
+    document.getElementById('dropCam').onclick = openCamera;
+    document.getElementById('camShoot').onclick = capturePhoto;
+    document.getElementById('camClose').onclick = closeCamera;
+    document.getElementById('camFlip').onclick = () => {
+      camFacing = (camFacing === 'user') ? 'environment' : 'user';
+      startStream();
+    };
+
+    /* ── Clear wall ── */
+    document.getElementById('btnClear').onclick = () => {
+      userObjects.forEach(o => {
+        if (o.material && o.material !== photoFrameMat) {
+          if (o.material.map) o.material.map.dispose();
+          o.material.dispose();
+        }
+        if (o.geometry) o.geometry.dispose();
+        scene.remove(o);
+      });
+      userObjects.length = 0;
+      imageQueue.length = 0;
+      isProcessing = false;
+      animState = 'idle';
+      flyMesh.visible = false;
+      scrollY = scrollYTarget = maxScrollY = 0;
+      resetGrid();
+      updateQueueUI();
+      refreshScrollHint();
+      countEl.classList.remove('show');
+      showStatus('Wall cleared');
+    };
+
+    /* ── Resize ── */
+    window.addEventListener('resize', () => {
+      const w = innerWidth, h = innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      // Recalculate column layout so the grid always fills the new viewport
+      recalcGridLayout();
+    });
+  </script>
+</body>
+
+</html>

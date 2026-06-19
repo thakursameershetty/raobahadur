@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useState } from 'react';
 import { milestones } from '../data/milestones';
 import CustomCursor from '../components/CustomCursor';
 import HeroSection from '../components/HeroSection';
@@ -25,72 +26,81 @@ const SatyadevTimeline = dynamic(() => import('../components/SatyadevTimeline'),
   ),
 });
 
+// Lazy-load ImageWall so its iframe doesn't mount until needed
+const ImageWall = dynamic(() => import('../components/ImageWall'), { ssr: false });
+
 export default function Home() {
+  const [isWallOpen, setIsWallOpen] = useState(false);
+
   return (
-    <main className="relative w-full h-screen bg-black overflow-hidden font-sans select-none" style={{ cursor: 'none' }}>
+    <main
+      className="relative w-full h-screen bg-black overflow-hidden font-sans select-none"
+      style={{ cursor: 'none' }}
+    >
+      {/* ─── Main Landing Page (Hero + 3D Timeline) ─── */}
+      <div className="relative w-full h-full">
+        {/* Dynamic 3D Scene */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <SatyadevTimeline />
+        </div>
 
-      {/* Dynamic 3D Scene */}
-      <div className="absolute inset-0 w-full h-full z-0">
-        <SatyadevTimeline />
-      </div>
+        {/* Hero Section */}
+        <div id="hero-section" className="absolute inset-0 w-full h-full pointer-events-none z-30 will-change-transform">
+          <HeroSection isWallOpen={isWallOpen} onOpenWall={() => setIsWallOpen(true)} />
+        </div>
 
-      {/* Hero Section */}
-      <div id="hero-section" className="absolute inset-0 w-full h-full pointer-events-none z-30 will-change-transform">
-        <HeroSection />
-      </div>
+        {/* Cinematic Ambient Overlay Gradient (Vignette) */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.85)_90%)] z-20" />
 
-      {/* Cinematic Ambient Overlay Gradient (Vignette) */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.85)_90%)] z-20" />
+        {/* Bottom Progress Bar with Year Nodes */}
+        <div id="timeline-container" className="absolute bottom-8 left-16 right-16 z-20 opacity-0 pointer-events-none transition-opacity duration-1000">
+          <div className="relative w-full h-[3px] bg-zinc-800/40 rounded-full backdrop-blur-sm">
+            {/* Progress Fill */}
+            <div
+              id="timeline-progress-fill"
+              className="absolute top-0 left-0 h-full w-0 bg-gradient-to-r from-amber-500 to-red-600 transition-all duration-100 ease-out rounded-full"
+            />
 
-      {/* --- HUD LAYER (All Interactive UI panels) --- */}
-
-
-
-
-
-      {/* 3. Bottom Progress Bar with Year Nodes */}
-      <div id="timeline-container" className="absolute bottom-8 left-16 right-16 z-20 opacity-0 pointer-events-none transition-opacity duration-1000">
-        <div className="relative w-full h-[3px] bg-zinc-800/40 rounded-full backdrop-blur-sm">
-          {/* Progress Fill */}
-          <div
-            id="timeline-progress-fill"
-            className="absolute top-0 left-0 h-full w-0 bg-gradient-to-r from-amber-500 to-red-600 transition-all duration-100 ease-out rounded-full"
-          />
-
-          {/* Year Tick Marks and Labels */}
-          {milestones.map((m, index) => {
-            const percentage = getMilestoneOffset(index, milestones.length) * 100;
-            return (
-              <div
-                key={index}
-                className="absolute top-1/2 -translate-y-1/2"
-                style={{ left: `${percentage}%` }}
-              >
-                {/* Visual Tick Dot */}
+            {/* Year Tick Marks and Labels */}
+            {milestones.map((m, index) => {
+              const percentage = getMilestoneOffset(index, milestones.length) * 100;
+              return (
                 <div
-                  id={`progress-tick-${index}`}
-                  className="absolute w-2 h-2 rounded-full bg-zinc-700 -translate-x-1/2 -translate-y-1/2 border border-black transition-all duration-300"
-                />
-
-                {/* Floating Year Label */}
-                <span
-                  id={`progress-year-${index}`}
-                  className="absolute left-0 text-[10px] font-mono font-bold tracking-tighter text-zinc-500 opacity-60 transition-all duration-300 pointer-events-none select-none"
-                  style={{
-                    transform: 'translate(-50%, -20px)',
-                  }}
+                  key={index}
+                  className="absolute top-1/2 -translate-y-1/2"
+                  style={{ left: `${percentage}%` }}
                 >
-                  {m.year}
-                </span>
-              </div>
-            );
-          })}
+                  {/* Visual Tick Dot */}
+                  <div
+                    id={`progress-tick-${index}`}
+                    className="absolute w-2 h-2 rounded-full bg-zinc-700 -translate-x-1/2 -translate-y-1/2 border border-black transition-all duration-300"
+                  />
+                  {/* Floating Year Label */}
+                  <span
+                    id={`progress-year-${index}`}
+                    className="absolute left-0 text-[10px] font-mono font-bold tracking-tighter text-zinc-500 opacity-60 transition-all duration-300 pointer-events-none select-none"
+                    style={{ transform: 'translate(-50%, -20px)' }}
+                  >
+                    {m.year}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-
-
-
+      {/* ─── Full Screen Wall of Love Overlay ─── */}
+      <div
+        className={`absolute inset-0 z-40 transition-all duration-700 ease-in-out transform ${
+          isWallOpen ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full opacity-0 scale-95'
+        }`}
+        style={{ pointerEvents: isWallOpen ? 'auto' : 'none' }}
+      >
+        {isWallOpen && (
+          <ImageWall onBack={() => setIsWallOpen(false)} />
+        )}
+      </div>
 
       {/* Hardware-independent HTML custom cursor rendering */}
       <CustomCursor />

@@ -1,0 +1,77 @@
+'use client';
+
+import { useRef } from 'react';
+
+export default function ImageWall({ onBack }) {
+  const iframeRef = useRef(null);
+
+  return (
+    <div className="w-full h-full relative bg-[#07161b] overflow-hidden">
+      {/* Header strip */}
+      <div className="absolute top-0 left-0 right-0 z-10 px-6 pt-5 pb-3 pointer-events-none flex justify-between items-start"
+        style={{ background: 'linear-gradient(to bottom, rgba(7,22,27,0.95) 0%, transparent 100%)' }}
+      >
+        <div>
+          <h2
+            className="text-[22px] font-semibold tracking-[0.3em] uppercase"
+            style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              background: 'linear-gradient(105deg, #9c7a35 0%, #f0d693 35%, #c9a24c 55%, #f6e4a8 70%, #9c7a35 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            Wall of Love
+          </h2>
+          <p className="text-[11px] tracking-[0.2em] uppercase mt-1" style={{ color: 'rgba(201,162,76,0.5)', fontFamily: "'Cormorant Garamond', serif" }}>
+            Upload · Snap · Pin your tribute
+          </p>
+        </div>
+
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="group px-5 py-2.5 text-xs tracking-[0.2em] uppercase transition-all duration-300 pointer-events-auto flex items-center gap-2 mt-1"
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              border: '1px solid rgba(201,162,76,0.4)',
+              background: 'rgba(7,22,27,0.6)',
+              color: '#e7c879',
+              borderRadius: '9999px',
+              backdropFilter: 'blur(4px)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(201,162,76,0.18)';
+              e.currentTarget.style.border = '1px solid rgba(201,162,76,0.85)';
+              e.currentTarget.style.boxShadow = '0 0 15px rgba(201,162,76,0.2)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(7,22,27,0.6)';
+              e.currentTarget.style.border = '1px solid rgba(201,162,76,0.4)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <span>←</span> Back to Tribute
+          </button>
+        )}
+      </div>
+
+      {/* The sandboxed gallery wall — full fidelity, no conflicts */}
+      <iframe
+        ref={iframeRef}
+        src="/image-wall.html"
+        className="absolute inset-0 w-full h-full border-0"
+        title="Image Wall"
+        // allow camera, and allow-same-origin so Three.js importmap works
+        allow="camera"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      />
+
+      {/* Vertical gold divider accent on the left edge */}
+      <div className="absolute top-0 left-0 bottom-0 w-[1px] z-20 pointer-events-none"
+        style={{ background: 'linear-gradient(to bottom, transparent, rgba(201,162,76,0.4) 20%, rgba(201,162,76,0.4) 80%, transparent)' }}
+      />
+    </div>
+  );
+}
