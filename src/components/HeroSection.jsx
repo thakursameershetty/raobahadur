@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import TimberText from './TimberText';
+import { ASSETS } from '@/lib/assets';
 
 export default function HeroSection({ isWallOpen, onOpenWall }) {
   const containerRef = useRef(null);
@@ -150,7 +151,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       className="relative w-full h-full flex justify-center items-center overflow-hidden bg-[#030807] pointer-events-none"
     >
       <img
-        src={isMobile ? "/mobile-layers/last.png" : "/layers/last.png"}
+        src={isMobile ? ASSETS.mobileLayers.last : ASSETS.layers.last}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.02"
         alt="Background"
@@ -160,7 +161,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       />
 
       <img
-        src={isMobile ? "/mobile-layers/fourth.png" : "/layers/fourth.png"}
+        src={isMobile ? ASSETS.mobileLayers.fourth : ASSETS.layers.fourth}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.035"
         alt="Background"
@@ -170,7 +171,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       />
 
       <img
-        src={isMobile ? "/mobile-layers/third.png" : "/layers/third.png"}
+        src={isMobile ? ASSETS.mobileLayers.third : ASSETS.layers.third}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.05"
         alt="Feathers"
@@ -180,7 +181,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       />
 
       <img
-        src={isMobile ? "/mobile-layers/second.png" : "/layers/second.png"}
+        src={isMobile ? ASSETS.mobileLayers.second : ASSETS.layers.second}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.08"
         alt="Back Elements"
@@ -190,7 +191,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       />
 
       <img
-        src={isMobile ? "/mobile-layers/top.png" : "/layers/top.png"}
+        src={isMobile ? ASSETS.mobileLayers.top : ASSETS.layers.top}
         className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] object-cover parallax-layer pointer-events-none"
         data-speed="0.12"
         alt="Satyadev"

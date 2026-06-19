@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { ASSETS } from '@/lib/assets';
 
 export default function ImageWall({ onBack }) {
   const iframeRef = useRef(null);
@@ -119,21 +120,21 @@ export default function ImageWall({ onBack }) {
       <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 5 }}>
         {/* Desktop Layer */}
         <img
-          src="/wall-layers/wall-layer-desktop.png"
+          src={ASSETS.wallLayers["wall-layer-desktop"]}
           alt=""
           className="hidden md:block absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.95 }}
         />
         {/* Tablet Layer */}
         <img
-          src="/wall-layers/wall-layer-tablet.png"
+          src={ASSETS.wallLayers["wall-layer-tablet"]}
           alt=""
           className="hidden sm:block md:hidden absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.95 }}
         />
         {/* Mobile Layer */}
         <img
-          src="/wall-layers/wall-layer-mobile.png"
+          src={ASSETS.wallLayers["wall-layer-mobile"]}
           alt=""
           className="block sm:hidden absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.95 }}

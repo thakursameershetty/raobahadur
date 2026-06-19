@@ -756,17 +756,17 @@
       } else if (w >= 480) {
         // Average mobile view: 2 columns, slightly scaled down
         COLS = 2;
-        CAM_Z = 13.8;
-        GAP_X = 0.34;
-        GAP_Y = 0.44;
-        START_Y = 3.8;
+        CAM_Z = 12.5;
+        GAP_X = 0.45;
+        GAP_Y = 0.55;
+        START_Y = 3.6;
       } else {
         // Smallest mobile: 2 columns, scaled down even more
         COLS = 2;
-        CAM_Z = 16.5;
-        GAP_X = 0.28;
-        GAP_Y = 0.38;
-        START_Y = 4.4;
+        CAM_Z = 14.5;
+        GAP_X = 0.38;
+        GAP_Y = 0.48;
+        START_Y = 4.0;
       }
 
       CAM_DIST = CAM_Z - BOARD_Z;
@@ -786,9 +786,9 @@
       } else if (w >= 768) {
         gridW = Math.min(9.8, visW * 0.86);
       } else if (w >= 480) {
-        gridW = Math.min(5.8, visW * 0.90);
+        gridW = Math.min(6.2, visW * 0.92);
       } else {
-        gridW = Math.min(4.8, visW * 0.93);
+        gridW = Math.min(5.2, visW * 0.95);
       }
 
       CELL_W = gridW / COLS;
