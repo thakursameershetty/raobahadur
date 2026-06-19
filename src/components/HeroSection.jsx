@@ -252,7 +252,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
             fontSize={isMobile ? 32 : 60}
             tracking={isMobile ? 3 : 6}
             glow={true}
-            className={isMobile ? '!justify-center' : '!justify-start'}
+            className={isMobile ? '!justify-center -translate-x-1.5' : '!justify-start'}
           />
         </div>
       </div>
