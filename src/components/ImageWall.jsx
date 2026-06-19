@@ -1,72 +1,22 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 export default function ImageWall({ onBack }) {
   const iframeRef = useRef(null);
-  const desktopLayerRef = useRef(null);
-  const tabletLayerRef = useRef(null);
-  const mobileLayerRef = useRef(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    let currentScrollY = 0;
-    let currentMouse = { x: 0, y: 0 };
-    let targetMouse = { x: 0, y: 0 };
-    let rafId = null;
-
-    const updateStyles = () => {
-      // Smoothly interpolate mouse coords for extra buttery parallax
-      currentMouse.x += (targetMouse.x - currentMouse.x) * 0.08;
-      currentMouse.y += (targetMouse.y - currentMouse.y) * 0.08;
-
-      // Apply parallax offsets: scrollY * -offset multiplier, mouse * -range px
-      if (desktopLayerRef.current) {
-        const tx = currentMouse.x * -25;
-        const ty = currentMouse.y * -25 + currentScrollY * -12;
-        desktopLayerRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.08)`;
-      }
-      if (tabletLayerRef.current) {
-        const tx = currentMouse.x * -20;
-        const ty = currentMouse.y * -20 + currentScrollY * -10;
-        tabletLayerRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.08)`;
-      }
-      if (mobileLayerRef.current) {
-        const tx = currentMouse.x * -15;
-        const ty = currentMouse.y * -15 + currentScrollY * -8;
-        mobileLayerRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.08)`;
-      }
-
-      rafId = requestAnimationFrame(updateStyles);
-    };
-
-    rafId = requestAnimationFrame(updateStyles);
-
     const handleMessage = (event) => {
       if (!event.data) return;
-      if (event.data.type === 'WALL_SCROLL') {
-        currentScrollY = event.data.scrollY;
-      } else if (event.data.type === 'WALL_MOUSEMOVE') {
-        targetMouse.x = event.data.nx;
-        targetMouse.y = event.data.ny;
+      if (event.data.type === 'MODAL_STATE') {
+        setIsModalOpen(event.data.isOpen);
       }
     };
-
-    const handleMouseMove = (e) => {
-      const nx = (e.clientX / window.innerWidth) - 0.5;
-      const ny = (e.clientY / window.innerHeight) - 0.5;
-      targetMouse.x = nx;
-      targetMouse.y = ny;
-    };
-
     window.addEventListener('message', handleMessage);
-    window.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      window.removeEventListener('message', handleMessage);
-      window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(rafId);
-    };
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
+
 
   const triggerUploadModal = () => {
     if (iframeRef.current) {
@@ -77,12 +27,12 @@ export default function ImageWall({ onBack }) {
   return (
     <div className="w-full h-full relative bg-[#07161b] overflow-hidden">
       {/* Header strip */}
-      <div className="absolute top-0 left-0 right-0 z-10 px-4 md:px-6 pt-4 md:pt-5 pb-3 pointer-events-none flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0"
+      <div className="absolute top-0 left-0 right-0 z-10 px-4 md:px-6 pt-4 md:pt-5 pb-3 pointer-events-none flex flex-col items-center gap-3"
         style={{ background: 'linear-gradient(to bottom, rgba(7,22,27,0.95) 0%, transparent 100%)' }}
       >
-        <div>
+        <div className="text-center flex flex-col items-center">
           <h2
-            className="text-lg md:text-[22px] font-semibold tracking-[0.3em] uppercase"
+            className="text-lg md:text-[22px] font-semibold tracking-[0.3em] uppercase text-center"
             style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               background: 'linear-gradient(105deg, #9c7a35 0%, #f0d693 35%, #c9a24c 55%, #f6e4a8 70%, #9c7a35 100%)',
@@ -98,7 +48,7 @@ export default function ImageWall({ onBack }) {
           </p>
         </div>
 
-        <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-3 pointer-events-auto mt-1 flex-wrap justify-end">
+        <div className="flex flex-row items-center justify-center gap-2 sm:gap-3 pointer-events-auto mt-1">
           {onBack && (
             <button
               onClick={onBack}
@@ -122,7 +72,7 @@ export default function ImageWall({ onBack }) {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              <span>←</span> Back to Tribute
+              <span>←</span> Back
             </button>
           )}
 
@@ -150,7 +100,7 @@ export default function ImageWall({ onBack }) {
               e.currentTarget.style.boxShadow = '0 0 15px rgba(201,162,76,0.1)';
             }}
           >
-            <span>📷 Camera & Upload</span>
+            <span>Upload</span>
           </button>
         </div>
       </div>
@@ -159,37 +109,34 @@ export default function ImageWall({ onBack }) {
       <iframe
         ref={iframeRef}
         src="/image-wall.html"
-        className="absolute inset-0 w-full h-full border-0"
+        className={`absolute inset-0 w-full h-full border-0 ${isModalOpen ? 'z-50' : 'z-0'}`}
         title="Image Wall"
         allow="camera"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       />
 
-      {/* Responsive Parallax Overlays */}
+      {/* Responsive Static Overlays */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 5 }}>
         {/* Desktop Layer */}
         <img
-          ref={desktopLayerRef}
           src="/wall-layers/wall-layer-desktop.png"
           alt=""
-          className="hidden md:block absolute inset-0 w-full h-full object-cover will-change-transform"
-          style={{ transform: 'scale(1.08)', opacity: 0.95 }}
+          className="hidden md:block absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.95 }}
         />
         {/* Tablet Layer */}
         <img
-          ref={tabletLayerRef}
           src="/wall-layers/wall-layer-tablet.png"
           alt=""
-          className="hidden sm:block md:hidden absolute inset-0 w-full h-full object-cover will-change-transform"
-          style={{ transform: 'scale(1.08)', opacity: 0.95 }}
+          className="hidden sm:block md:hidden absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.95 }}
         />
         {/* Mobile Layer */}
         <img
-          ref={mobileLayerRef}
           src="/wall-layers/wall-layer-mobile.png"
           alt=""
-          className="block sm:hidden absolute inset-0 w-full h-full object-cover will-change-transform"
-          style={{ transform: 'scale(1.08)', opacity: 0.95 }}
+          className="block sm:hidden absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.95 }}
         />
       </div>
 

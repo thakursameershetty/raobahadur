@@ -395,6 +395,10 @@
       opacity: 1;
     }
 
+    .mobile-drop-content {
+      display: none;
+    }
+
     @media (max-width: 600px) {
       .modalSplit {
         flex-direction: column;
@@ -406,6 +410,29 @@
 
       .modalContent {
         padding: 30px 20px 20px;
+      }
+
+      .desktop-drop-content {
+        display: none;
+      }
+
+      .mobile-drop-content {
+        display: block;
+        width: 100%;
+      }
+
+      .dropBox {
+        height: auto;
+        border: none;
+        background: transparent;
+        padding: 10px 0;
+      }
+
+      .dropBox:hover,
+      .dropBox.over {
+        border: none;
+        background: transparent;
+        box-shadow: none;
       }
     }
   </style>
@@ -422,7 +449,7 @@
         <!-- Left: Camera Panel -->
         <div class="modalPane camPane">
           <div class="paneHeader">
-            <h3>📷 Live Camera</h3>
+            <h3>Live Camera</h3>
           </div>
           <div class="camContainer">
             <video id="camVideo" autoplay playsinline muted></video>
@@ -440,16 +467,23 @@
         <!-- Right: File Upload Panel -->
         <div class="modalPane filePane">
           <div class="paneHeader">
-            <h3>📁 Upload Photo</h3>
+            <h3>Upload Photo</h3>
           </div>
           <div class="dropBox" id="dropBox">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9a24c" stroke-width="1.2">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21,15 16,10 5,21" />
-            </svg>
-            <h4>Drag & Drop</h4>
-            <p>or click to browse files</p>
+            <div class="desktop-drop-content">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9a24c" stroke-width="1.2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21,15 16,10 5,21" />
+              </svg>
+              <h4>Drag & Drop</h4>
+              <p>or click to browse files</p>
+            </div>
+            <div class="mobile-drop-content">
+              <button class="btn"
+                style="background: linear-gradient(180deg, #f0d693, #c9a24c 55%, #9c7a35); color: #2a1d05; width: 100%; padding: 14px 0; font-size: 14px; margin-top: 10px;">Upload
+                File</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1463,11 +1497,13 @@
       uploadModal.offsetHeight; // Force layout reflow for animation
       uploadModal.classList.add('visible');
       startStream();
+      window.parent.postMessage({ type: 'MODAL_STATE', isOpen: true }, '*');
     }
 
     function closeUploadModal() {
       stopStream();
       uploadModal.classList.remove('visible');
+      window.parent.postMessage({ type: 'MODAL_STATE', isOpen: false }, '*');
       setTimeout(() => {
         if (!uploadModal.classList.contains('visible')) {
           uploadModal.classList.add('hidden');
