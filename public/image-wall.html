@@ -493,8 +493,14 @@
 
   <div id="uploadModal" class="hidden">
     <div class="modalContent">
-      <img src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1781901800/satyadev_assets/extras/b74rycddp7yi1fa4ly0k.png" alt="" style="position: absolute; top: -30px; left: -20px; width: 110px; opacity: 0.7; transform: rotate(-25deg); pointer-events: none; z-index: 50;" />
-      <img src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1781901802/satyadev_assets/extras/vdacnmnbh1r2qocyga7e.png" alt="" style="position: absolute; bottom: -30px; right: -25px; width: 100px; opacity: 0.7; transform: rotate(15deg); pointer-events: none; z-index: 50;" />
+      <img
+        src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1781901800/satyadev_assets/extras/b74rycddp7yi1fa4ly0k.png"
+        alt=""
+        style="position: absolute; top: -30px; left: -20px; width: 110px; opacity: 0.7; transform: rotate(-25deg); pointer-events: none; z-index: 50;" />
+      <img
+        src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1781901802/satyadev_assets/extras/vdacnmnbh1r2qocyga7e.png"
+        alt=""
+        style="position: absolute; bottom: -30px; right: -25px; width: 100px; opacity: 0.7; transform: rotate(15deg); pointer-events: none; z-index: 50;" />
       <button id="modalClose" title="Close Modal">✕</button>
       <div class="modalSplit">
         <!-- Left: Camera Panel -->
@@ -504,7 +510,9 @@
           </div>
           <div class="camContainer">
             <video id="camVideo" autoplay playsinline muted style="position: absolute; z-index: 1;"></video>
-            <img id="poseOverlay" src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1781901803/satyadev_assets/extras/opfklczsuu3unblz5jom.png" alt="Pose Guide"
+            <img id="poseOverlay"
+              src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1781901803/satyadev_assets/extras/opfklczsuu3unblz5jom.png"
+              alt="Pose Guide"
               style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; pointer-events: none; z-index: 10; transition: opacity 0.3s; mix-blend-mode: difference; filter: invert(1);" />
             <div id="camError" style="position: relative; z-index: 20;"></div>
           </div>
@@ -1718,7 +1726,7 @@
     async function handleFiles(files) {
       const valid = [...files].filter(f => f.type.startsWith('image/'));
       if (!valid.length) return;
-      
+
       // Upload only the first selected image
       const fileToUpload = valid[0];
       await uploadImage(fileToUpload, fileToUpload.name);
