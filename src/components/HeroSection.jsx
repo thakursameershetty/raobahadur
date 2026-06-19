@@ -14,16 +14,18 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
   const currentY = useRef(0);
 
   // Total visitor count state
-  const [visitorCount, setVisitorCount] = useState(1432);
+  const [visitorCount, setVisitorCount] = useState(null);
 
   useEffect(() => {
-    // Basic simulation for total visits incrementing occasionally
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        setVisitorCount(prev => prev + 1);
-      }
-    }, 5000);
-    return () => clearInterval(interval);
+    // Increment and fetch the live visitor count on page mount
+    fetch('/api/visits', { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.count === 'number') {
+          setVisitorCount(data.count);
+        }
+      })
+      .catch(err => console.error('Error tracking visit:', err));
   }, []);
 
   useEffect(() => {
@@ -158,7 +160,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
         </h2>
         <div className="flex items-center gap-2 mt-1">
           <span className="text-white/90 font-mono text-sm tracking-widest uppercase drop-shadow-md">
-            Total Visits: <span className="font-bold text-white">{visitorCount.toLocaleString()}</span>
+            Total Visits: <span className="font-bold text-white">{visitorCount !== null ? visitorCount.toLocaleString() : '...'}</span>
           </span>
         </div>
       </div>

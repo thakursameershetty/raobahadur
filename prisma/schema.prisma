@@ -19,3 +19,9 @@ model Image {
   uploader  String?  // Optional name of the person who uploaded
   createdAt DateTime @default(now())
 }
+
+model VisitorCount {
+  id    Int @id
+  count Int @default(1)
+}
+
