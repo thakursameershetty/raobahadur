@@ -1087,6 +1087,7 @@
     }
 
     function updateQueueUI() {
+      if (!queueEl) return;
       queueEl.innerHTML = '';
       imageQueue.forEach((item, i) => {
         const t = document.createElement('img');

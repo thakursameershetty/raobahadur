@@ -55,84 +55,197 @@
       color: transparent;
     }
 
-    #dropOverlay {
+    #uploadModal {
       position: fixed;
       inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(4, 12, 15, 0.6);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    #uploadModal.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modalContent {
+      position: relative;
+      width: 780px;
+      max-width: 90vw;
+      background: linear-gradient(135deg, rgba(12, 33, 40, 0.9) 0%, rgba(7, 22, 27, 0.98) 100%);
+      border: 1px solid rgba(201, 162, 76, 0.4);
+      border-radius: 8px;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(201, 162, 76, 0.1) inset;
+      padding: 40px 30px 30px;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #uploadModal.visible .modalContent {
+      transform: scale(1) translateY(0);
+    }
+
+    #modalClose {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: rgba(239, 226, 196, 0.6);
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    #modalClose:hover {
+      color: var(--gold-lt);
+    }
+
+    .modalSplit {
+      display: flex;
+      gap: 30px;
+      align-items: stretch;
+    }
+
+    .modalPane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .paneHeader h3 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold-lt);
+      font-size: 16px;
+      letter-spacing: 1.5px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .modalDivider {
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(201, 162, 76, 0.3) 20%, rgba(201, 162, 76, 0.3) 80%, transparent);
+    }
+
+    .camContainer {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      background: #000;
+      border: 1px solid rgba(201, 162, 76, 0.25);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #camVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #camError {
+      color: var(--gold);
+      font-size: 12px;
+      text-align: center;
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    .camControls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 15px;
+      width: 100%;
+    }
+
+    #camShoot {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid var(--gold);
+      background: radial-gradient(circle at 50% 35%, #fff, #efe2c4);
+      box-shadow: 0 0 15px rgba(201, 162, 76, 0.3);
+      transition: transform 0.12s;
+    }
+
+    #camShoot:hover {
+      transform: scale(1.08);
+    }
+
+    #camShoot:active {
+      transform: scale(0.92);
+    }
+
+    .camBtn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid rgba(201, 162, 76, 0.4);
+      background: rgba(201, 162, 76, 0.08);
+      color: var(--gold);
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.12s;
+    }
+
+    .camBtn:hover {
+      background: rgba(201, 162, 76, 0.18);
+    }
+
+    .dropBox {
+      width: 100%;
+      height: 240px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 20;
-      background: radial-gradient(80% 80% at 50% 45%, rgba(10, 28, 33, .82), rgba(4, 12, 15, .93));
-      backdrop-filter: blur(6px);
-      transition: opacity .4s;
-    }
-
-    #dropOverlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .dropBox {
-      position: relative;
-      width: 380px;
-      text-align: center;
       cursor: pointer;
-      padding: 54px 40px;
+      border: 1px dashed rgba(201, 162, 76, 0.4);
       border-radius: 4px;
-      border: 1px solid rgba(201, 162, 76, .45);
-      box-shadow: 0 0 0 1px rgba(201, 162, 76, .18) inset, 0 0 60px rgba(0, 0, 0, .5);
-      background: linear-gradient(180deg, rgba(201, 162, 76, .05), rgba(201, 162, 76, .01));
-      transition: border-color .25s, box-shadow .25s, background .25s;
-    }
-
-    .dropBox::before {
-      content: '\2756';
-      position: absolute;
-      top: -13px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: var(--gold);
-      font-size: 18px;
-      background: #0a1c20;
-      padding: 0 10px;
+      background: rgba(201, 162, 76, 0.02);
+      transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+      padding: 20px;
+      text-align: center;
     }
 
     .dropBox:hover,
     .dropBox.over {
       border-color: var(--gold-lt);
-      box-shadow: 0 0 0 1px rgba(231, 200, 121, .35) inset, 0 0 70px rgba(201, 162, 76, .18);
-      background: linear-gradient(180deg, rgba(201, 162, 76, .09), rgba(201, 162, 76, .02));
+      border-style: solid;
+      background: rgba(201, 162, 76, 0.06);
+      box-shadow: 0 0 15px rgba(201, 162, 76, 0.1);
     }
 
-    .dropBox svg {
-      margin-bottom: 16px;
-      opacity: .85;
-    }
-
-    .dropBox h2 {
+    .dropBox h4 {
       font-family: 'Cinzel', serif;
-      font-weight: 600;
-      font-size: 21px;
-      letter-spacing: 1.5px;
-      margin-bottom: 12px;
-      text-transform: uppercase;
+      color: var(--gold-lt);
+      font-size: 15px;
+      margin-top: 10px;
+      letter-spacing: 1px;
     }
 
     .dropBox p {
-      color: rgba(239, 226, 196, .6);
-      font-size: 16px;
-      line-height: 1.55;
-      font-weight: 500;
-    }
-
-    .dropBox .sub {
-      margin-top: 16px;
-      color: rgba(201, 162, 76, .7);
-      font-size: 12.5px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      font-family: 'Cinzel', serif;
+      color: rgba(239, 226, 196, 0.5);
+      font-size: 12px;
+      margin-top: 5px;
     }
 
     #fileInput {
@@ -151,14 +264,6 @@
       gap: 14px;
       padding: 14px 20px 18px;
       background: linear-gradient(to top, rgba(4, 12, 15, .97) 50%, transparent);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .4s;
-    }
-
-    #bar.visible {
-      opacity: 1;
-      pointer-events: all;
     }
 
     .btn {
@@ -190,36 +295,7 @@
       box-shadow: 0 0 0 1px rgba(120, 90, 35, .6);
     }
 
-    #btnClear,
-    #btnCamera {
-      background: rgba(201, 162, 76, .07);
-      color: var(--gold);
-      border: 1px solid rgba(201, 162, 76, .4);
-    }
 
-    #queue {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      max-width: 42vw;
-      overflow-x: auto;
-      padding: 3px 2px;
-    }
-
-    .qthumb {
-      width: 36px;
-      height: 36px;
-      border-radius: 2px;
-      object-fit: cover;
-      flex-shrink: 0;
-      border: 1px solid rgba(201, 162, 76, .4);
-      transition: border-color .2s, box-shadow .2s;
-    }
-
-    .qthumb.active {
-      border-color: var(--gold-lt);
-      box-shadow: 0 0 0 2px rgba(201, 162, 76, .3);
-    }
 
     #scrollHint {
       position: fixed;
@@ -319,129 +395,18 @@
       opacity: 1;
     }
 
-    /* camera */
-    #dropCam {
-      margin-top: 20px;
-      padding: 12px 24px;
-      border-radius: 9999px;
-      cursor: pointer;
-      border: 1px solid rgba(201, 162, 76, .45);
-      background: rgba(201, 162, 76, .07);
-      color: var(--gold);
-      font-family: 'Cinzel', serif;
-      font-size: 11.5px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      transition: background .2s, transform .12s;
-    }
+    @media (max-width: 600px) {
+      .modalSplit {
+        flex-direction: column;
+      }
 
-    #dropCam:hover {
-      background: rgba(201, 162, 76, .16);
-      transform: translateY(-1px);
-    }
+      .modalDivider {
+        display: none;
+      }
 
-    #dropCam:active {
-      transform: scale(.96);
-    }
-
-    #camOverlay {
-      position: fixed;
-      inset: 0;
-      z-index: 30;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(80% 80% at 50% 45%, rgba(8, 20, 24, .96), rgba(3, 9, 11, .98));
-      backdrop-filter: blur(5px);
-      transition: opacity .3s;
-    }
-
-    #camOverlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .camStage {
-      position: relative;
-      min-width: 280px;
-      min-height: 160px;
-      max-width: 92vw;
-      max-height: 70vh;
-      border-radius: 4px;
-      overflow: hidden;
-      border: 1px solid rgba(201, 162, 76, .5);
-      box-shadow: 0 0 0 1px rgba(201, 162, 76, .2) inset, 0 0 50px rgba(0, 0, 0, .6);
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #camVideo {
-      display: block;
-      max-width: 92vw;
-      max-height: 70vh;
-    }
-
-    #camError {
-      color: var(--gold);
-      font-size: 15px;
-      line-height: 1.6;
-      text-align: center;
-      max-width: 340px;
-      padding: 34px 24px;
-      font-weight: 500;
-    }
-
-    .camControls {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-      margin-top: 28px;
-    }
-
-    #camShoot {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 3px solid var(--gold);
-      background: radial-gradient(circle at 50% 35%, #fff, #efe2c4);
-      box-shadow: 0 0 0 3px rgba(201, 162, 76, .3), 0 0 22px rgba(201, 162, 76, .3);
-      transition: transform .12s;
-    }
-
-    #camShoot:hover {
-      transform: scale(1.06);
-    }
-
-    #camShoot:active {
-      transform: scale(.92);
-    }
-
-    .camBtn {
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 1px solid rgba(201, 162, 76, .4);
-      background: rgba(201, 162, 76, .08);
-      color: var(--gold);
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background .2s, transform .12s;
-    }
-
-    .camBtn:hover {
-      background: rgba(201, 162, 76, .18);
-    }
-
-    .camBtn:active {
-      transform: scale(.9);
+      .modalContent {
+        padding: 30px 20px 20px;
+      }
     }
   </style>
 </head>
@@ -450,39 +415,49 @@
 
   <div id="vignette"></div>
 
-  <div id="dropOverlay">
-    <div class="dropBox" id="dropBox">
-      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#c9a24c" stroke-width="1.2">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <circle cx="8.5" cy="8.5" r="1.5" />
-        <polyline points="21,15 16,10 5,21" />
-      </svg>
-      <h2 class="foil">Curate your gallery</h2>
-      <p>Drop in your photographs and watch each one<br>flutter onto the wall, framed and pinned in gold.</p>
-      <p class="sub">click · drag &amp; drop · multiple welcome</p>
+  <div id="uploadModal" class="hidden">
+    <div class="modalContent">
+      <button id="modalClose" title="Close Modal">✕</button>
+      <div class="modalSplit">
+        <!-- Left: Camera Panel -->
+        <div class="modalPane camPane">
+          <div class="paneHeader">
+            <h3>📷 Live Camera</h3>
+          </div>
+          <div class="camContainer">
+            <video id="camVideo" autoplay playsinline muted></video>
+            <div id="camError"></div>
+          </div>
+          <div class="camControls">
+            <button class="camBtn" id="camFlip" title="Switch camera">⟲</button>
+            <button id="camShoot" title="Take photo"></button>
+          </div>
+        </div>
+
+        <!-- Vertical Divider -->
+        <div class="modalDivider"></div>
+
+        <!-- Right: File Upload Panel -->
+        <div class="modalPane filePane">
+          <div class="paneHeader">
+            <h3>📁 Upload Photo</h3>
+          </div>
+          <div class="dropBox" id="dropBox">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9a24c" stroke-width="1.2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21,15 16,10 5,21" />
+            </svg>
+            <h4>Drag & Drop</h4>
+            <p>or click to browse files</p>
+          </div>
+        </div>
+      </div>
     </div>
-    <button id="dropCam">📷 Take a photo</button>
   </div>
   <input type="file" id="fileInput" accept="image/*" multiple>
 
-  <div id="camOverlay" class="hidden">
-    <div class="camStage">
-      <video id="camVideo" autoplay playsinline muted></video>
-      <div id="camError"></div>
-    </div>
-    <div class="camControls">
-      <button class="camBtn" id="camFlip" title="Switch camera">⟲</button>
-      <button id="camShoot" title="Take photo"></button>
-      <button class="camBtn" id="camClose" title="Close">✕</button>
-    </div>
-  </div>
 
-  <div id="bar">
-    <div id="queue"></div>
-    <button class="btn" id="btnUpload">＋ Add Photos</button>
-    <button class="btn" id="btnCamera">📷 Camera</button>
-    <button class="btn" id="btnClear">✕ Clear Wall</button>
-  </div>
 
   <div id="scrollHint">
     <div class="sArrow">↓</div>
@@ -1066,67 +1041,77 @@
        The fly mesh is never reused; stuck meshes are plain PlaneGeometry (no deformation)
     ══════════════════════════════════════════════ */
     function stickToWall() {
-      const item = imageQueue.shift();
-      updateQueueUI();
-      totalPinned++;
+      try {
+        const item = imageQueue.shift();
+        if (!item) {
+          throw new Error("No item shifted from imageQueue!");
+        }
+        updateQueueUI();
+        totalPinned++;
 
-      // Gold frame behind the photo (shows as a gilt border)
-      const frame = new THREE.Mesh(
-        new THREE.PlaneGeometry(flyW + 0.22, flyH + 0.22),
-        photoFrameMat
-      );
-      frame.position.set(flyTargetPos.x, flyTargetPos.y, flyTargetPos.z - 0.04);
-      frame.rotation.copy(flyTargetRot);
-      frame.receiveShadow = true;
-      scene.add(frame);
-      userObjects.push(frame);
+        // Gold frame behind the photo (shows as a gilt border)
+        const frame = new THREE.Mesh(
+          new THREE.PlaneGeometry(flyW + 0.22, flyH + 0.22),
+          photoFrameMat
+        );
+        frame.position.set(flyTargetPos.x, flyTargetPos.y, flyTargetPos.z - 0.04);
+        frame.rotation.copy(flyTargetRot);
+        frame.receiveShadow = true;
+        scene.add(frame);
+        userObjects.push(frame);
 
-      // NEW flat geometry for the stuck image — completely independent of flyGeo
-      const geo = new THREE.PlaneGeometry(flyW, flyH);
-      const tex = new THREE.Texture(item.img);
-      tex.encoding = THREE.sRGBEncoding;
-      tex.needsUpdate = true;
-      const mat = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.copy(flyTargetPos);
-      mesh.rotation.copy(flyTargetRot);
-      mesh.castShadow = mesh.receiveShadow = true;
-      scene.add(mesh);
-      userObjects.push(mesh);
+        // NEW flat geometry for the stuck image — completely independent of flyGeo
+        const geo = new THREE.PlaneGeometry(flyW, flyH);
+        const tex = new THREE.Texture(item.img);
+        tex.encoding = THREE.sRGBEncoding;
+        tex.needsUpdate = true;
+        const mat = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(flyTargetPos);
+        mesh.rotation.copy(flyTargetRot);
+        mesh.castShadow = mesh.receiveShadow = true;
+        scene.add(mesh);
+        userObjects.push(mesh);
 
-      // Soft drop shadow
-      const shMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.32 });
-      const sh = new THREE.Mesh(new THREE.PlaneGeometry(flyW + 0.16, flyH + 0.16), shMat);
-      // Keep the shadow near the cork surface (just off the board face at -1.05),
-      // so it reads as a drop shadow on the wall and sits well behind the image.
-      sh.position.set(flyTargetPos.x + 0.05, flyTargetPos.y - 0.05, -1.0);
-      sh.rotation.copy(flyTargetRot);
-      scene.add(sh);
-      userObjects.push(sh);
+        // Soft drop shadow
+        const shMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.32 });
+        const sh = new THREE.Mesh(new THREE.PlaneGeometry(flyW + 0.16, flyH + 0.16), shMat);
+        // Keep the shadow near the cork surface (just off the board face at -1.05),
+        // so it reads as a drop shadow on the wall and sits well behind the image.
+        sh.position.set(flyTargetPos.x + 0.05, flyTargetPos.y - 0.05, -1.0);
+        sh.rotation.copy(flyTargetRot);
+        scene.add(sh);
+        userObjects.push(sh);
 
-      // Push pin
-      const pin = makePushPin(GEM_COLORS[totalPinned % GEM_COLORS.length]);
-      pin.position.set(
-        flyTargetPos.x + (Math.random() - .5) * 0.2,
-        flyTargetPos.y + flyH / 2 - 0.06,
-        flyTargetPos.z + 0.09
-      );
-      scene.add(pin);
-      userObjects.push(pin);
+        // Push pin
+        const pin = makePushPin(GEM_COLORS[totalPinned % GEM_COLORS.length]);
+        pin.position.set(
+          flyTargetPos.x + (Math.random() - .5) * 0.2,
+          flyTargetPos.y + flyH / 2 - 0.06,
+          flyTargetPos.z + 0.09
+        );
+        scene.add(pin);
+        userObjects.push(pin);
 
-      // Hide flying mesh
-      flyMesh.visible = false;
+        // Hide flying mesh
+        flyMesh.visible = false;
 
-      computeMaxScroll();
-      refreshScrollHint();
-      updateImgCount();
-      showStatus('Pinned! 📌');
+        computeMaxScroll();
+        refreshScrollHint();
+        updateImgCount();
+        showStatus('Pinned! 📌');
 
-      setTimeout(() => {
+        setTimeout(() => {
+          isProcessing = false;
+          if (imageQueue.length) launchNext();
+          else showStatus('');
+        }, 480);
+      } catch (err) {
+        console.error("Error in stickToWall:", err);
+        showStatus("Pinning failed: " + err.message);
         isProcessing = false;
-        if (imageQueue.length) launchNext();
-        else showStatus('');
-      }, 480);
+        if (flyMesh) flyMesh.visible = false;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -1226,7 +1211,7 @@
 
     /* ══════════════════════════════════════════════
        UI HELPERS
-    ══════════════════════════════════════════════ */
+       ══════════════════════════════════════════════ */
     const queueEl = document.getElementById('queue');
     const statusEl = document.getElementById('status');
     const countEl = document.getElementById('imgCount');
@@ -1240,6 +1225,7 @@
     }
 
     function updateQueueUI() {
+      if (!queueEl) return;
       queueEl.innerHTML = '';
       imageQueue.forEach((item, i) => {
         const t = document.createElement('img');
@@ -1256,119 +1242,75 @@
     }
 
     /* ══════════════════════════════════════════════
-       FILE HANDLING
-    ══════════════════════════════════════════════ */
-    function loadImg(file) {
-      return new Promise(res => {
-        const r = new FileReader();
-        r.onload = e => {
-          const img = new Image();
-          img.onload = () => res({ dataURL: e.target.result, img, name: file.name });
-          img.src = e.target.result;
-        };
-        r.readAsDataURL(file);
-      });
-    }
+       DATABASE & DYNAMIC LOADING
+       ══════════════════════════════════════════════ */
+    const loadedImageUrls = new Set();
 
-    async function handleFiles(files) {
-      const valid = [...files].filter(f => f.type.startsWith('image/'));
-      if (!valid.length) return;
-      document.getElementById('dropOverlay').classList.add('hidden');
-      document.getElementById('bar').classList.add('visible');
-      for (const f of valid) imageQueue.push(await loadImg(f));
-      updateQueueUI();
-      if (!isProcessing) { isProcessing = true; launchNext(); }
-    }
-
-    const fileInput = document.getElementById('fileInput');
-    fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
-    document.getElementById('btnUpload').onclick = () => fileInput.click();
-
-    const dropBox = document.getElementById('dropBox');
-    dropBox.onclick = () => fileInput.click();
-    dropBox.addEventListener('dragover', e => { e.preventDefault(); dropBox.classList.add('over'); });
-    dropBox.addEventListener('dragleave', () => dropBox.classList.remove('over'));
-    dropBox.addEventListener('drop', e => { e.preventDefault(); dropBox.classList.remove('over'); handleFiles(e.dataTransfer.files); });
-    document.addEventListener('dragover', e => e.preventDefault());
-    document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
-
-    /* ══════════════════════════════════════════════
-       CAMERA CAPTURE  (feeds the same imageQueue pipeline)
-    ══════════════════════════════════════════════ */
-    const camOverlay = document.getElementById('camOverlay');
-    const camVideo = document.getElementById('camVideo');
-    const camError = document.getElementById('camError');
-    let camStream = null;
-    let camFacing = 'environment';   // 'environment' = back cam, 'user' = front
-    let camMirror = false;
-
-    function revealWall() {
-      document.getElementById('dropOverlay').classList.add('hidden');
-      document.getElementById('bar').classList.add('visible');
-    }
-
-    // Build a queue item from a dataURL and resolve once the image has decoded
-    function enqueueDataURL(dataURL, name) {
-      return new Promise(res => {
+    function loadImgUrl(url) {
+      return new Promise((res, rej) => {
         const img = new Image();
-        img.onload = () => { imageQueue.push({ dataURL, img, name }); res(); };
-        img.src = dataURL;
+        img.crossOrigin = 'anonymous';
+        img.onload = () => res({ dataURL: url, img, name: url.split('/').pop() });
+        img.onerror = err => rej(err);
+        img.src = url;
       });
     }
 
-    function stopStream() {
-      if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
-      camVideo.srcObject = null;
+    function placeImageDirectly(img, name) {
+      const slot = nextSlot(img.naturalWidth, img.naturalHeight);
+      const w = slot.w;
+      const h = slot.h;
+      const targetPos = new THREE.Vector3(slot.x, slot.y, -0.9);
+      const targetRot = new THREE.Euler(0, 0, (Math.random() - .5) * 0.06);
+
+      ensureBoardCovers(slot.y - slot.h / 2 - 2);
+
+      totalPinned++;
+
+      // Gold frame
+      const frame = new THREE.Mesh(
+        new THREE.PlaneGeometry(w + 0.22, h + 0.22),
+        photoFrameMat
+      );
+      frame.position.set(targetPos.x, targetPos.y, targetPos.z - 0.04);
+      frame.rotation.copy(targetRot);
+      frame.receiveShadow = true;
+      scene.add(frame);
+      userObjects.push(frame);
+
+      // Stuck image
+      const geo = new THREE.PlaneGeometry(w, h);
+      const tex = new THREE.Texture(img);
+      tex.encoding = THREE.sRGBEncoding;
+      tex.needsUpdate = true;
+      const mat = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(targetPos);
+      mesh.rotation.copy(targetRot);
+      mesh.castShadow = mesh.receiveShadow = true;
+      scene.add(mesh);
+      userObjects.push(mesh);
+
+      // Shadow
+      const shMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.32 });
+      const sh = new THREE.Mesh(new THREE.PlaneGeometry(w + 0.16, h + 0.16), shMat);
+      sh.position.set(targetPos.x + 0.05, targetPos.y - 0.05, -1.0);
+      sh.rotation.copy(targetRot);
+      scene.add(sh);
+      userObjects.push(sh);
+
+      // Pin
+      const pin = makePushPin(GEM_COLORS[totalPinned % GEM_COLORS.length]);
+      pin.position.set(
+        targetPos.x + (Math.random() - .5) * 0.2,
+        targetPos.y + h / 2 - 0.06,
+        targetPos.z + 0.09
+      );
+      scene.add(pin);
+      userObjects.push(pin);
     }
 
-    async function startStream() {
-      stopStream();
-      camError.textContent = '';
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        camError.textContent = 'Camera unavailable here. Open this page over https:// or http://localhost — most browsers block the camera on plain file:// pages.';
-        return;
-      }
-      try {
-        camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: camFacing }, audio: false });
-        camVideo.srcObject = camStream;
-        camMirror = (camFacing === 'user');                       // mirror selfies so preview = capture
-        camVideo.style.transform = camMirror ? 'scaleX(-1)' : 'none';
-      } catch (err) {
-        camError.textContent = 'Could not access the camera: ' + (err && err.message ? err.message : err) + '. Make sure you granted permission.';
-      }
-    }
-
-    function openCamera() { camOverlay.classList.remove('hidden'); startStream(); }
-    function closeCamera() { stopStream(); camOverlay.classList.add('hidden'); }
-
-    async function capturePhoto() {
-      const vw = camVideo.videoWidth, vh = camVideo.videoHeight;
-      if (!vw || !vh) return;                       // stream not ready yet
-      const cv = document.createElement('canvas');
-      cv.width = vw; cv.height = vh;
-      const ctx = cv.getContext('2d');
-      if (camMirror) { ctx.translate(vw, 0); ctx.scale(-1, 1); }   // match the mirrored preview
-      ctx.drawImage(camVideo, 0, 0, vw, vh);
-      const dataURL = cv.toDataURL('image/jpeg', 0.92);
-
-      await enqueueDataURL(dataURL, `photo-${Date.now()}.jpg`);
-      updateQueueUI();
-      closeCamera();
-      revealWall();
-      if (!isProcessing) { isProcessing = true; launchNext(); }
-    }
-
-    document.getElementById('btnCamera').onclick = openCamera;
-    document.getElementById('dropCam').onclick = openCamera;
-    document.getElementById('camShoot').onclick = capturePhoto;
-    document.getElementById('camClose').onclick = closeCamera;
-    document.getElementById('camFlip').onclick = () => {
-      camFacing = (camFacing === 'user') ? 'environment' : 'user';
-      startStream();
-    };
-
-    /* ── Clear wall ── */
-    document.getElementById('btnClear').onclick = () => {
+    function clearWallMesh() {
       userObjects.forEach(o => {
         if (o.material && o.material !== photoFrameMat) {
           if (o.material.map) o.material.map.dispose();
@@ -1381,14 +1323,239 @@
       imageQueue.length = 0;
       isProcessing = false;
       animState = 'idle';
-      flyMesh.visible = false;
+      if (flyMesh) flyMesh.visible = false;
       scrollY = scrollYTarget = maxScrollY = 0;
       resetGrid();
-      updateQueueUI();
-      refreshScrollHint();
-      countEl.classList.remove('show');
-      showStatus('Wall cleared');
+      totalPinned = 0;
+    }
+
+    async function loadDynamicImages(forceReload = false) {
+      try {
+        const response = await fetch('/api/images');
+        if (!response.ok) throw new Error('Failed to fetch images');
+        const dbImages = await response.json();
+
+        const chronologicalImages = dbImages;
+
+        if (forceReload) {
+          clearWallMesh();
+          loadedImageUrls.clear();
+        }
+
+        // Find images that are not yet loaded
+        const newImages = chronologicalImages.filter(img => !loadedImageUrls.has(img.url));
+        if (newImages.length === 0) return;
+
+        // If forceReload or totalPinned is 0 (initial load), load them all directly without animation
+        if (forceReload || totalPinned === 0) {
+          showStatus('Loading images...');
+          const loadPromises = newImages.map(img => {
+            return loadImgUrl(img.url).then(loaded => ({
+              ...loaded,
+              url: img.url
+            })).catch(err => {
+              console.error("Failed to load image:", img.url, err);
+              return null;
+            });
+          });
+
+          const loadedResults = await Promise.all(loadPromises);
+
+          for (const item of loadedResults) {
+            if (item) {
+              placeImageDirectly(item.img, item.name);
+              loadedImageUrls.add(item.url);
+            }
+          }
+          showStatus('');
+        } else {
+          // If totalPinned > 0, load and flutter them one by one
+          for (const img of newImages) {
+            try {
+              const loaded = await loadImgUrl(img.url);
+              imageQueue.push({
+                dataURL: img.url,
+                img: loaded.img,
+                name: img.url.split('/').pop()
+              });
+              loadedImageUrls.add(img.url);
+            } catch (err) {
+              console.error("Failed to load dynamic image for animation:", img.url, err);
+            }
+          }
+          if (!isProcessing && imageQueue.length > 0) {
+            isProcessing = true;
+            launchNext();
+          }
+        }
+        computeMaxScroll();
+        refreshScrollHint();
+        updateImgCount();
+      } catch (error) {
+        console.error("Error loading images:", error);
+        showStatus('Failed to load images');
+      }
+    }
+
+    async function uploadImage(fileOrBlob, filename = 'photo.jpg') {
+      const formData = new FormData();
+      formData.append('file', fileOrBlob, filename);
+      formData.append('uploader', 'Tribute Guest');
+
+      try {
+        closeUploadModal();
+        showStatus('Uploading...');
+        const response = await fetch('/api/images', {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) throw new Error('Upload failed');
+        const saved = await response.json();
+
+        // Notify parent Next.js page so it knows an upload happened
+        window.parent.postMessage('IMAGE_UPLOADED', '*');
+
+        // Load the new image dynamically (using the database URL so it is persistent) and trigger flutter
+        const loaded = await loadImgUrl(saved.url);
+        imageQueue.push({
+          dataURL: saved.url,
+          img: loaded.img,
+          name: filename
+        });
+        loadedImageUrls.add(saved.url);
+
+        if (!isProcessing) {
+          isProcessing = true;
+          launchNext();
+        }
+      } catch (error) {
+        console.error("Upload failed:", error);
+        showStatus('Upload failed');
+      }
+    }
+
+    function dataURLtoBlob(dataURL) {
+      const parts = dataURL.split(',');
+      const byteString = atob(parts[1]);
+      const mimeString = parts[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ab], { type: mimeString });
+    }
+
+    /* ══════════════════════════════════════════════
+       UPLOAD MODAL CONTROLS
+       ══════════════════════════════════════════════ */
+    const uploadModal = document.getElementById('uploadModal');
+
+    function openUploadModal() {
+      uploadModal.classList.remove('hidden');
+      uploadModal.offsetHeight; // Force layout reflow for animation
+      uploadModal.classList.add('visible');
+      startStream();
+    }
+
+    function closeUploadModal() {
+      stopStream();
+      uploadModal.classList.remove('visible');
+      setTimeout(() => {
+        if (!uploadModal.classList.contains('visible')) {
+          uploadModal.classList.add('hidden');
+        }
+      }, 400);
+    }
+
+    /* ══════════════════════════════════════════════
+       FILE HANDLING
+       ══════════════════════════════════════════════ */
+    async function handleFiles(files) {
+      const valid = [...files].filter(f => f.type.startsWith('image/'));
+      if (!valid.length) return;
+      for (const f of valid) {
+        await uploadImage(f, f.name);
+      }
+    }
+
+    const fileInput = document.getElementById('fileInput');
+    fileInput.addEventListener('change', () => { if (fileInput.files.length) { handleFiles(fileInput.files); fileInput.value = ''; } });
+
+    const dropBox = document.getElementById('dropBox');
+    dropBox.onclick = () => fileInput.click();
+    dropBox.addEventListener('dragover', e => { e.preventDefault(); dropBox.classList.add('over'); });
+    dropBox.addEventListener('dragleave', () => dropBox.classList.remove('over'));
+    dropBox.addEventListener('drop', e => { e.preventDefault(); dropBox.classList.remove('over'); if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+    document.addEventListener('dragover', e => e.preventDefault());
+    document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+
+    /* ══════════════════════════════════════════════
+       CAMERA CAPTURE
+       ══════════════════════════════════════════════ */
+    const camVideo = document.getElementById('camVideo');
+    const camError = document.getElementById('camError');
+    let camStream = null;
+    let camFacing = 'environment';
+    let camMirror = false;
+
+    function stopStream() {
+      if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+      camVideo.srcObject = null;
+    }
+
+    async function startStream() {
+      stopStream();
+      camError.textContent = '';
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        camError.textContent = 'Camera unavailable here. Open this page over https:// or http://localhost.';
+        return;
+      }
+      try {
+        camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: camFacing }, audio: false });
+        camVideo.srcObject = camStream;
+        camMirror = (camFacing === 'user');
+        camVideo.style.transform = camMirror ? 'scaleX(-1)' : 'none';
+      } catch (err) {
+        camError.textContent = 'Could not access the camera: ' + (err && err.message ? err.message : err) + '. Check permissions.';
+      }
+    }
+
+    async function capturePhoto() {
+      const vw = camVideo.videoWidth, vh = camVideo.videoHeight;
+      if (!vw || !vh) return;
+      const cv = document.createElement('canvas');
+      cv.width = vw; cv.height = vh;
+      const ctx = cv.getContext('2d');
+      if (camMirror) { ctx.translate(vw, 0); ctx.scale(-1, 1); }
+      ctx.drawImage(camVideo, 0, 0, vw, vh);
+      const dataURL = cv.toDataURL('image/jpeg', 0.92);
+
+      const blob = dataURLtoBlob(dataURL);
+      const filename = `photo-${Date.now()}.jpg`;
+      await uploadImage(blob, filename);
+    }
+
+    document.getElementById('modalClose').onclick = closeUploadModal;
+    document.getElementById('camShoot').onclick = capturePhoto;
+    document.getElementById('camFlip').onclick = () => {
+      camFacing = (camFacing === 'user') ? 'environment' : 'user';
+      startStream();
     };
+
+
+
+    /* ── Initial Load ── */
+    loadDynamicImages(false);
+
+    // Listen for new uploads or triggers from the Next.js parent wrapper
+    window.addEventListener('message', (event) => {
+      if (event.data === 'REFRESH_WALL') {
+        loadDynamicImages(false);
+      } else if (event.data === 'OPEN_UPLOAD_MODAL') {
+        openUploadModal();
+      }
+    });
 
     /* ── Resize ── */
     window.addEventListener('resize', () => {
@@ -1396,7 +1563,6 @@
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-      // Recalculate column layout so the grid always fills the new viewport
       recalcGridLayout();
     });
   </script>

@@ -31,6 +31,30 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 1. Prerequisites (Environment Variables)
+
+You need to configure the following Environment Variables in your Vercel Project Settings under **Settings > Environment Variables**:
+
+| Variable Name | Description | Example / Format |
+|---|---|---|
+| `DATABASE_URL` | Your PostgreSQL database connection string | `postgresql://user:password@host:port/database` |
+| `CLOUDINARY_URL` | Your Cloudinary connection URL (automatically parsed by Cloudinary SDK) | `cloudinary://API_KEY:API_SECRET@CLOUD_NAME` |
+
+### 2. Database Sync / Push
+
+Since the project uses Prisma, make sure your remote database is in sync with the Prisma schema. Before or after your first deployment, run this command locally:
+
+```bash
+npx prisma db push
+```
+
+This will automatically create the database tables (`Image` model) in your remote PostgreSQL database.
+
+### 3. Build Configuration
+
+The project is pre-configured to run `prisma generate` as part of the build step (`npm run build`). Vercel will automatically run this during the deployment build phase, ensuring the Prisma Client matches your schema.
+
+Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+

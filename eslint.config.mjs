@@ -10,7 +10,16 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "support (1).js",
+    "*.html",
+    "Timber Type.dc.html",
   ]),
+  {
+    rules: {
+      "react-hooks/immutability": "off",
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
