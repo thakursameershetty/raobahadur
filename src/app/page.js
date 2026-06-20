@@ -34,7 +34,7 @@ export default function Home() {
 
   return (
     <main
-      className="relative w-full h-screen bg-black overflow-hidden font-sans select-none"
+      className="relative w-full h-[100dvh] bg-black overflow-hidden font-sans select-none"
       style={{ cursor: 'none' }}
     >
       {/* ─── Main Landing Page (Hero + 3D Timeline) ─── */}

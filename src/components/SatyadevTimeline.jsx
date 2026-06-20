@@ -655,7 +655,7 @@ export default function SatyadevTimeline() {
 
   if (!isLoaded) {
     return (
-      <div className="w-full h-screen bg-black flex items-center justify-center">
+      <div className="w-full h-[100dvh] bg-black flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-t-amber-500 border-zinc-800 rounded-full animate-spin"></div>
           <p className="text-zinc-500 text-sm font-mono tracking-widest uppercase">Initializing 3D Canvas...</p>
@@ -665,7 +665,7 @@ export default function SatyadevTimeline() {
   }
 
   return (
-    <div className="w-full h-screen bg-black relative" style={{ cursor: 'none' }}>
+    <div className="w-full h-[100dvh] bg-black relative" style={{ cursor: 'none' }}>
       <Canvas
         key={canvasKey}
         camera={{ position: [0, 0, 5], fov: 60 }}
