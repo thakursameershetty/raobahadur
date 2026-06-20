@@ -103,20 +103,25 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
           if (state === 'granted') {
             window.addEventListener('deviceorientation', handleOrientation);
           }
+          return true; // Successfully prompted or handled
         } catch (err) {
           console.warn('Orientation permission request failed:', err);
+          return false; // Failed, probably due to invalid gesture like touchstart
         }
+      }
+      return true; // Not required on this device
+    };
+
+    const triggerPermission = async () => {
+      const handled = await requestPermissionAndRegister();
+      if (handled) {
+        window.removeEventListener('click', triggerPermission);
+        window.removeEventListener('touchend', triggerPermission);
       }
     };
 
-    const triggerPermission = () => {
-      requestPermissionAndRegister();
-      window.removeEventListener('click', triggerPermission);
-      window.removeEventListener('touchstart', triggerPermission);
-    };
-
     window.addEventListener('click', triggerPermission);
-    window.addEventListener('touchstart', triggerPermission);
+    window.addEventListener('touchend', triggerPermission);
 
     const animate = () => {
       currentX.current += (targetX.current - currentX.current) * 0.08;
@@ -140,7 +145,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('deviceorientation', handleOrientation);
       window.removeEventListener('click', triggerPermission);
-      window.removeEventListener('touchstart', triggerPermission);
+      window.removeEventListener('touchend', triggerPermission);
       cancelAnimationFrame(requestRef.current);
     };
   }, []);
@@ -148,7 +153,8 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full flex justify-center items-center overflow-hidden bg-[#030807] pointer-events-none"
+      className="relative w-full h-full flex justify-center items-center overflow-hidden bg-[#030807]"
+      onClick={() => {}}
     >
       <img
         src={isMobile ? ASSETS.mobileLayers.last : ASSETS.layers.last}
