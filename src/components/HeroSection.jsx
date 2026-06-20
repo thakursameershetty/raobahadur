@@ -93,7 +93,9 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
 
     // iOS WebKit permission requester
     const requestPermissionAndRegister = async () => {
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       if (
+        isTouch &&
         typeof window !== 'undefined' &&
         typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function'
@@ -162,7 +164,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
         data-speed="0.02"
         alt="Background"
         style={{
-          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 20vh)), 0)'
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 20vh), 0)'
         }}
       />
 
@@ -172,7 +174,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
         data-speed="0.035"
         alt="Background"
         style={{
-          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 50vh)), 0)'
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 50vh), 0)'
         }}
       />
 
@@ -182,7 +184,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
         data-speed="0.05"
         alt="Feathers"
         style={{
-          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 90vh)), 0)'
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 90vh), 0)'
         }}
       />
 
@@ -192,7 +194,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
         data-speed="0.08"
         alt="Back Elements"
         style={{
-          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 140vh)), 0)'
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 140vh), 0)'
         }}
       />
 
@@ -202,7 +204,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
         data-speed="0.12"
         alt="Satyadev"
         style={{
-          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 200vh)), 0)'
+          transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 200vh), 0)'
         }}
       />
 
@@ -229,8 +231,8 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
         data-speed="0.15"
         style={{
           transform: isMobile
-            ? 'translate3d(calc(var(--x, 0) * 1px - 50%), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 250vh)), 0)'
-            : 'translate3d(calc(var(--x, 0) * 1px), calc(calc(var(--y, 0) * 1px) - calc(var(--scroll-progress, 0) * 250vh)), 0)'
+            ? 'translate3d(calc(var(--x, 0) * 1px - 50%), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 250vh), 0)'
+            : 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 250vh), 0)'
         }}
       >
         <div className={`flex flex-col drop-shadow-2xl ${isMobile ? 'items-center text-center' : 'items-start text-left'}`}>
