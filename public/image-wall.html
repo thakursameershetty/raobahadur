@@ -1304,11 +1304,15 @@
     /* ══════════════════════════════════════════════
        RENDER LOOP
     ══════════════════════════════════════════════ */
-    const clock = new THREE.Clock();
+    let lastTime = performance.now();
+    let el = 0;
 
     (function animate() {
       requestAnimationFrame(animate);
-      const dt = clock.getDelta(), el = clock.getElapsedTime();
+      const now = performance.now();
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+      el += dt;
 
       // Smooth scroll → camera Y
       scrollY += (scrollYTarget - scrollY) * SCROLL_SMOOTH;
