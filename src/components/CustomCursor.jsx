@@ -83,7 +83,7 @@ export default function CustomCursor() {
       }}
     >
       <img
-        src="/assets/cursor/cursor.png"
+        src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782114367/satyadev_assets/assets/cursor/cursor.png"
         alt="Custom Cursor"
         className="w-10 h-10 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
       />
