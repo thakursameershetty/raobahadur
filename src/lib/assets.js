@@ -17,5 +17,8 @@ export const ASSETS = {
     "wall-layer-desktop": "https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782118978/satyadev_assets/wall-layers/wall-layer-desktop.png",
     "wall-layer-mobile": "https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782118979/satyadev_assets/wall-layers/wall-layer-mobile.png",
     "wall-layer-tablet": "https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782118981/satyadev_assets/wall-layers/wall-layer-tablet.png"
+  },
+  "extras": {
+    "camera-preview": "https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782218127/satyadev_assets/camera-preview/pg8cobvbbngtxuw04ppj.png"
   }
 };
