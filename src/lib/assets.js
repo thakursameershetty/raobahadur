@@ -20,5 +20,11 @@ export const ASSETS = {
   },
   "extras": {
     "camera-preview": "https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782218127/satyadev_assets/camera-preview/pg8cobvbbngtxuw04ppj.png"
+  },
+  "photobooth": {
+    "background": "https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782402353/satyadev_assets/photobooth/background.jpg",
+    "leftwing":   "https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782402354/satyadev_assets/photobooth/leftwing.png",
+    "rightwing":  "https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782402355/satyadev_assets/photobooth/rightwing.png",
+    "wings":      "https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782402357/satyadev_assets/photobooth/wings.png"
   }
 };
