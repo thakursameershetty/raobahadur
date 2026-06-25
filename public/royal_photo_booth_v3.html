@@ -819,8 +819,20 @@
           S.stream.getTracks().forEach(t => t.stop());
         }
         try {
+          const isMobile = window.innerWidth <= 768;
+          const videoConstraints = isMobile 
+            ? {
+                facingMode: currentFacing,
+                aspectRatio: { ideal: window.innerHeight / window.innerWidth },
+              }
+            : {
+                facingMode: currentFacing,
+                width: { ideal: 720 },
+                height: { ideal: 1280 },
+              };
+
           S.stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: currentFacing, width: { ideal: 720 }, height: { ideal: 1280 } },
+            video: videoConstraints,
             audio: false,
           });
           video.srcObject = S.stream;
@@ -849,12 +861,20 @@
 
       async function startBooth() {
         // 1. Camera
+        const isMobile = window.innerWidth <= 768;
+        const videoConstraints = isMobile 
+          ? {
+              facingMode: currentFacing,
+              aspectRatio: { ideal: window.innerHeight / window.innerWidth },
+            }
+          : {
+              facingMode: currentFacing,
+              width: { ideal: 720 },
+              height: { ideal: 1280 },
+            };
+
         S.stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'user',
-            width: { ideal: 720 },
-            height: { ideal: 1280 },
-          },
+          video: videoConstraints,
           audio: false,
         });
         video.srcObject = S.stream;
@@ -1053,20 +1073,22 @@
           for (let i = 0; i < N; i++) vd[i * 4 + 3] = fin[i];
         }
 
-        // NEW LOGIC: Calculate contained video box
+        // NEW LOGIC: Calculate cover video box
         const videoAspect = vW / vH;
         const canvasAspect = W / H;
         let drawW, drawH, drawX, drawY;
         if (videoAspect > canvasAspect) {
-          drawW = W;
-          drawH = W / videoAspect;
-          drawX = 0;
-          drawY = (H - drawH) / 2;
-        } else {
+          // Video is wider, fit to height and crop width
           drawH = H;
           drawW = H * videoAspect;
           drawX = (W - drawW) / 2;
           drawY = 0;
+        } else {
+          // Video is taller, fit to width and crop height
+          drawW = W;
+          drawH = W / videoAspect;
+          drawX = 0;
+          drawY = (H - drawH) / 2;
         }
 
         // 3. Shoulder coordinates (normalized → canvas pixels)
