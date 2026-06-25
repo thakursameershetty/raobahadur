@@ -778,6 +778,11 @@
 
       const wingYAdjEl = document.getElementById('wingYAdj');
       const wingYAdjV = document.getElementById('wingYAdjVal');
+      if (window.innerWidth <= 768) {
+        S.wingYAdj = 18;
+        wingYAdjEl.value = 18;
+        wingYAdjV.textContent = '18';
+      }
       wingYAdjEl.oninput = () => {
         S.wingYAdj = +wingYAdjEl.value;
         wingYAdjV.textContent = wingYAdjEl.value;
