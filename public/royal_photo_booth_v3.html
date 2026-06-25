@@ -754,13 +754,21 @@
         rightShoulder: { x: 0.75, y: 0.35 },
         poseReady: false,
         autoCalib: true,    // auto-calibrate wing scale from shoulder distance
+        segmentLastTs: 0,
       };
 
       const LERP = 0.18;  // how fast shoulders follow (0=frozen, 1=instant)
 
-      // ── Off-screen canvas ────────────────────────────────────────────────
+      // ── Off-screen canvas & Buffers ────────────────────────────────────────
       const frameCanvas = document.createElement('canvas');
       const frameCtx = frameCanvas.getContext('2d', { willReadFrequently: true });
+      
+      // REUSABLE BUFFERS (Prevents memory leaks!)
+      const personC = document.createElement('canvas');
+      const personCtx = personC.getContext('2d', { willReadFrequently: false });
+      let alphaBuffer = null;
+      let finBuffer = null;
+      let fmBuffer = null;
 
       // ── Asset loading ────────────────────────────────────────────────────
       let loaded = 0;
@@ -843,6 +851,7 @@
           const videoConstraints = isMobile
             ? {
               facingMode: currentFacing,
+              height: { ideal: 640 },
               aspectRatio: { ideal: window.innerHeight / window.innerWidth },
             }
             : {
@@ -885,6 +894,7 @@
         const videoConstraints = isMobile
           ? {
             facingMode: currentFacing,
+            height: { ideal: 640 },
             aspectRatio: { ideal: window.innerHeight / window.innerWidth },
           }
           : {
@@ -1011,14 +1021,14 @@
             // Target: each wing should span ~55% of canvas width
             const targetWingW = W * 0.55;
             const newScale = Math.max(0.4, Math.min(2.0, targetWingW / sDist));
-            
+
             if (isFirstDetection) {
               S.wingScale = newScale;
             } else {
               // Lerp gently so it doesn't jump
               S.wingScale = lerp(S.wingScale, newScale, 0.08);
             }
-            
+
             // Sync UI slider
             const pct = Math.round(S.wingScale * 100);
             wingScaleEl.value = pct;
@@ -1039,14 +1049,17 @@
           }
           poseFrameCount++;
 
-          // Segmentation every frame
-          try {
-            const result = S.segmenter.segmentForVideo(video, now);
-            if (result?.confidenceMasks?.length > 0) {
-              renderFrame(result.confidenceMasks[0]);
-              result.close();
-            }
-          } catch (_) { }
+          // Segmentation every frame, throttled to ~20fps
+          if (now - S.segmentLastTs > 50) {
+            try {
+              const result = S.segmenter.segmentForVideo(video, now);
+              if (result?.confidenceMasks?.length > 0) {
+                renderFrame(result.confidenceMasks[0]);
+                result.close();
+              }
+            } catch (_) { }
+            S.segmentLastTs = now;
+          }
 
           S.lastTs = now;
         }
@@ -1060,37 +1073,46 @@
         const vW = frameCanvas.width, vH = frameCanvas.height;
         const N = vW * vH;
 
-        // 1. Extract & smooth mask
-        let alpha = new Float32Array(N);
+        // 1. Initialize reusable buffers if size changes
+        if (!alphaBuffer || alphaBuffer.length !== N) {
+          alphaBuffer = new Float32Array(N);
+          finBuffer = new Uint8Array(N);
+          fmBuffer = new Uint8Array(N);
+          personC.width = vW;
+          personC.height = vH;
+        }
+
+        // 2. Extract mask to persistent buffer
         try {
           const floats = mask.getAsFloat32Array();
-          for (let i = 0; i < N; i++) alpha[i] = Math.max(0, Math.min(1, floats[i]));
+          for (let i = 0; i < N; i++) alphaBuffer[i] = Math.max(0, Math.min(1, floats[i]));
         } catch (_) {
           const tmp = document.createElement('canvas');
           tmp.width = vW; tmp.height = vH;
           const tc = tmp.getContext('2d');
           try { tc.drawImage(mask.getAsCanvas(), 0, 0, vW, vH); } catch (__) { }
           const d = tc.getImageData(0, 0, vW, vH).data;
-          for (let i = 0; i < N; i++) alpha[i] = d[i * 4] / 255;
+          for (let i = 0; i < N; i++) alphaBuffer[i] = d[i * 4] / 255;
         }
 
         if (S.prevMask) {
           const t = 0.42;
-          for (let i = 0; i < N; i++) alpha[i] = alpha[i] * (1 - t) + S.prevMask[i] * t;
+          for (let i = 0; i < N; i++) alphaBuffer[i] = alphaBuffer[i] * (1 - t) + S.prevMask[i] * t;
         }
-        S.prevMask = new Float32Array(alpha);
+        
+        // We must copy alphaBuffer for prevMask to avoid reference issues
+        S.prevMask = new Float32Array(alphaBuffer);
 
         // Smoothstep threshold
         const lo = 0.35, hi = 0.65;
-        const fin = new Uint8Array(N);
         for (let i = 0; i < N; i++) {
-          const v = alpha[i];
-          if (v <= lo) fin[i] = 0;
-          else if (v >= hi) fin[i] = 255;
-          else { const t = (v - lo) / (hi - lo); fin[i] = Math.round(t * t * (3 - 2 * t) * 255); }
+          const v = alphaBuffer[i];
+          if (v <= lo) finBuffer[i] = 0;
+          else if (v >= hi) finBuffer[i] = 255;
+          else { const t = (v - lo) / (hi - lo); finBuffer[i] = Math.round(t * t * (3 - 2 * t) * 255); }
         }
 
-        // 2. Draw video to frameCanvas (with mirror)
+        // 3. Draw video to frameCanvas (with mirror)
         frameCtx.save();
         if (S.mirror) { frameCtx.translate(vW, 0); frameCtx.scale(-1, 1); }
         frameCtx.drawImage(video, 0, 0, vW, vH);
@@ -1101,40 +1123,33 @@
 
         // Apply alpha — mirror the mask too if mirrored
         if (S.mirror) {
-          const fm = new Uint8Array(N);
-          for (let y = 0; y < vH; y++) for (let x = 0; x < vW; x++) fm[y * vW + (vW - 1 - x)] = fin[y * vW + x];
-          for (let i = 0; i < N; i++) vd[i * 4 + 3] = fm[i];
+          for (let y = 0; y < vH; y++) {
+            for (let x = 0; x < vW; x++) fmBuffer[y * vW + (vW - 1 - x)] = finBuffer[y * vW + x];
+          }
+          for (let i = 0; i < N; i++) vd[i * 4 + 3] = fmBuffer[i];
         } else {
-          for (let i = 0; i < N; i++) vd[i * 4 + 3] = fin[i];
+          for (let i = 0; i < N; i++) vd[i * 4 + 3] = finBuffer[i];
         }
 
-        // NEW LOGIC: Calculate cover video box
+        // Calculate cover video box
         const videoAspect = vW / vH;
         const canvasAspect = W / H;
         let drawW, drawH, drawX, drawY;
         if (videoAspect > canvasAspect) {
-          // Video is wider, fit to height and crop width
-          drawH = H;
-          drawW = H * videoAspect;
-          drawX = (W - drawW) / 2;
-          drawY = 0;
+          drawH = H; drawW = H * videoAspect;
+          drawX = (W - drawW) / 2; drawY = 0;
         } else {
-          // Video is taller, fit to width and crop height
-          drawW = W;
-          drawH = W / videoAspect;
-          drawX = 0;
-          drawY = (H - drawH) / 2;
+          drawW = W; drawH = W / videoAspect;
+          drawX = 0; drawY = (H - drawH) / 2;
         }
 
-        // 3. Shoulder coordinates (normalized → canvas pixels)
+        // Shoulder coordinates
         let lx, ly, rx, ry;
         if (S.poseReady) {
           const rawLx = S.mirror ? 1 - S.leftShoulder.x : S.leftShoulder.x;
           const rawRx = S.mirror ? 1 - S.rightShoulder.x : S.rightShoulder.x;
-          lx = drawX + rawLx * drawW;
-          ly = drawY + (S.leftShoulder.y + S.yShift) * drawH;
-          rx = drawX + rawRx * drawW;
-          ry = drawY + (S.rightShoulder.y + S.yShift) * drawH;
+          lx = drawX + rawLx * drawW; ly = drawY + (S.leftShoulder.y + S.yShift) * drawH;
+          rx = drawX + rawRx * drawW; ry = drawY + (S.rightShoulder.y + S.yShift) * drawH;
         } else {
           lx = drawX + 0.22 * drawW; rx = drawX + 0.78 * drawW;
           ly = ry = drawY + (0.42 + S.yShift) * drawH;
@@ -1143,8 +1158,7 @@
         const shoulderDist = Math.abs(rx - lx);
         const wingW = shoulderDist * S.wingScale;
         const wingH = wingW * (leftImg.naturalHeight / leftImg.naturalWidth);
-        const ATTACH_X_FRAC = 0.08;
-        const ATTACH_Y_FRAC = 0.38;
+        const ATTACH_X_FRAC = 0.08, ATTACH_Y_FRAC = 0.38;
 
         const adjY = S.wingYAdj * (H / 100);
         const adjX = S.wingXAdj * (W / 100);
@@ -1155,9 +1169,8 @@
         ctx.clearRect(0, 0, W, H);
         drawCover(ctx, bgImg, W, H);
 
-        const personC = document.createElement('canvas');
-        personC.width = vW; personC.height = vH;
-        personC.getContext('2d').putImageData(videoData, 0, 0);
+        // REUSING the personC canvas instead of recreating it!
+        personCtx.putImageData(videoData, 0, 0);
         ctx.drawImage(personC, drawX, drawY, drawW, drawH);
 
         if (S.poseReady) {
