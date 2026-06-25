@@ -13,14 +13,14 @@ async function main() {
     if (!fs.existsSync(dirPath)) continue;
 
     const files = fs.readdirSync(dirPath).filter(f => !f.startsWith('.') && fs.statSync(path.join(dirPath, f)).isFile());
-    
+
     const camelDir = dir.replace(/-([a-z])/g, g => g[1].toUpperCase());
     assets[camelDir] = {};
 
     for (const file of files) {
       const filePath = path.join(dirPath, file);
       console.log(`Uploading ${dir}/${file}...`);
-      
+
       try {
         const result = await cloudinary.uploader.upload(filePath, {
           folder: `satyadev_assets/${dir}`,
@@ -28,12 +28,12 @@ async function main() {
           unique_filename: false,
           overwrite: true
         });
-        
+
         console.log(`Uploaded: ${result.secure_url}`);
-        
+
         const parts = result.secure_url.split('/upload/');
         const optimizedUrl = `${parts[0]}/upload/f_auto,q_auto/${parts[1]}`;
-        
+
         // Strip extension for easier key usage
         const fileKey = file.split('.')[0];
         assets[camelDir][fileKey] = optimizedUrl;

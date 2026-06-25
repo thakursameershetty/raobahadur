@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { milestones } from '../data/milestones';
 import CustomCursor from '../components/CustomCursor';
 import HeroSection from '../components/HeroSection';
@@ -31,6 +31,36 @@ const ImageWall = dynamic(() => import('../components/ImageWall'), { ssr: false 
 
 export default function Home() {
   const [isWallOpen, setIsWallOpen] = useState(false);
+  // 'hero' = hero visible & timeline locked at start
+  // 'timeline' = hero faded out & timeline scroll active
+  const [scrollPhase, setScrollPhase] = useState('hero');
+  const touchStartYRef = useRef(0);
+
+  // Detect first downward scroll/swipe → transition to timeline phase
+  useEffect(() => {
+    if (scrollPhase !== 'hero') return;
+
+    const handleWheel = (e) => {
+      if (e.deltaY > 5) setScrollPhase('timeline');
+    };
+    const handleTouchStart = (e) => {
+      touchStartYRef.current = e.touches[0].clientY;
+    };
+    const handleTouchEnd = (e) => {
+      if (touchStartYRef.current - e.changedTouches[0].clientY > 30) {
+        setScrollPhase('timeline');
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [scrollPhase]);
 
   return (
     <main
@@ -39,13 +69,18 @@ export default function Home() {
     >
       {/* ─── Main Landing Page (Hero + 3D Timeline) ─── */}
       <div className="relative w-full h-full">
-        {/* Dynamic 3D Scene */}
+        {/* Dynamic 3D Scene – locked while hero is visible */}
         <div className="absolute inset-0 w-full h-full z-0">
-          <SatyadevTimeline />
+          <SatyadevTimeline locked={scrollPhase === 'hero'} />
         </div>
 
-        {/* Hero Section */}
-        <div id="hero-section" className="absolute inset-0 w-full h-full pointer-events-none z-30 will-change-transform">
+        {/* Hero Section – fades out on first scroll */}
+        <div
+          id="hero-section"
+          className={`absolute inset-0 w-full h-full pointer-events-none z-30 will-change-transform
+            transition-all duration-700 ease-in-out
+            ${scrollPhase === 'hero' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'}`}
+        >
           <HeroSection isWallOpen={isWallOpen} onOpenWall={() => setIsWallOpen(true)} />
         </div>
 

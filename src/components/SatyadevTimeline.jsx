@@ -156,6 +156,10 @@ const createBorderMaterial = () => {
   });
 };
 
+// Module-level ref shared between SatyadevTimeline (prop sync) and CameraRig (useFrame read)
+// Using a plain object avoids any R3F fiber/context boundary issues
+const lockRef = { current: true };
+
 // Winding camera path to fly PAST the new cards instead of colliding
 const PATH_POINTS = [
   new THREE.Vector3(0, 0, 5),       // Start (Perfectly centered)
@@ -210,6 +214,14 @@ function CameraRig() {
   }, [scroll]);
 
   useFrame((state) => {
+    // ── LOCKED STATE: hold camera at the start, skip all scroll-driven logic ──
+    if (lockRef.current) {
+      state.camera.position.lerp(new THREE.Vector3(0, 0, 5), 0.1);
+      state.camera.fov = 60;
+      state.camera.updateProjectionMatrix();
+      return;
+    }
+
     // Dynamic FOV adjustment to prevent horizontal clipping on portrait viewports
     const aspect = state.size.width / state.size.height;
     if (aspect < 1.0) {
@@ -240,8 +252,8 @@ function CameraRig() {
       easedOffsetRef.current = 0;
     }
 
-    // Smoothly ease the scroll offset value itself
-    easedOffsetRef.current = THREE.MathUtils.lerp(easedOffsetRef.current, scrollOffset, 0.08);
+    // Smoothly ease the scroll offset value itself, clamped to [0,1] for curve.getPoint()
+    easedOffsetRef.current = Math.max(0, Math.min(1, THREE.MathUtils.lerp(easedOffsetRef.current, scrollOffset, 0.15)));
 
     // Get the point on the curve based on the smoothed scroll position
     const pointOnCurve = curve.getPoint(easedOffsetRef.current);
@@ -290,20 +302,10 @@ function CameraRig() {
 
     const heroSection = document.getElementById('hero-section');
     if (heroSection && scroll.el) {
-      // Scroll progress for the hero section (first 1/24th of the scroll)
+      // Keep scroll progress for parallax layers inside HeroSection
       const heroProgress = Math.min(easedOffsetRef.current / 0.042, 1);
-
       heroSection.style.setProperty('--scroll-progress', heroProgress);
-
-      // Fade out the hero section near the end of its progress to reveal 3D scene
-      if (heroProgress > 0.8) {
-        heroSection.style.opacity = 1 - ((heroProgress - 0.8) * 5); // 0.8 => 1, 1.0 => 0
-      } else {
-        heroSection.style.opacity = 1;
-      }
-
-      // Ensure we don't translate the entire container anymore (handling inside via parallax)
-      heroSection.style.transform = `none`;
+      // Note: opacity & transform are owned by page.js (CSS transition) — do not override here
     }
 
     const timelineContainer = document.getElementById('timeline-container');
@@ -421,7 +423,8 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
     if (isNaN(easedOffsetRef.current)) {
       easedOffsetRef.current = 0;
     }
-    easedOffsetRef.current = THREE.MathUtils.lerp(easedOffsetRef.current, scrollOffset, 0.08);
+    // Smoothly ease, clamped to [0,1]
+    easedOffsetRef.current = Math.max(0, Math.min(1, THREE.MathUtils.lerp(easedOffsetRef.current, scrollOffset, 0.15)));
 
     // Calculate scroll velocity
     const dt = Math.max(delta, 0.001);
@@ -641,9 +644,13 @@ function ContextHelper({ onContextLost }) {
   return null;
 }
 
-export default function SatyadevTimeline() {
+export default function SatyadevTimeline({ locked = false }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [canvasKey, setCanvasKey] = useState(0);
+
+  // Sync the locked prop into the module-level ref so CameraRig can read it
+  // This runs synchronously before the next useFrame, keeping them in sync
+  lockRef.current = locked;
 
   useEffect(() => {
     setIsLoaded(true);
@@ -703,7 +710,7 @@ export default function SatyadevTimeline() {
           />
 
           {/* Main interactive scroll rig */}
-          <ScrollControls pages={25} damping={0.25}>
+          <ScrollControls pages={8} damping={0.2}>
             <CameraRig />
             {milestones.map((m, index) => (
               <Milestone key={index} {...m} />

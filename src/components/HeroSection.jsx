@@ -20,6 +20,9 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
   // Mobile state detection
   const [isMobile, setIsMobile] = useState(false);
 
+  // Dynamic safe-area-inset-top (handles Safari/iOS browser chrome)
+  const [safeAreaTop, setSafeAreaTop] = useState(0);
+
   useEffect(() => {
     // Increment and fetch the live visitor count on page mount
     fetch('/api/visits', { method: 'POST' })
@@ -35,6 +38,15 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
+
+      // Read the safe-area-inset-top CSS env variable dynamically
+      // This is the only reliable way to get its pixel value in JS
+      const testEl = document.createElement('div');
+      testEl.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);left:0;width:1px;height:1px;pointer-events:none;visibility:hidden';
+      document.body.appendChild(testEl);
+      const inset = testEl.getBoundingClientRect().top;
+      document.body.removeChild(testEl);
+      setSafeAreaTop(Math.max(0, inset));
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -266,16 +278,36 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       </div>
 
       {/* Top Center (Mobile) / Top-right (Desktop): Visitor Count */}
-      <div className="absolute top-4 left-0 right-0 md:left-auto md:right-8 md:top-8 z-50 flex flex-col items-center md:items-end pointer-events-auto">
+      {/* paddingTop uses safe-area-inset-top so it's never hidden under Safari/iOS chrome */}
+      <div
+        className="absolute top-0 left-0 right-0 md:left-auto md:right-8 z-50 flex flex-col items-center md:items-end pointer-events-auto"
+        style={{
+          paddingTop: isMobile
+            ? `calc(${safeAreaTop}px + 1rem)`
+            : `calc(${safeAreaTop}px + 2rem)`,
+        }}
+      >
         <h2
-          className="text-amber-500 text-lg md:text-3xl mb-0.5 tracking-wider drop-shadow-md text-center"
-          style={{ fontFamily: 'var(--font-raobahadur), serif' }}
+          className="text-amber-400 text-2xl md:text-4xl mb-1 tracking-wider drop-shadow-lg text-center"
+          style={{ fontFamily: 'var(--font-raobahadur), serif', textShadow: '0 0 18px rgba(251,191,36,0.55)' }}
         >
           I root for Satyadev
         </h2>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-white/90 font-mono text-[9px] md:text-sm tracking-widest uppercase drop-shadow-md text-center">
-            Total Visits: <span className="font-bold text-white">{visitorCount !== null ? visitorCount.toLocaleString() : '...'}</span>
+        <div
+          className="mt-1 px-4 py-2 md:px-6 md:py-3 flex flex-col items-center md:items-end rounded-xl"
+          style={{
+            background: 'rgba(7,22,27,0.55)',
+            border: '1px solid rgba(201,162,76,0.35)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 0 24px rgba(201,162,76,0.18), inset 0 0 0 1px rgba(201,162,76,0.08)',
+          }}
+        >
+          <span className="text-white/60 font-mono text-[10px] md:text-xs tracking-[0.25em] uppercase mb-0.5">Total Visits</span>
+          <span
+            className="font-mono font-bold text-3xl md:text-5xl text-white"
+            style={{ textShadow: '0 0 22px rgba(251,191,36,0.7), 0 0 6px rgba(251,191,36,0.4)', letterSpacing: '0.05em' }}
+          >
+            {visitorCount !== null ? visitorCount.toLocaleString() : '···'}
           </span>
         </div>
       </div>
