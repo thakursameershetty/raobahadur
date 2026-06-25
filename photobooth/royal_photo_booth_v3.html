@@ -1083,19 +1083,9 @@
           drawY = (H - drawH) / 2;
         }
 
-        // 3. Shoulder coordinates (normalized → canvas pixels)
-        let lx, ly, rx, ry;
-        if (S.poseReady) {
-          const rawLx = S.mirror ? 1 - S.leftShoulder.x : S.leftShoulder.x;
-          const rawRx = S.mirror ? 1 - S.rightShoulder.x : S.rightShoulder.x;
-          lx = drawX + rawLx * drawW;
-          ly = drawY + (S.leftShoulder.y + S.yShift) * drawH;
-          rx = drawX + rawRx * drawW;
-          ry = drawY + (S.rightShoulder.y + S.yShift) * drawH;
-        } else {
-          lx = drawX + 0.22 * drawW; rx = drawX + 0.78 * drawW;
-          ly = ry = drawY + (0.42 + S.yShift) * drawH;
-        }
+        // Fixed wing positions (no shoulder tracking)
+        const lx = drawX + 0.22 * drawW; const rx = drawX + 0.78 * drawW;
+        const ly = drawY + (0.42 + S.yShift) * drawH; const ry = ly;
 
         const shoulderDist = Math.abs(rx - lx);
         const wingW = shoulderDist * S.wingScale;
