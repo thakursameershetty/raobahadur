@@ -820,12 +820,24 @@
         const screenAspect = screenW / screenH;
 
         let cW, cH;
-        if (videoAspect < screenAspect) {
-          // Video is taller than screen aspect → fit to height
-          cH = screenH; cW = Math.round(cH * videoAspect);
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+          // Cover logic for mobile (fill the screen)
+          if (videoAspect > screenAspect) {
+            cH = screenH; cW = Math.round(cH * videoAspect);
+          } else {
+            cW = screenW; cH = Math.round(cW / videoAspect);
+          }
         } else {
-          // Video is wider → fit to width
-          cW = screenW; cH = Math.round(cW / videoAspect);
+          // Contain logic for desktop
+          if (videoAspect < screenAspect) {
+            // Video is taller than screen aspect → fit to height
+            cH = screenH; cW = Math.round(cH * videoAspect);
+          } else {
+            // Video is wider → fit to width
+            cW = screenW; cH = Math.round(cW / videoAspect);
+          }
         }
 
         canvas.width = vW;
