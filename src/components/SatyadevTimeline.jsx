@@ -1,7 +1,7 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { ScrollControls, useScroll, useTexture, Text, Image as DreiImage, Environment, Float, Sparkles, MeshReflectorMaterial, Scroll } from '@react-three/drei';
+import { ScrollControls, useScroll, useTexture, Text, Image as DreiImage, Environment, Float, Sparkles, MeshReflectorMaterial, Scroll, Preload } from '@react-three/drei';
 import * as THREE from 'three';
 import { useRef, useMemo, useState, useEffect, Suspense } from 'react';
 import { milestones } from '../data/milestones';
@@ -251,13 +251,13 @@ function CameraRig({ onScrollToTop }) {
       state.camera.position.lerp(new THREE.Vector3(0, 0, 5), 0.1);
       state.camera.fov = 60;
       state.camera.updateProjectionMatrix();
-      
+
       // Smoothly reset the eased offset and parallax progress back to 0 when returning to Hero
       if (easedOffsetRef.current > 0.0001) {
         easedOffsetRef.current = THREE.MathUtils.lerp(easedOffsetRef.current, 0, 0.15);
         const progressFill = document.getElementById('timeline-progress-fill');
         if (progressFill) progressFill.style.width = `${easedOffsetRef.current * 100}%`;
-        
+
         const heroSection = document.getElementById('hero-section');
         if (heroSection) {
           const heroProgress = Math.min(easedOffsetRef.current / 0.042, 1);
@@ -691,6 +691,7 @@ function ContextHelper({ onContextLost }) {
 
 export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [canvasKey, setCanvasKey] = useState(0);
 
   // Sync the locked prop into the module-level ref so CameraRig can read it
@@ -698,6 +699,7 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
   lockRef.current = locked;
 
   useEffect(() => {
+    setIsMobile(window.innerWidth <= 768);
     setIsLoaded(true);
   }, []);
 
@@ -722,7 +724,8 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
         key={canvasKey}
         camera={{ position: [0, 0, 5], fov: 60 }}
         shadows={{ type: THREE.PCFShadowMap }}
-        gl={{ antialias: true, alpha: false, stencil: false }}
+        gl={{ antialias: !isMobile, alpha: false, stencil: false }}
+        dpr={[1, 1.5]}
         style={{ cursor: 'none' }}
       >
         <ContextHelper onContextLost={handleContextLost} />
@@ -782,6 +785,7 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
 
           {/* Subtle environment lighting reflections */}
           <Environment preset="night" />
+          <Preload all />
         </Suspense>
       </Canvas>
     </div>

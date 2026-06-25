@@ -171,70 +171,95 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       className="relative w-full h-full flex justify-center items-center overflow-hidden bg-[#030807]"
       onClick={() => { }}
     >
-      <Image
-        src={isMobile ? ASSETS.mobileLayers.last : ASSETS.layers.last}
-        className="absolute top-[-5%] left-[0%] !w-[110%] !h-[110%] object-cover parallax-layer pointer-events-none"
+      <div 
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.02"
-        alt="Background"
-        fill
-        priority
-        sizes="100vw"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 20vh), 0)'
         }}
-      />
+      >
+        <Image
+          src={isMobile ? ASSETS.mobileLayers.last : ASSETS.layers.last}
+          alt="Background"
+          fill
+          priority
+          quality={75}
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
 
-      <Image
-        src={isMobile ? ASSETS.mobileLayers.fourth : ASSETS.layers.fourth}
-        className="absolute top-[-5%] left-[0%] !w-[110%] !h-[110%] object-cover parallax-layer pointer-events-none"
+      <div 
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.035"
-        alt="Background"
-        fill
-        priority
-        sizes="100vw"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 50vh), 0)'
         }}
-      />
+      >
+        <Image
+          src={isMobile ? ASSETS.mobileLayers.fourth : ASSETS.layers.fourth}
+          alt="Background"
+          fill
+          priority
+          quality={75}
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
 
-      <Image
-        src={isMobile ? ASSETS.mobileLayers.third : ASSETS.layers.third}
-        className="absolute top-[-5%] left-[0%] !w-[110%] !h-[110%] object-cover parallax-layer pointer-events-none"
+      <div 
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.05"
-        alt="Feathers"
-        fill
-        priority
-        sizes="100vw"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 90vh), 0)'
         }}
-      />
+      >
+        <Image
+          src={isMobile ? ASSETS.mobileLayers.third : ASSETS.layers.third}
+          alt="Feathers"
+          fill
+          priority
+          quality={75}
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
 
-      <Image
-        src={isMobile ? ASSETS.mobileLayers.second : ASSETS.layers.second}
-        className="absolute top-[-5%] left-[0%] !w-[110%] !h-[110%] object-cover parallax-layer pointer-events-none"
+      <div 
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.08"
-        alt="Back Elements"
-        fill
-        priority
-        sizes="100vw"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 140vh), 0)'
         }}
-      />
+      >
+        <Image
+          src={isMobile ? ASSETS.mobileLayers.second : ASSETS.layers.second}
+          alt="Back Elements"
+          fill
+          priority
+          quality={75}
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
 
-      <Image
-        src={isMobile ? ASSETS.mobileLayers.top : ASSETS.layers.top}
-        className="absolute top-[-5%] left-[0%] !w-[110%] !h-[110%] object-cover parallax-layer pointer-events-none"
+      <div 
+        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.12"
-        alt="Satyadev"
-        fill
-        priority
-        sizes="100vw"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 200vh), 0)'
         }}
-      />
+      >
+        <Image
+          src={isMobile ? ASSETS.mobileLayers.top : ASSETS.layers.top}
+          alt="Satyadev"
+          fill
+          priority
+          quality={75}
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
 
       {/* Vignette */}
       <div
