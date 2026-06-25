@@ -122,6 +122,10 @@
     }
 
     .btn-royal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
       font-family: 'Cinzel', serif;
       font-size: 0.78rem;
       letter-spacing: 0.18em;
@@ -668,8 +672,24 @@
     <div class="share-title">Your Royal Portrait</div>
     <div class="share-frame"><img id="capturedImg" src="" alt="Your royal portrait"></div>
     <div class="share-actions">
-      <button class="btn-royal" id="downloadBtn">↓ Save Photo</button>
-      <button class="btn-royal" id="shareBtn" style="display:none;">↑ Share</button>
+      <button class="btn-royal" id="downloadBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Save Photo
+      </button>
+      <button class="btn-royal" id="shareBtn" style="display:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+          <polyline points="16 6 12 2 8 6"></polyline>
+          <line x1="12" y1="2" x2="12" y2="15"></line>
+        </svg>
+        Share
+      </button>
       <button class="btn-secondary" id="retakeBtn">Retake</button>
     </div>
     <div class="share-hint" id="shareHint">Long-press the photo to save on mobile</div>
@@ -820,16 +840,16 @@
         }
         try {
           const isMobile = window.innerWidth <= 768;
-          const videoConstraints = isMobile 
+          const videoConstraints = isMobile
             ? {
-                facingMode: currentFacing,
-                aspectRatio: { ideal: window.innerHeight / window.innerWidth },
-              }
+              facingMode: currentFacing,
+              aspectRatio: { ideal: window.innerHeight / window.innerWidth },
+            }
             : {
-                facingMode: currentFacing,
-                width: { ideal: 720 },
-                height: { ideal: 1280 },
-              };
+              facingMode: currentFacing,
+              width: { ideal: 720 },
+              height: { ideal: 1280 },
+            };
 
           S.stream = await navigator.mediaDevices.getUserMedia({
             video: videoConstraints,
@@ -862,16 +882,16 @@
       async function startBooth() {
         // 1. Camera
         const isMobile = window.innerWidth <= 768;
-        const videoConstraints = isMobile 
+        const videoConstraints = isMobile
           ? {
-              facingMode: currentFacing,
-              aspectRatio: { ideal: window.innerHeight / window.innerWidth },
-            }
+            facingMode: currentFacing,
+            aspectRatio: { ideal: window.innerHeight / window.innerWidth },
+          }
           : {
-              facingMode: currentFacing,
-              width: { ideal: 720 },
-              height: { ideal: 1280 },
-            };
+            facingMode: currentFacing,
+            width: { ideal: 720 },
+            height: { ideal: 1280 },
+          };
 
         S.stream = await navigator.mediaDevices.getUserMedia({
           video: videoConstraints,
