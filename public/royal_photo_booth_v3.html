@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Rao Bahadur · Royal Photo Booth</title>
+  <title>Rao Bahadur · Photo Booth</title>
   
   <link rel="preload" as="image" href="https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_1080/f_auto,q_auto/v1782402353/satyadev_assets/photobooth/background.jpg">
   <link rel="preload" as="image" href="https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_800/f_auto,q_auto/v1782402354/satyadev_assets/photobooth/leftwing.png">
@@ -620,14 +620,14 @@
   <div id="flash"></div>
   <div id="loading-overlay">
     <div class="spinner"></div>
-    <div class="load-txt">Preparing Royal Frame…</div>
+    <div class="load-txt">Preparing Frame…</div>
   </div>
   <div id="toast"></div>
 
   <!-- SCREEN 1: INTRO -->
   <div class="screen screen-hidden" id="screen-intro">
     <div class="intro-badge">Rao Bahadur · 2026</div>
-    <div class="intro-title">Royal<br>Photo Booth</div>
+    <div class="intro-title">Photo Booth</div>
     <div class="intro-preview">
       <img class="bg-layer" id="bgPreview" alt="">
       <img class="wings-layer" id="wingsPreview" alt="">
@@ -641,7 +641,7 @@
     <canvas id="boothCanvas"></canvas>
     <div id="booth-ui">
       <div class="booth-topbar">
-        <span class="booth-brand">Rao Bahadur · Royal Booth</span>
+        <span class="booth-brand">Rao Bahadur · Photo Booth</span>
         <span class="live-pill" id="livePill">Live</span>
       </div>
       <div class="booth-bottombar">
@@ -673,10 +673,12 @@
   </div>
 
   <!-- SCREEN 3: SHARE -->
-  <div class="screen screen-hidden" id="screen-share">
-    <div class="share-title">Your Royal Portrait</div>
-    <div class="share-frame"><img id="capturedImg" src="" alt="Your royal portrait"></div>
-    <div class="share-actions">
+  <div class="screen screen-hidden" id="screen-share" style="position: relative; overflow: hidden;">
+    <img src="/assets/extras/peacock-feather.png" alt="" style="position: absolute; top: -20px; right: -40px; width: 180px; transform: rotate(15deg); opacity: 0.9; pointer-events: none; z-index: 0;">
+    <img src="/assets/extras/spooky-pumpkin.png" alt="" style="position: absolute; bottom: 80px; left: -20px; width: 150px; opacity: 0.85; pointer-events: none; z-index: 0;">
+    <div class="share-title" style="position: relative; z-index: 1;">Your Portrait</div>
+    <div class="share-frame" style="position: relative; z-index: 1;"><img id="capturedImg" src="" alt="Your portrait"></div>
+    <div class="share-actions" style="position: relative; z-index: 1;">
       <button class="btn-royal" id="downloadBtn">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1255,8 +1257,10 @@
       downloadBtn.onclick = () => {
         const a = document.createElement('a');
         a.href = capturedImg.src;
-        a.download = 'rao-bahadur-royal-' + Date.now() + '.jpg';
+        a.download = 'rao-bahadur-' + Date.now() + '.jpg';
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
       };
 
       // Share button — show only if Web Share API is available
@@ -1276,13 +1280,13 @@
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
               files: [file],
-              title: 'Rao Bahadur · Royal Portrait',
-              text: 'I just posed for the Royal Photo Booth! 🦚'
+              title: 'Rao Bahadur · Portrait',
+              text: 'I just posed for Rao Bahadur! 🦚'
             });
           } else if (navigator.share) {
             await navigator.share({
-              title: 'Rao Bahadur · Royal Portrait',
-              text: 'I just posed for the Royal Photo Booth! 🦚',
+              title: 'Rao Bahadur · Portrait',
+              text: 'I just posed for Rao Bahadur! 🦚',
               url: window.location.href,
             });
           }

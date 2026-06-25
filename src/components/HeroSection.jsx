@@ -171,8 +171,8 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       className="relative w-full h-full flex justify-center items-center overflow-hidden bg-[#030807]"
       onClick={() => { }}
     >
-      <div 
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+      <div
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.02"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 20vh), 0)'
@@ -185,12 +185,12 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
           priority
           quality={75}
           sizes="100vw"
-          className="object-cover"
+          className="object-cover object-center"
         />
       </div>
 
-      <div 
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+      <div
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.035"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 50vh), 0)'
@@ -203,12 +203,12 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
           priority
           quality={75}
           sizes="100vw"
-          className="object-cover"
+          className="object-cover object-center"
         />
       </div>
 
-      <div 
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+      <div
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.05"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 90vh), 0)'
@@ -221,12 +221,12 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
           priority
           quality={75}
           sizes="100vw"
-          className="object-cover"
+          className="object-cover object-center"
         />
       </div>
 
-      <div 
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+      <div
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.08"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 140vh), 0)'
@@ -239,12 +239,12 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
           priority
           quality={75}
           sizes="100vw"
-          className="object-cover"
+          className="object-cover object-center"
         />
       </div>
 
-      <div 
-        className="absolute top-[-5%] left-[0%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+      <div
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
         data-speed="0.12"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 200vh), 0)'
@@ -257,7 +257,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
           priority
           quality={75}
           sizes="100vw"
-          className="object-cover"
+          className="object-cover object-center"
         />
       </div>
 
