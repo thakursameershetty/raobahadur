@@ -71,7 +71,10 @@ export default function Home() {
       <div className="relative w-full h-full">
         {/* Dynamic 3D Scene – locked while hero is visible */}
         <div className="absolute inset-0 w-full h-full z-0">
-          <SatyadevTimeline locked={scrollPhase === 'hero'} />
+          <SatyadevTimeline 
+            locked={scrollPhase === 'hero'} 
+            onScrollToTop={() => setScrollPhase('hero')}
+          />
         </div>
 
         {/* Hero Section – fades out on first scroll */}

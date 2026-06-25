@@ -168,7 +168,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
     <div
       ref={containerRef}
       className="relative w-full h-full flex justify-center items-center overflow-hidden bg-[#030807]"
-      onClick={() => {}}
+      onClick={() => { }}
     >
       <img
         src={isMobile ? ASSETS.mobileLayers.last : ASSETS.layers.last}
@@ -238,9 +238,9 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
 
       {/* The Parallax Title Layer */}
       <div
-        className={`absolute flex flex-col parallax-layer pointer-events-none z-30 transition-all duration-300 ${isMobile ? 'bottom-[24%] left-1/2 items-center' : 'top-[8%] left-[5%] items-start'
+        className={`absolute flex flex-col parallax-layer pointer-events-none z-30 ${isMobile ? 'bottom-[24%] left-1/2 items-center' : 'top-[8%] left-[5%] items-start'
           }`}
-        data-speed="0.15"
+        data-speed="0.08"
         style={{
           transform: isMobile
             ? 'translate3d(calc(var(--x, 0) * 1px - 50%), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 250vh), 0)'

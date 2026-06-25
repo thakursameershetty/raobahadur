@@ -186,7 +186,7 @@ const getMilestoneOffset = (index, total) => {
   return (index + 1) / (total + 1);
 };
 
-function CameraRig() {
+function CameraRig({ onScrollToTop }) {
   const scroll = useScroll();
   const curve = useMemo(() => new THREE.CatmullRomCurve3(PATH_POINTS), []);
   const easedOffsetRef = useRef(0);
@@ -213,12 +213,57 @@ function CameraRig() {
     };
   }, [scroll]);
 
+  // Listener to detect scrolling up when at the top of the timeline
+  useEffect(() => {
+    if (!onScrollToTop || !scroll.el) return;
+
+    const handleWheel = (e) => {
+      // If we are at the top and scrolling up
+      if (scroll.el.scrollTop <= 0 && e.deltaY < -5) {
+        onScrollToTop();
+      }
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const handleTouchEnd = (e) => {
+      if (scroll.el.scrollTop <= 0 && e.changedTouches[0].clientY - touchStartY > 30) {
+        onScrollToTop();
+      }
+    };
+
+    scroll.el.addEventListener('wheel', handleWheel, { passive: true });
+    scroll.el.addEventListener('touchstart', handleTouchStart, { passive: true });
+    scroll.el.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      scroll.el.removeEventListener('wheel', handleWheel);
+      scroll.el.removeEventListener('touchstart', handleTouchStart);
+      scroll.el.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [scroll.el, onScrollToTop]);
+
   useFrame((state) => {
     // ── LOCKED STATE: hold camera at the start, skip all scroll-driven logic ──
     if (lockRef.current) {
       state.camera.position.lerp(new THREE.Vector3(0, 0, 5), 0.1);
       state.camera.fov = 60;
       state.camera.updateProjectionMatrix();
+      
+      // Smoothly reset the eased offset and parallax progress back to 0 when returning to Hero
+      if (easedOffsetRef.current > 0.0001) {
+        easedOffsetRef.current = THREE.MathUtils.lerp(easedOffsetRef.current, 0, 0.15);
+        const progressFill = document.getElementById('timeline-progress-fill');
+        if (progressFill) progressFill.style.width = `${easedOffsetRef.current * 100}%`;
+        
+        const heroSection = document.getElementById('hero-section');
+        if (heroSection) {
+          const heroProgress = Math.min(easedOffsetRef.current / 0.042, 1);
+          heroSection.style.setProperty('--scroll-progress', heroProgress);
+        }
+      }
       return;
     }
 
@@ -644,7 +689,7 @@ function ContextHelper({ onContextLost }) {
   return null;
 }
 
-export default function SatyadevTimeline({ locked = false }) {
+export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [canvasKey, setCanvasKey] = useState(0);
 
@@ -711,7 +756,7 @@ export default function SatyadevTimeline({ locked = false }) {
 
           {/* Main interactive scroll rig */}
           <ScrollControls pages={8} damping={0.2}>
-            <CameraRig />
+            <CameraRig onScrollToTop={onScrollToTop} />
             {milestones.map((m, index) => (
               <Milestone key={index} {...m} />
             ))}
