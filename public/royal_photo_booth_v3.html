@@ -6,6 +6,11 @@
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Rao Bahadur · Royal Photo Booth</title>
+  
+  <link rel="preload" as="image" href="https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_1080/f_auto,q_auto/v1782402353/satyadev_assets/photobooth/background.jpg">
+  <link rel="preload" as="image" href="https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_800/f_auto,q_auto/v1782402354/satyadev_assets/photobooth/leftwing.png">
+  <link rel="preload" as="image" href="https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_800/f_auto,q_auto/v1782402355/satyadev_assets/photobooth/rightwing.png">
+  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
 
@@ -762,7 +767,7 @@
       // ── Off-screen canvas & Buffers ────────────────────────────────────────
       const frameCanvas = document.createElement('canvas');
       const frameCtx = frameCanvas.getContext('2d', { willReadFrequently: true });
-      
+
       // REUSABLE BUFFERS (Prevents memory leaks!)
       const personC = document.createElement('canvas');
       const personCtx = personC.getContext('2d', { willReadFrequently: false });
@@ -777,13 +782,13 @@
       bgImg.onload = leftImg.onload = rightImg.onload = onLoad;
       bgImg.onerror = leftImg.onerror = rightImg.onerror = onLoad; // don't hang
 
-      bgImg.src = 'https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782402353/satyadev_assets/photobooth/background.jpg';  // background frame
-      leftImg.src = 'https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782402354/satyadev_assets/photobooth/leftwing.png';   // left peacock wing
-      rightImg.src = 'https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782402355/satyadev_assets/photobooth/rightwing.png'; // right peacock wing
+      bgImg.src = 'https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_1080/f_auto,q_auto/v1782402353/satyadev_assets/photobooth/background.jpg';  // background frame
+      leftImg.src = 'https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_800/f_auto,q_auto/v1782402354/satyadev_assets/photobooth/leftwing.png';   // left peacock wing
+      rightImg.src = 'https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_800/f_auto,q_auto/v1782402355/satyadev_assets/photobooth/rightwing.png'; // right peacock wing
 
       // Populate intro preview
-      document.getElementById('bgPreview').src = bgImg.src;
-      document.getElementById('wingsPreview').src = 'https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782402357/satyadev_assets/photobooth/wings.png';
+      document.getElementById('bgPreview').src = 'https://res.cloudinary.com/dbn2ye2zo/image/upload/c_fill,w_400/f_auto,q_auto/v1782402353/satyadev_assets/photobooth/background.jpg';
+      document.getElementById('wingsPreview').src = 'https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_400/f_auto,q_auto/v1782402357/satyadev_assets/photobooth/wings.png';
 
       function revealIntro() {
         loadingEl.classList.add('gone');
@@ -1099,7 +1104,7 @@
           const t = 0.42;
           for (let i = 0; i < N; i++) alphaBuffer[i] = alphaBuffer[i] * (1 - t) + S.prevMask[i] * t;
         }
-        
+
         // We must copy alphaBuffer for prevMask to avoid reference issues
         S.prevMask = new Float32Array(alphaBuffer);
 

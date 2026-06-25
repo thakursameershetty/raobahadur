@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 const META = {
   "0": [111, 135], "1": [48, 131], "2": [91, 137], "3": [84, 135], "4": [100, 133], "5": [87, 132],
@@ -45,13 +46,14 @@ export default function TimberText({ text, fontSize = 78, tracking = 5, glow = t
               {tok.glyphs.map((g, j) => {
                 if (g.isImg) {
                   return (
-                    <img
+                    <Image
                       key={j}
                       src={g.src}
                       width={g.w}
                       height={g.h}
                       alt={g.ch}
                       className="block h-auto align-bottom"
+                      priority
                       style={{
                         filter: glow ? 'drop-shadow(0 5px 9px rgba(90,55,18,.5)) drop-shadow(0 0 16px rgba(214,170,92,.22))' : 'none'
                       }}
