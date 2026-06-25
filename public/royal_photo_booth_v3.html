@@ -538,11 +538,40 @@
       background: rgba(240, 214, 147, 0.92);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.07s;
+      transition: opacity 0.06s ease-in;
     }
 
     #flash.on {
       opacity: 1;
+      transition: opacity 0.06s ease-in;
+    }
+
+    #flash.fade {
+      opacity: 0;
+      transition: opacity 0.4s ease-out;
+    }
+
+    /* Shutter press animation */
+    @keyframes shutterPop {
+      0% {
+        transform: scale(1);
+      }
+
+      30% {
+        transform: scale(0.84);
+      }
+
+      70% {
+        transform: scale(1.06);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .shutter.firing {
+      animation: shutterPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
     /* ── TOAST ── */
@@ -641,9 +670,10 @@
     <div class="share-frame"><img id="capturedImg" src="" alt="Your royal portrait"></div>
     <div class="share-actions">
       <button class="btn-royal" id="downloadBtn">↓ Save Photo</button>
+      <button class="btn-royal" id="shareBtn" style="display:none;">↑ Share</button>
       <button class="btn-secondary" id="retakeBtn">Retake</button>
     </div>
-    <div class="share-hint">Long-press the photo to save on mobile</div>
+    <div class="share-hint" id="shareHint">Long-press the photo to save on mobile</div>
   </div>
 
   <video id="videoEl" autoplay playsinline muted style="display:none;position:fixed;"></video>
@@ -680,8 +710,11 @@
 
       // ── Assets ──────────────────────────────────────────────────────────
       const bgImg = new Image();
+      bgImg.crossOrigin = "anonymous";
       const leftImg = new Image();   // left peacock wing
+      leftImg.crossOrigin = "anonymous";
       const rightImg = new Image();  // right peacock wing
+      rightImg.crossOrigin = "anonymous";
 
       // ── State ───────────────────────────────────────────────────────────
       const S = {
@@ -1119,19 +1152,38 @@
 
       // ── Capture ───────────────────────────────────────────────────────────
       shutterBtn.onclick = () => {
+        if (shutterBtn.disabled) return;
+        shutterBtn.disabled = true;
+
+        // 1. Button pop animation
+        shutterBtn.classList.add('firing');
+        shutterBtn.addEventListener('animationend', () => shutterBtn.classList.remove('firing'), { once: true });
+
+        // 2. Flash: snap on
+        flash.classList.remove('fade');
         flash.classList.add('on');
-        setTimeout(() => flash.classList.remove('on'), 110);
 
-        // Render final frame to a fresh canvas for download (correct pixel dimensions)
-        const out = document.createElement('canvas');
-        out.width = canvas.width; out.height = canvas.height;
-        out.getContext('2d').drawImage(canvas, 0, 0);
-        const dataUrl = out.toDataURL('image/jpeg', 0.92);
-        capturedImg.src = dataUrl;
+        // 3. Capture frame at peak of flash
+        setTimeout(() => {
+          const out = document.createElement('canvas');
+          out.width = canvas.width; out.height = canvas.height;
+          out.getContext('2d').drawImage(canvas, 0, 0);
+          const dataUrl = out.toDataURL('image/jpeg', 0.92);
+          capturedImg.src = dataUrl;
+          S._captureDataUrl = dataUrl;
 
-        S.running = false;
-        if (S.animId) cancelAnimationFrame(S.animId);
-        showScreen(sShare);
+          // 4. Flash fade out
+          flash.classList.remove('on');
+          flash.classList.add('fade');
+
+          // 5. Stop loop and show share screen after flash fades
+          setTimeout(() => {
+            flash.classList.remove('fade');
+            S.running = false;
+            if (S.animId) cancelAnimationFrame(S.animId);
+            showScreen(sShare);
+          }, 420);
+        }, 80);
       };
 
       downloadBtn.onclick = () => {
@@ -1141,8 +1193,41 @@
         a.click();
       };
 
+      // Share button — show only if Web Share API is available
+      const shareBtn = document.getElementById('shareBtn');
+      const shareHint = document.getElementById('shareHint');
+      if (navigator.share && navigator.canShare) {
+        shareBtn.style.display = '';
+        shareHint.style.display = 'none';
+      }
+
+      shareBtn.onclick = async () => {
+        try {
+          // Convert dataURL to Blob for sharing
+          const res = await fetch(capturedImg.src);
+          const blob = await res.blob();
+          const file = new File([blob], 'rao-bahadur-royal-' + Date.now() + '.jpg', { type: 'image/jpeg' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'Rao Bahadur · Royal Portrait',
+              text: 'I just posed for the Royal Photo Booth! 🦚'
+            });
+          } else if (navigator.share) {
+            await navigator.share({
+              title: 'Rao Bahadur · Royal Portrait',
+              text: 'I just posed for the Royal Photo Booth! 🦚',
+              url: window.location.href,
+            });
+          }
+        } catch (e) {
+          if (e.name !== 'AbortError') showToast('Could not share — try saving instead');
+        }
+      };
+
       retakeBtn.onclick = () => {
         S.running = true;
+        shutterBtn.disabled = false;
         showScreen(sBooth);
         loop();
       };
