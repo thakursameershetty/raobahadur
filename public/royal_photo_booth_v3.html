@@ -984,12 +984,21 @@
         const ls = lm[11], rs = lm[12];
         if (!ls || !rs) return;
 
+        const isFirstDetection = !S.poseReady;
+
         // Smooth
-        S.leftShoulder.x = lerp(S.leftShoulder.x, ls.x, LERP);
-        S.leftShoulder.y = lerp(S.leftShoulder.y, ls.y, LERP);
-        S.rightShoulder.x = lerp(S.rightShoulder.x, rs.x, LERP);
-        S.rightShoulder.y = lerp(S.rightShoulder.y, rs.y, LERP);
-        S.poseReady = true;
+        if (isFirstDetection) {
+          S.leftShoulder.x = ls.x;
+          S.leftShoulder.y = ls.y;
+          S.rightShoulder.x = rs.x;
+          S.rightShoulder.y = rs.y;
+          S.poseReady = true;
+        } else {
+          S.leftShoulder.x = lerp(S.leftShoulder.x, ls.x, LERP);
+          S.leftShoulder.y = lerp(S.leftShoulder.y, ls.y, LERP);
+          S.rightShoulder.x = lerp(S.rightShoulder.x, rs.x, LERP);
+          S.rightShoulder.y = lerp(S.rightShoulder.y, rs.y, LERP);
+        }
 
         // ── Auto-calibration ─────────────────────────────────────────────
         if (S.autoCalib && canvas.width > 0) {
@@ -1002,8 +1011,14 @@
             // Target: each wing should span ~55% of canvas width
             const targetWingW = W * 0.55;
             const newScale = Math.max(0.4, Math.min(2.0, targetWingW / sDist));
-            // Lerp gently so it doesn't jump
-            S.wingScale = lerp(S.wingScale, newScale, 0.08);
+            
+            if (isFirstDetection) {
+              S.wingScale = newScale;
+            } else {
+              // Lerp gently so it doesn't jump
+              S.wingScale = lerp(S.wingScale, newScale, 0.08);
+            }
+            
             // Sync UI slider
             const pct = Math.round(S.wingScale * 100);
             wingScaleEl.value = pct;
@@ -1145,8 +1160,10 @@
         personC.getContext('2d').putImageData(videoData, 0, 0);
         ctx.drawImage(personC, drawX, drawY, drawW, drawH);
 
-        drawLeftWing(ctx, leftImg, lxF, lyF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
-        drawRightWing(ctx, rightImg, rxF, ryF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
+        if (S.poseReady) {
+          drawLeftWing(ctx, leftImg, lxF, lyF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
+          drawRightWing(ctx, rightImg, rxF, ryF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
+        }
       }
 
       // Cover-fit background
