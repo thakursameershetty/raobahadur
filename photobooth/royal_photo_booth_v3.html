@@ -536,6 +536,32 @@
       opacity: 1;
     }
 
+    /* ── COUNTDOWN ── */
+    #countdown {
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    #countdown.visible { opacity: 1; }
+    #countdown-num {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(5rem, 25vw, 9rem);
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 40px rgba(212,175,55,0.9), 0 4px 24px rgba(0,0,0,0.7);
+      animation: countPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes countPop {
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
     /* ── TOAST ── */
     #toast {
       position: fixed;
@@ -572,6 +598,7 @@
 <body>
 
   <div id="flash"></div>
+  <div id="countdown"><span id="countdown-num">2</span></div>
   <div id="loading-overlay">
     <div class="spinner"></div>
     <div class="load-txt">Preparing Royal Frame…</div>
@@ -603,8 +630,6 @@
           <span class="ctrl-label">Wing Size</span>
           <input type="range" class="gold-slider" id="wingScale" min="40" max="200" value="100">
           <span class="ctrl-val" id="wingScaleVal">100%</span>
-          <button class="chip active" id="chipAutoCalib"
-            style="margin-left:0.4rem;padding:0.3rem 0.65rem;font-size:0.52rem;">Auto</button>
         </div>
         <div class="wing-size-row">
           <span class="ctrl-label">↕ Vertical</span>
@@ -715,7 +740,7 @@
         leftShoulder: { x: 0.25, y: 0.35 },
         rightShoulder: { x: 0.75, y: 0.35 },
         poseReady: false,
-        autoCalib: true,    // auto-calibrate wing scale from shoulder distance
+
       };
 
       const LERP = 0.18;  // how fast shoulders follow (0=frozen, 1=instant)
@@ -762,18 +787,6 @@
       wingScaleEl.oninput = () => {
         S.wingScale = +wingScaleEl.value / 100;
         wingScaleV.textContent = wingScaleEl.value + '%';
-        // Manual adjustment disables auto-calibration
-        if (S.autoCalib) {
-          S.autoCalib = false;
-          chipAutoCalibEl.classList.remove('active');
-        }
-      };
-
-      // Auto-calibration toggle
-      const chipAutoCalibEl = document.getElementById('chipAutoCalib');
-      chipAutoCalibEl.onclick = () => {
-        S.autoCalib = !S.autoCalib;
-        chipAutoCalibEl.classList.toggle('active', S.autoCalib);
       };
 
       const wingYAdjEl = document.getElementById('wingYAdj');
@@ -963,25 +976,6 @@
         S.rightShoulder.y = lerp(S.rightShoulder.y, rs.y, LERP);
         S.poseReady = true;
 
-        // ── Auto-calibration ─────────────────────────────────────────────
-        if (S.autoCalib && canvas.width > 0) {
-          const W = canvas.width;
-          // Shoulder distance in canvas pixels
-          const rawLx = S.mirror ? 1 - S.leftShoulder.x : S.leftShoulder.x;
-          const rawRx = S.mirror ? 1 - S.rightShoulder.x : S.rightShoulder.x;
-          const sDist = Math.abs(rawRx - rawLx) * W;
-          if (sDist > 20) {
-            // Target: each wing should span ~55% of canvas width
-            const targetWingW = W * 0.55;
-            const newScale = Math.max(0.4, Math.min(2.0, targetWingW / sDist));
-            // Lerp gently so it doesn't jump
-            S.wingScale = lerp(S.wingScale, newScale, 0.08);
-            // Sync UI slider
-            const pct = Math.round(S.wingScale * 100);
-            wingScaleEl.value = pct;
-            wingScaleV.textContent = pct + '%';
-          }
-        }
       }
 
       // ── Main loop ─────────────────────────────────────────────────────────
@@ -1085,7 +1079,7 @@
 
         // Fixed wing positions (no shoulder tracking)
         const lx = drawX + 0.22 * drawW; const rx = drawX + 0.78 * drawW;
-        const ly = drawY + (0.42 + S.yShift) * drawH; const ry = ly;
+        const ly = drawY + (0.50 + S.yShift) * drawH; const ry = ly;
 
         const shoulderDist = Math.abs(rx - lx);
         const wingW = shoulderDist * S.wingScale;
@@ -1143,12 +1137,13 @@
         ctx.drawImage(img, x, y, w, h);
       }
 
-      // ── Capture ───────────────────────────────────────────────────────────
-      shutterBtn.onclick = () => {
+      const countdownEl = document.getElementById('countdown');
+      const countdownNum = document.getElementById('countdown-num');
+
+      function doCapture() {
         flash.classList.add('on');
         setTimeout(() => flash.classList.remove('on'), 110);
 
-        // Render final frame to a fresh canvas for download (correct pixel dimensions)
         const out = document.createElement('canvas');
         out.width = canvas.width; out.height = canvas.height;
         out.getContext('2d').drawImage(canvas, 0, 0);
@@ -1158,6 +1153,31 @@
         S.running = false;
         if (S.animId) cancelAnimationFrame(S.animId);
         showScreen(sShare);
+      }
+
+      shutterBtn.onclick = () => {
+        if (shutterBtn.disabled) return;
+        shutterBtn.disabled = true;
+
+        // 2-second countdown then capture
+        let count = 2;
+        countdownNum.textContent = count;
+        countdownEl.classList.add('visible');
+
+        const tick = () => {
+          count--;
+          if (count <= 0) {
+            countdownEl.classList.remove('visible');
+            doCapture();
+          } else {
+            countdownNum.style.animation = 'none';
+            countdownNum.offsetHeight; // reflow
+            countdownNum.style.animation = '';
+            countdownNum.textContent = count;
+            setTimeout(tick, 1000);
+          }
+        };
+        setTimeout(tick, 1000);
       };
 
       downloadBtn.onclick = () => {
