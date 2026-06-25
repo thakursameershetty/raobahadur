@@ -863,38 +863,15 @@
 
         const vW = video.videoWidth, vH = video.videoHeight;
 
-        // 2. Size canvas to match video, fit screen
-        // On mobile portrait: video is 720x1280-ish
-        // Canvas should fill screen height, letterbox width
+        // 2. Size canvas to match screen exactly (full screen background)
         const screenW = window.innerWidth, screenH = window.innerHeight;
-        const videoAspect = vW / vH;
-        const screenAspect = screenW / screenH;
 
-        let cW, cH;
-        const isMobile = window.innerWidth <= 768;
-        
-        if (isMobile) {
-          // Cover logic for mobile (fill the screen)
-          if (videoAspect > screenAspect) {
-            cH = screenH; cW = Math.round(cH * videoAspect);
-          } else {
-            cW = screenW; cH = Math.round(cW / videoAspect);
-          }
-        } else {
-          // Contain logic for desktop
-          if (videoAspect < screenAspect) {
-            // Video is taller than screen aspect → fit to height
-            cH = screenH; cW = Math.round(cH * videoAspect);
-          } else {
-            // Video is wider → fit to width
-            cW = screenW; cH = Math.round(cW / videoAspect);
-          }
-        }
+        canvas.width = screenW;
+        canvas.height = screenH;
+        canvas.style.width = screenW + 'px';
+        canvas.style.height = screenH + 'px';
 
-        canvas.width = vW;
-        canvas.height = vH;
-        canvas.style.width = cW + 'px';
-        canvas.style.height = cH + 'px';
+        // frameCanvas processes raw video, must match video dimensions
         frameCanvas.width = vW;
         frameCanvas.height = vH;
 
@@ -1025,7 +1002,8 @@
       // ── Core compositor ───────────────────────────────────────────────────
       function renderFrame(mask) {
         const W = canvas.width, H = canvas.height;
-        const N = W * H;
+        const vW = frameCanvas.width, vH = frameCanvas.height;
+        const N = vW * vH;
 
         // 1. Extract & smooth mask
         let alpha = new Float32Array(N);
@@ -1034,10 +1012,10 @@
           for (let i = 0; i < N; i++) alpha[i] = Math.max(0, Math.min(1, floats[i]));
         } catch (_) {
           const tmp = document.createElement('canvas');
-          tmp.width = W; tmp.height = H;
+          tmp.width = vW; tmp.height = vH;
           const tc = tmp.getContext('2d');
-          try { tc.drawImage(mask.getAsCanvas(), 0, 0, W, H); } catch (__) { }
-          const d = tc.getImageData(0, 0, W, H).data;
+          try { tc.drawImage(mask.getAsCanvas(), 0, 0, vW, vH); } catch (__) { }
+          const d = tc.getImageData(0, 0, vW, vH).data;
           for (let i = 0; i < N; i++) alpha[i] = d[i * 4] / 255;
         }
 
@@ -1059,72 +1037,72 @@
 
         // 2. Draw video to frameCanvas (with mirror)
         frameCtx.save();
-        if (S.mirror) { frameCtx.translate(W, 0); frameCtx.scale(-1, 1); }
-        frameCtx.drawImage(video, 0, 0, W, H);
+        if (S.mirror) { frameCtx.translate(vW, 0); frameCtx.scale(-1, 1); }
+        frameCtx.drawImage(video, 0, 0, vW, vH);
         frameCtx.restore();
 
-        const videoData = frameCtx.getImageData(0, 0, W, H);
+        const videoData = frameCtx.getImageData(0, 0, vW, vH);
         const vd = videoData.data;
 
         // Apply alpha — mirror the mask too if mirrored
         if (S.mirror) {
           const fm = new Uint8Array(N);
-          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) fm[y * W + (W - 1 - x)] = fin[y * W + x];
+          for (let y = 0; y < vH; y++) for (let x = 0; x < vW; x++) fm[y * vW + (vW - 1 - x)] = fin[y * vW + x];
           for (let i = 0; i < N; i++) vd[i * 4 + 3] = fm[i];
         } else {
           for (let i = 0; i < N; i++) vd[i * 4 + 3] = fin[i];
         }
 
-        // 3. Shoulder coordinates (normalized → canvas pixels)
-        // Mirror: if mirror mode, flip x so landmarks match displayed video
-        let lx, ly, rx, ry;
-        if (S.poseReady) {
-          // Raw landmarks: 0=left edge of video, 1=right edge
-          // In mirrored display, we flip x
-          const rawLx = S.mirror ? 1 - S.leftShoulder.x : S.leftShoulder.x;
-          const rawRx = S.mirror ? 1 - S.rightShoulder.x : S.rightShoulder.x;
-          lx = rawLx * W;
-          ly = S.leftShoulder.y * H + S.yShift * H;
-          rx = rawRx * W;
-          ry = S.rightShoulder.y * H + S.yShift * H;
+        // NEW LOGIC: Calculate contained video box
+        const videoAspect = vW / vH;
+        const canvasAspect = W / H;
+        let drawW, drawH, drawX, drawY;
+        if (videoAspect > canvasAspect) {
+          drawW = W;
+          drawH = W / videoAspect;
+          drawX = 0;
+          drawY = (H - drawH) / 2;
         } else {
-          // Fallback: estimate shoulders at ~25%/75% width, ~40% height
-          lx = 0.22 * W; rx = 0.78 * W;
-          ly = ry = 0.42 * H + S.yShift * H;
+          drawH = H;
+          drawW = H * videoAspect;
+          drawX = (W - drawW) / 2;
+          drawY = 0;
         }
 
-        // Wing size: base = distance between shoulders * scale factor
+        // 3. Shoulder coordinates (normalized → canvas pixels)
+        let lx, ly, rx, ry;
+        if (S.poseReady) {
+          const rawLx = S.mirror ? 1 - S.leftShoulder.x : S.leftShoulder.x;
+          const rawRx = S.mirror ? 1 - S.rightShoulder.x : S.rightShoulder.x;
+          lx = drawX + rawLx * drawW;
+          ly = drawY + (S.leftShoulder.y + S.yShift) * drawH;
+          rx = drawX + rawRx * drawW;
+          ry = drawY + (S.rightShoulder.y + S.yShift) * drawH;
+        } else {
+          lx = drawX + 0.22 * drawW; rx = drawX + 0.78 * drawW;
+          ly = ry = drawY + (0.42 + S.yShift) * drawH;
+        }
+
         const shoulderDist = Math.abs(rx - lx);
-        // Wing width = shoulderDist * scale (each wing spans roughly the shoulder-to-edge space)
         const wingW = shoulderDist * S.wingScale;
         const wingH = wingW * (leftImg.naturalHeight / leftImg.naturalWidth);
+        const ATTACH_X_FRAC = 0.08;
+        const ATTACH_Y_FRAC = 0.38;
 
-        // Fine-tune attachment: what fraction from the inner edge of the wing image
-        // is the actual "attachment point" (where the wing root meets the body).
-        // The wing images have the root/quill area toward the inner side.
-        // Adjust these to shift the attachment point within the image.
-        const ATTACH_X_FRAC = 0.08;  // how far from the inner edge the quill root sits (0=edge, 0.1=10% in)
-        const ATTACH_Y_FRAC = 0.38;  // how far from top the wing root sits (0=top, 0.5=center)
-
-        // Apply user fine-tune adjustments (pixel offsets on shoulder anchor)
-        const adjY = S.wingYAdj * (H / 100);  // convert slider units to canvas pixels
+        const adjY = S.wingYAdj * (H / 100);
         const adjX = S.wingXAdj * (W / 100);
         const lxF = lx - adjX, lyF = ly + adjY;
         const rxF = rx + adjX, ryF = ry + adjY;
 
         // 4. Compose layers onto canvas
         ctx.clearRect(0, 0, W, H);
-
-        // Layer A: Background (cover fit)
         drawCover(ctx, bgImg, W, H);
 
-        // Layer B: Person (segmented)
         const personC = document.createElement('canvas');
-        personC.width = W; personC.height = H;
+        personC.width = vW; personC.height = vH;
         personC.getContext('2d').putImageData(videoData, 0, 0);
-        ctx.drawImage(personC, 0, 0);
+        ctx.drawImage(personC, drawX, drawY, drawW, drawH);
 
-        // Layer C: Wings fully on top (highest z-index in camera view)
         drawLeftWing(ctx, leftImg, lxF, lyF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
         drawRightWing(ctx, rightImg, rxF, ryF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
       }
