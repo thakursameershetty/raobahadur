@@ -4,11 +4,19 @@ import { v2 as cloudinary } from 'cloudinary';
 
 // Cloudinary config is automatically loaded from process.env.CLOUDINARY_URL
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const images = await prisma.image.findMany({
-      orderBy: { createdAt: 'asc' } // Sorted from oldest to newest for sequential grid rendering
-    });
+    const { searchParams } = new URL(request.url);
+    const deviceId = searchParams.get('deviceId');
+
+    let query = { orderBy: { createdAt: 'desc' } };
+    
+    // Only return images for the requested deviceId if provided
+    if (deviceId) {
+      query.where = { uploader: deviceId };
+    }
+
+    const images = await prisma.image.findMany(query);
     return NextResponse.json(images);
   } catch (error) {
     console.error("GET images error:", error);
@@ -57,13 +65,34 @@ export async function POST(request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request) {
   try {
-    // Delete all images from the database
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const deviceId = searchParams.get('deviceId');
+
+    if (id && deviceId) {
+      // Find the image first to verify ownership
+      const image = await prisma.image.findUnique({ where: { id } });
+      
+      if (!image) {
+        return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+      }
+      
+      if (image.uploader !== deviceId) {
+        return NextResponse.json({ error: 'Unauthorized to delete this image' }, { status: 403 });
+      }
+
+      await prisma.image.delete({ where: { id } });
+      return NextResponse.json({ message: 'Image deleted successfully' });
+    }
+
+    // Delete all images from the database (fallback/admin behavior)
+    // Note: We might want to restrict this in the future
     await prisma.image.deleteMany();
     return NextResponse.json({ message: 'Wall cleared successfully' });
   } catch (error) {
     console.error("DELETE images error:", error);
-    return NextResponse.json({ error: 'Failed to clear wall' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
   }
 }

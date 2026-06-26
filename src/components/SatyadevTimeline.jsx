@@ -699,7 +699,8 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
   lockRef.current = locked;
 
   useEffect(() => {
-    setIsMobile(window.innerWidth <= 768);
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setIsMobile(window.innerWidth <= 768 || isTouch);
     setIsLoaded(true);
   }, []);
 
@@ -723,9 +724,9 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
       <Canvas
         key={canvasKey}
         camera={{ position: [0, 0, 5], fov: 60 }}
-        shadows={{ type: THREE.PCFShadowMap }}
+        shadows={!isMobile}
         gl={{ antialias: !isMobile, alpha: false, stencil: false }}
-        dpr={[1, 1.5]}
+        dpr={isMobile ? [1, 1] : [1, 1.5]}
         style={{ cursor: 'none' }}
       >
         <ContextHelper onContextLost={handleContextLost} />
@@ -740,22 +741,24 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
           <directionalLight
             position={[5, 10, 3]}
             intensity={1.5}
-            castShadow
+            castShadow={!isMobile}
             shadow-mapSize-width={1024}
             shadow-mapSize-height={1024}
           />
           <pointLight position={[-10, -10, -10]} intensity={0.5} color="#555" />
 
-          {/* Soft dust particles floating in the environment */}
-          <Sparkles
-            count={600}
-            position={[0, 0, -90]}
-            scale={[20, 15, 210]}
-            size={1.8}
-            speed={0.6}
-            noise={0.4}
-            color="#d4af37"
-          />
+          {/* Soft dust particles floating in the environment (Disabled on mobile) */}
+          {!isMobile && (
+            <Sparkles
+              count={600}
+              position={[0, 0, -90]}
+              scale={[20, 15, 210]}
+              size={1.8}
+              speed={0.6}
+              noise={0.4}
+              color="#d4af37"
+            />
+          )}
 
           {/* Main interactive scroll rig */}
           <ScrollControls pages={8} damping={0.2}>
@@ -768,19 +771,23 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
           {/* Reflective Dark Floor */}
           <mesh position={[0, -2.75, -90]} rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[100, 300]} />
-            <MeshReflectorMaterial
-              blur={[400, 100]} // Blurs the reflection (width, height)
-              resolution={1024} // Resolution of the reflection off-buffer
-              mixBlur={1} // How much blur mixes with surface roughness
-              mixStrength={80} // Strength of the reflections
-              roughness={1}
-              depthScale={1.2} // Scales the depth factor
-              minDepthThreshold={0.4} // Fades out the reflection at a distance
-              maxDepthThreshold={1.4}
-              color="#020202" // Matches your background/fog color
-              metalness={0.5}
-              mirror={1}
-            />
+            {isMobile ? (
+              <meshStandardMaterial color="#020202" roughness={1} metalness={0.5} />
+            ) : (
+              <MeshReflectorMaterial
+                blur={[400, 100]} // Blurs the reflection (width, height)
+                resolution={1024} // Resolution of the reflection off-buffer
+                mixBlur={1} // How much blur mixes with surface roughness
+                mixStrength={80} // Strength of the reflections
+                roughness={1}
+                depthScale={1.2} // Scales the depth factor
+                minDepthThreshold={0.4} // Fades out the reflection at a distance
+                maxDepthThreshold={1.4}
+                color="#020202" // Matches your background/fog color
+                metalness={0.5}
+                mirror={1}
+              />
+            )}
           </mesh>
 
           {/* Subtle environment lighting reflections */}

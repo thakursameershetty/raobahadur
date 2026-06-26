@@ -26,8 +26,8 @@ const SatyadevTimeline = dynamic(() => import('../components/SatyadevTimeline'),
   ),
 });
 
-// Lazy-load ImageWall so its iframe doesn't mount until needed
-const ImageWall = dynamic(() => import('../components/ImageWall'), { ssr: false });
+// Lazy-load PortraitGenerator so it doesn't mount until needed
+const PortraitGenerator = dynamic(() => import('../components/PortraitGenerator'), { ssr: false });
 
 export default function Home() {
   const [isWallOpen, setIsWallOpen] = useState(false);
@@ -36,9 +36,19 @@ export default function Home() {
   const [scrollPhase, setScrollPhase] = useState('hero');
   const touchStartYRef = useRef(0);
 
+  // Check for open=generator query parameter on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('open=generator')) {
+      setIsWallOpen(true);
+      // Clean up the URL so a refresh doesn't trigger it again if unwanted
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
+
   // Detect first downward scroll/swipe → transition to timeline phase
   useEffect(() => {
-    if (scrollPhase !== 'hero') return;
+    // If we're not in the hero phase OR the portrait generator is open, ignore global scroll
+    if (scrollPhase !== 'hero' || isWallOpen) return;
 
     const handleWheel = (e) => {
       if (e.deltaY > 5) setScrollPhase('timeline');
@@ -60,7 +70,7 @@ export default function Home() {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [scrollPhase]);
+  }, [scrollPhase, isWallOpen]);
 
   return (
     <main
@@ -71,8 +81,8 @@ export default function Home() {
       <div className="relative w-full h-full">
         {/* Dynamic 3D Scene – locked while hero is visible */}
         <div className="absolute inset-0 w-full h-full z-0">
-          <SatyadevTimeline 
-            locked={scrollPhase === 'hero'} 
+          <SatyadevTimeline
+            locked={scrollPhase === 'hero'}
             onScrollToTop={() => setScrollPhase('hero')}
           />
         </div>
@@ -128,16 +138,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ─── Full Screen Wall of Love Overlay ─── */}
+      {/* ─── Full Screen Portrait Generator Overlay ─── */}
       <div
-        className={`absolute inset-0 z-40 transition-all duration-700 ease-in-out transform ${
-          isWallOpen ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full opacity-0 scale-95'
-        }`}
+        className={`absolute inset-0 z-40 transition-all duration-700 ease-in-out transform ${isWallOpen ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full opacity-0 scale-95'
+          }`}
         style={{ pointerEvents: isWallOpen ? 'auto' : 'none' }}
       >
-        {isWallOpen && (
-          <ImageWall onBack={() => setIsWallOpen(false)} />
-        )}
+        <PortraitGenerator onBack={() => setIsWallOpen(false)} />
       </div>
 
       {/* Hardware-independent HTML custom cursor rendering */}

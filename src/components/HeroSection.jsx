@@ -59,6 +59,16 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
     if (!container) return;
 
     const layers = container.querySelectorAll('.parallax-layer');
+
+    // Check for mobile or touch device to disable heavy parallax animations
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobileDevice = window.innerWidth < 768 || isTouch;
+
+    if (isMobileDevice) {
+      // Do not bind listeners or start requestAnimationFrame on mobile/touch devices
+      return;
+    }
+
     let gyroActive = false;
 
     const handleMouseMove = (e) => {
@@ -172,7 +182,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       onClick={() => { }}
     >
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[1]"
         data-speed="0.02"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 20vh), 0)'
@@ -190,7 +200,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       </div>
 
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[2]"
         data-speed="0.035"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 50vh), 0)'
@@ -208,7 +218,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       </div>
 
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[3]"
         data-speed="0.05"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 90vh), 0)'
@@ -226,7 +236,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       </div>
 
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[4]"
         data-speed="0.08"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 140vh), 0)'
@@ -244,7 +254,7 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       </div>
 
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[5]"
         data-speed="0.12"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 200vh), 0)'

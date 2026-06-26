@@ -1,0 +1,793 @@
+/* ── Reset & Base ─────────────────────────────────────── */
+.portrait-generator-wrapper {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --gold-dim: #7A6230;
+  --ink: #0E0C09;
+  --ink-2: #1A1710;
+  --ink-3: #252219;
+  --ink-4: #302C22;
+  --parchment: #F5EDD8;
+  --parchment-2: #EDE2C4;
+  --text-primary: #F0E6CC;
+  --text-secondary: #B8A882;
+  --text-muted: #7A7060;
+  --border: rgba(201, 168, 76, 0.18);
+  --border-strong: rgba(201, 168, 76, 0.35);
+  --danger-bg: rgba(180, 50, 40, 0.15);
+  --danger-text: #F08070;
+  --danger-border: rgba(180, 50, 40, 0.35);
+  --success-text: #7DC98A;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+
+  background-color: var(--ink);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  z-index: 100;
+}
+
+.portrait-generator-wrapper * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page Layout ───────────────────────────────────────── */
+.portrait-generator-wrapper .pg-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5rem 1.5rem 5rem;
+  position: relative;
+}
+
+.portrait-generator-wrapper .pg-page::before {
+  content: '';
+  position: fixed;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(201, 168, 76, 0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.portrait-generator-wrapper .pg-container {
+  width: 100%;
+  max-width: 680px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Header ────────────────────────────────────────────── */
+.portrait-generator-wrapper .pg-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-top: 1rem;
+  position: relative;
+}
+
+.portrait-generator-wrapper .pg-back-btn,
+.portrait-generator-wrapper .pg-history-btn {
+  position: fixed;
+  top: calc(1.5rem + env(safe-area-inset-top));
+  background: rgba(26, 23, 16, 0.85);
+  /* Dark ink with opacity */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  color: var(--gold-dim);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px 16px;
+  z-index: 1000;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+}
+
+.portrait-generator-wrapper .pg-back-btn {
+  left: calc(1.5rem + env(safe-area-inset-left));
+}
+
+.portrait-generator-wrapper .pg-history-btn {
+  right: calc(1.5rem + env(safe-area-inset-right));
+}
+
+.portrait-generator-wrapper .pg-back-btn:hover,
+.portrait-generator-wrapper .pg-history-btn:hover {
+  color: var(--gold);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.portrait-generator-wrapper .pg-header-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.portrait-generator-wrapper .pg-ornament-line {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold-dim));
+}
+
+.portrait-generator-wrapper .pg-ornament-line.right {
+  background: linear-gradient(to left, transparent, var(--gold-dim));
+}
+
+.portrait-generator-wrapper .pg-ornament-diamond {
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.portrait-generator-wrapper .pg-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--border-strong);
+  border-radius: 40px;
+  padding: 5px 16px;
+  margin-bottom: 1.25rem;
+}
+
+.portrait-generator-wrapper .pg-header-badge span {
+  width: 4px;
+  height: 4px;
+  background: var(--gold-dim);
+  border-radius: 50%;
+}
+
+.portrait-generator-wrapper .pg-header h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 500;
+  color: var(--gold-light);
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  margin-top: 2.5rem;
+}
+
+.portrait-generator-wrapper .pg-header h1 em {
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+.portrait-generator-wrapper .pg-header p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 380px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── Section Label ─────────────────────────────────────── */
+.portrait-generator-wrapper .pg-section-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.portrait-generator-wrapper .pg-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Cards / Panels ────────────────────────────────────── */
+.portrait-generator-wrapper .pg-card {
+  background: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.portrait-generator-wrapper .pg-card-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portrait-generator-wrapper .pg-card-header-icon {
+  font-size: 15px;
+  color: var(--gold-dim);
+}
+
+.portrait-generator-wrapper .pg-card-header-title {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ── Config Card ───────────────────────────────────────── */
+.portrait-generator-wrapper .pg-config-card {
+  background: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.portrait-generator-wrapper .pg-config-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.portrait-generator-wrapper .pg-config-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portrait-generator-wrapper .pg-config-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 82px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+.portrait-generator-wrapper .pg-config-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.portrait-generator-wrapper .pg-config-status {
+  font-size: 12px;
+  margin-top: 10px;
+  min-height: 18px;
+}
+
+/* ── Form Controls ─────────────────────────────────────── */
+.portrait-generator-wrapper input[type="text"],
+.portrait-generator-wrapper input[type="password"],
+.portrait-generator-wrapper textarea,
+.portrait-generator-wrapper select {
+  background: var(--ink-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.portrait-generator-wrapper input[type="text"]:focus,
+.portrait-generator-wrapper input[type="password"]:focus,
+.portrait-generator-wrapper textarea:focus,
+.portrait-generator-wrapper select:focus {
+  border-color: var(--gold-dim);
+}
+
+.portrait-generator-wrapper input::placeholder {
+  color: var(--text-muted);
+}
+
+.portrait-generator-wrapper textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.portrait-generator-wrapper input[type="text"].pg-mono,
+.portrait-generator-wrapper input[type="password"].pg-mono {
+  font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.portrait-generator-wrapper select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A6230' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.portrait-generator-wrapper select option {
+  background: var(--ink-3);
+  color: var(--text-primary);
+}
+
+.portrait-generator-wrapper textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.6;
+}
+
+/* ── Buttons ───────────────────────────────────────────── */
+.portrait-generator-wrapper button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--ink-3);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.portrait-generator-wrapper button:hover {
+  background: var(--ink-4);
+  color: var(--text-primary);
+  border-color: var(--gold-dim);
+}
+
+.portrait-generator-wrapper button:active {
+  transform: scale(0.98);
+}
+
+.portrait-generator-wrapper .pg-btn-primary {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, #2A2210, #1E1B0E);
+  border: 1px solid var(--gold-dim);
+  color: var(--gold-light);
+  border-radius: var(--radius);
+  gap: 10px;
+}
+
+.portrait-generator-wrapper .pg-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #352C14, #29251A);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+.portrait-generator-wrapper .pg-btn-primary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.portrait-generator-wrapper .pg-btn-download,
+.portrait-generator-wrapper .pg-btn-secondary {
+  width: 100%;
+  padding: 11px 20px;
+  font-size: 13px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--gold);
+}
+
+.portrait-generator-wrapper .pg-btn-download:hover,
+.portrait-generator-wrapper .pg-btn-secondary:hover {
+  background: rgba(201, 168, 76, 0.07);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+.portrait-generator-wrapper .pg-result-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+/* ── Upload Panels ─────────────────────────────────────── */
+.portrait-generator-wrapper .pg-workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 1.5rem;
+}
+
+.portrait-generator-wrapper .pg-upload-panel {
+  background: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.portrait-generator-wrapper .pg-upload-body {
+  position: relative;
+  height: 210px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.portrait-generator-wrapper .pg-upload-body img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.portrait-generator-wrapper .pg-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  padding: 1.5rem;
+  text-align: center;
+  z-index: 1;
+}
+
+.portrait-generator-wrapper .pg-upload-icon {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-dim);
+}
+
+.portrait-generator-wrapper .pg-upload-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.portrait-generator-wrapper .pg-upload-placeholder p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.portrait-generator-wrapper .pg-upload-placeholder small {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.portrait-generator-wrapper .pg-upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 12, 9, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--gold-light);
+  font-size: 13px;
+  z-index: 2;
+}
+
+.portrait-generator-wrapper .pg-upload-body:hover .pg-upload-overlay {
+  display: flex;
+}
+
+.portrait-generator-wrapper .pg-ref-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(14, 12, 9, 0.75);
+  border: 1px solid var(--border-strong);
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 40px;
+  z-index: 3;
+}
+
+/* ── Ref Upload Row ────────────────────────────────────── */
+.portrait-generator-wrapper .pg-ref-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.portrait-generator-wrapper .pg-ref-filename {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* ── Prompt & Controls ─────────────────────────────────── */
+.portrait-generator-wrapper .pg-field-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 7px;
+  letter-spacing: 0.06em;
+}
+
+.portrait-generator-wrapper .pg-field-group {
+  margin-bottom: 1.25rem;
+}
+
+.portrait-generator-wrapper .pg-controls-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Info Chips ────────────────────────────────────────── */
+.portrait-generator-wrapper .pg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.75rem;
+}
+
+.portrait-generator-wrapper .pg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 4px 12px;
+  background: var(--ink-2);
+}
+
+.portrait-generator-wrapper .pg-chip svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+/* ── Error ─────────────────────────────────────────────── */
+.portrait-generator-wrapper .pg-error-box {
+  display: none;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--danger-text);
+  margin-bottom: 1.25rem;
+}
+
+.portrait-generator-wrapper .pg-error-box svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.portrait-generator-wrapper .pg-privacy-msg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  background: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 8px 18px;
+  margin-top: 0.25rem;
+  max-width: 450px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.portrait-generator-wrapper .pg-privacy-msg svg {
+  width: 14px;
+  height: 14px;
+  color: var(--gold-dim);
+  flex-shrink: 0;
+}
+
+.portrait-generator-wrapper .pg-mobile-break {
+  display: none;
+}
+
+@media (max-width: 500px) {
+  .portrait-generator-wrapper .pg-mobile-break {
+    display: block;
+  }
+  .portrait-generator-wrapper .pg-privacy-msg {
+    border-radius: 12px; /* Less pill-shaped when multi-line */
+  }
+}
+
+/* ── Result Panel ──────────────────────────────────────── */
+.portrait-generator-wrapper .pg-result-card {
+  background: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.portrait-generator-wrapper .pg-result-body {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.portrait-generator-wrapper .pg-result-body img {
+  width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+  padding: 16px;
+}
+
+.portrait-generator-wrapper .pg-result-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.portrait-generator-wrapper .pg-result-placeholder-icon {
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-dim);
+}
+
+.portrait-generator-wrapper .pg-result-placeholder-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.portrait-generator-wrapper .pg-result-placeholder p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.portrait-generator-wrapper .pg-result-placeholder small {
+  font-size: 12px;
+}
+
+/* ── Loading ───────────────────────────────────────────── */
+.portrait-generator-wrapper .pg-loading-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 3rem 2rem;
+}
+
+.portrait-generator-wrapper .pg-spinner-ring {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: pg-spin 0.9s linear infinite;
+}
+
+@keyframes pg-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.portrait-generator-wrapper .pg-loading-msg {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.portrait-generator-wrapper .pg-loading-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── Divider ───────────────────────────────────────────── */
+.portrait-generator-wrapper .pg-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 1.75rem 0;
+}
+
+.portrait-generator-wrapper .pg-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.portrait-generator-wrapper .pg-divider-mark {
+  width: 5px;
+  height: 5px;
+  background: var(--gold-dim);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+/* ── Footer ────────────────────────────────────────────── */
+.portrait-generator-wrapper .pg-footer {
+  text-align: center;
+  margin-top: 3rem;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 520px) {
+  .portrait-generator-wrapper .pg-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .portrait-generator-wrapper .pg-controls-row {
+    grid-template-columns: 1fr;
+  }
+
+  .portrait-generator-wrapper .pg-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .portrait-generator-wrapper .pg-config-row {
+    flex-wrap: wrap;
+  }
+
+  .portrait-generator-wrapper .pg-config-label {
+    width: 100%;
+  }
+}
+
+/* Hidden file inputs */
+.portrait-generator-wrapper .pg-file-hidden {
+  display: none !important;
+}
