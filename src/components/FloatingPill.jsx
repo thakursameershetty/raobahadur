@@ -40,9 +40,7 @@ export default function FloatingPill({ progress, onExpand }) {
         className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-zinc-800 transition-colors text-zinc-300 hover:text-white"
         title="Expand Loading Screen"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
-          <path d="M120-120v-200h80v120h120v80H120Zm520 0v-80h120v-120h80v200H640ZM120-640v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80Z" />
-        </svg>
+        <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>expand_content</span>
       </button>
     </div>
   );

@@ -549,9 +549,7 @@ export default function PortraitGenerator({
                         className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white"
                         title="Minimize"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
-                          <path d="M440-120v-240H200v80h104L140-116l56 56 164-164v104h80Zm160-520v-104h-80v240h240v-80H656l164-164-56-56-164 164Z"/>
-                        </svg>
+                        <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>collapse_content</span>
                       </button>
 
                       {/* Circular Progress Indicator */}
@@ -576,8 +574,8 @@ export default function PortraitGenerator({
                         </div>
                       </div>
 
-                      <div className="pg-loading-msg">{loadingMsgs[loadingMsgIdx]}</div>
-                      <div className="pg-loading-sub mt-2">Please wait, your portrait is being crafted...</div>
+                      <div className="pg-loading-msg text-center">{loadingMsgs[loadingMsgIdx]}</div>
+                      <div className="pg-loading-sub mt-2 text-center">Please wait, your portrait is being crafted...</div>
                     </div>
                   )}
 
