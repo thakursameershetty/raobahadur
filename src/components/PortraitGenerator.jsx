@@ -69,7 +69,15 @@ const compressImageToPNG = (file, maxDimension = 1024) => {
   });
 };
 
-export default function PortraitGenerator({ onBack }) {
+export default function PortraitGenerator({ 
+  onBack,
+  isGenerating,
+  setIsGenerating,
+  generationProgress,
+  setGenerationProgress,
+  isMinimized,
+  onMinimize
+}) {
   const [screen, setScreen] = useState('config');
   const [userFile, setUserFile] = useState(null);
   const [userPreviewUrl, setUserPreviewUrl] = useState('');
@@ -82,7 +90,6 @@ export default function PortraitGenerator({ onBack }) {
   const [quality, setQuality] = useState('medium');
 
   const [errorMsg, setErrorMsg] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [resultDataUrl, setResultDataUrl] = useState(null);
 
@@ -111,13 +118,13 @@ export default function PortraitGenerator({ onBack }) {
 
   useEffect(() => {
     let interval;
-    if (isLoading) {
+    if (isGenerating && !isMinimized) {
       interval = setInterval(() => {
         setLoadingMsgIdx((prev) => (prev + 1) % loadingMsgs.length);
       }, 3500);
     }
     return () => clearInterval(interval);
-  }, [isLoading]);
+  }, [isGenerating, isMinimized]);
 
   const handleNameChange = (e) => {
     // Remove all spaces to force a single word
@@ -159,13 +166,21 @@ export default function PortraitGenerator({ onBack }) {
   };
 
   const generatePortrait = async () => {
-    if (!userFile || !refFile) return;
+    if (!userFile || !refFile || isGenerating) return;
 
     setErrorMsg('');
     setScreen('result');
-    setIsLoading(true);
+    setIsGenerating(true);
     setResultDataUrl(null);
     setLoadingMsgIdx(0);
+    setGenerationProgress(0);
+
+    const startTime = Date.now();
+    const progressInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const newProgress = Math.min(95, Math.floor((elapsed / 35000) * 95));
+      setGenerationProgress(newProgress);
+    }, 500);
 
     const fullPrompt = prompt.trim() || DEFAULT_PROMPT;
 
@@ -223,6 +238,7 @@ export default function PortraitGenerator({ onBack }) {
         throw new Error('No image returned. Open browser Console to see what Azure sent.');
       }
 
+      setGenerationProgress(100);
       setResultDataUrl(finalImageUrl);
 
       // Auto-upload to Cloudinary/Prisma for history
@@ -247,8 +263,10 @@ export default function PortraitGenerator({ onBack }) {
     } catch (err) {
       setScreen('config');
       setErrorMsg(err.message || 'Something went wrong. Please try again.');
+      setGenerationProgress(0);
     } finally {
-      setIsLoading(false);
+      clearInterval(progressInterval);
+      setTimeout(() => setIsGenerating(false), 500); // Give 100% a moment to show
     }
   };
 
@@ -471,7 +489,7 @@ export default function PortraitGenerator({ onBack }) {
               <button
                 className="pg-btn-primary"
                 onClick={generatePortrait}
-                disabled={!checkReady()}
+                disabled={!checkReady() || isGenerating}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                   <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
@@ -488,7 +506,7 @@ export default function PortraitGenerator({ onBack }) {
                 className="pg-btn-download"
                 style={{ marginBottom: '1.5rem', width: 'auto' }}
                 onClick={() => setScreen('config')}
-                disabled={isLoading}
+                disabled={isGenerating}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -500,7 +518,7 @@ export default function PortraitGenerator({ onBack }) {
               <div className="pg-section-label">Generated portrait</div>
               <div className="pg-result-card">
                 <div className="pg-result-body">
-                  {!isLoading && !resultDataUrl && (
+                  {!isGenerating && !resultDataUrl && (
                     <div className="pg-result-placeholder">
                       <div className="pg-result-placeholder-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -514,22 +532,54 @@ export default function PortraitGenerator({ onBack }) {
                     </div>
                   )}
 
-                  {isLoading && (
-                    <div className="pg-loading-area">
-                      <div className="pg-spinner-ring"></div>
-                      <div className="pg-loading-msg">{loadingMsgs[loadingMsgIdx]}</div>
-                      <div className="pg-loading-sub">This takes 20–45 seconds</div>
+                  {isGenerating && !isMinimized && (
+                    <div className="pg-loading-area relative w-full h-full flex flex-col items-center justify-center p-8 bg-zinc-900/80 rounded-xl backdrop-blur-md" style={{ minHeight: '400px' }}>
+                      {/* Minimize Button */}
+                      <button 
+                        onClick={onMinimize} 
+                        className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white"
+                        title="Minimize"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                          <path d="M440-120v-240H200v80h104L140-116l56 56 164-164v104h80Zm160-520v-104h-80v240h240v-80H656l164-164-56-56-164 164Z"/>
+                        </svg>
+                      </button>
+
+                      {/* Circular Progress Indicator */}
+                      <div className="relative w-40 h-40 mb-6 flex items-center justify-center">
+                        <svg className="absolute inset-0 w-full h-full -rotate-90">
+                          <circle cx="80" cy="80" r="70" fill="none" stroke="#27272a" strokeWidth="8" />
+                          <circle 
+                            cx="80" 
+                            cy="80" 
+                            r="70" 
+                            fill="none" 
+                            stroke="#f59e0b" 
+                            strokeWidth="8" 
+                            strokeDasharray="439.8" 
+                            strokeDashoffset={439.8 - (439.8 * generationProgress) / 100}
+                            className="transition-all duration-300 ease-out"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <div className="absolute flex flex-col items-center justify-center">
+                          <span className="text-3xl font-bold text-white font-mono">{generationProgress}%</span>
+                        </div>
+                      </div>
+
+                      <div className="pg-loading-msg text-lg text-amber-500 font-serif tracking-widest uppercase">{loadingMsgs[loadingMsgIdx]}</div>
+                      <div className="pg-loading-sub text-sm text-zinc-500 mt-2">Please wait, your portrait is being crafted...</div>
                     </div>
                   )}
 
-                  {resultDataUrl && !isLoading && (
+                  {resultDataUrl && !isGenerating && (
                     <img src={resultDataUrl} alt="Generated royal portrait" />
                   )}
                 </div>
               </div>
 
               {/* Action Buttons */}
-              {resultDataUrl && !isLoading && (
+              {resultDataUrl && !isGenerating && (
                 <div className="pg-result-actions">
                   <button className="pg-btn-secondary" onClick={shareResult}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

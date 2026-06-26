@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { milestones } from '../data/milestones';
 import CustomCursor from '../components/CustomCursor';
 import HeroSection from '../components/HeroSection';
+import FloatingPill from '../components/FloatingPill';
 
 const getMilestoneOffset = (index, total) => {
   if (index === total - 1) return 1.0;
@@ -35,6 +36,11 @@ export default function Home() {
   // 'timeline' = hero faded out & timeline scroll active
   const [scrollPhase, setScrollPhase] = useState('hero');
   const touchStartYRef = useRef(0);
+
+  // Global state for non-blocking UI generation
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   // Check for open=generator query parameter on mount
   useEffect(() => {
@@ -94,7 +100,15 @@ export default function Home() {
             transition-all duration-700 ease-in-out
             ${scrollPhase === 'hero' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'}`}
         >
-          <HeroSection isWallOpen={isWallOpen} onOpenWall={() => setIsWallOpen(true)} />
+          <HeroSection 
+            isWallOpen={isWallOpen} 
+            onOpenWall={() => setIsWallOpen(true)} 
+            isGenerating={isGenerating}
+            onExpandLoading={() => {
+              setIsWallOpen(true);
+              setIsMinimized(false);
+            }}
+          />
         </div>
 
         {/* Cinematic Ambient Overlay Gradient (Vignette) */}
@@ -144,8 +158,30 @@ export default function Home() {
           }`}
         style={{ pointerEvents: isWallOpen ? 'auto' : 'none' }}
       >
-        <PortraitGenerator onBack={() => setIsWallOpen(false)} />
+        <PortraitGenerator 
+          onBack={() => setIsWallOpen(false)} 
+          isGenerating={isGenerating}
+          setIsGenerating={setIsGenerating}
+          generationProgress={generationProgress}
+          setGenerationProgress={setGenerationProgress}
+          isMinimized={isMinimized}
+          onMinimize={() => {
+            setIsMinimized(true);
+            setIsWallOpen(false);
+          }}
+        />
       </div>
+
+      {/* ─── Floating Minimized Loading Pill ─── */}
+      {isGenerating && isMinimized && (
+        <FloatingPill 
+          progress={generationProgress} 
+          onExpand={() => {
+            setIsMinimized(false);
+            setIsWallOpen(true);
+          }} 
+        />
+      )}
 
       {/* Hardware-independent HTML custom cursor rendering */}
       <CustomCursor />

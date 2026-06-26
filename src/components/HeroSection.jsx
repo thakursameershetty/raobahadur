@@ -5,7 +5,7 @@ import Image from 'next/image';
 import TimberText from './TimberText';
 import { ASSETS } from '@/lib/assets';
 
-export default function HeroSection({ isWallOpen, onOpenWall }) {
+export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onExpandLoading }) {
   const containerRef = useRef(null);
   const requestRef = useRef();
 
@@ -367,7 +367,13 @@ export default function HeroSection({ isWallOpen, onOpenWall }) {
       {!isWallOpen && (
         <div className="absolute bottom-28 md:bottom-16 left-1/2 -translate-x-1/2 z-50 pointer-events-auto flex flex-col items-center">
           <button
-            onClick={onOpenWall}
+            onClick={() => {
+              if (isGenerating) {
+                onExpandLoading();
+              } else {
+                onOpenWall();
+              }
+            }}
             className="group relative overflow-hidden px-6 py-2.5 text-xs md:px-8 md:py-3.5 md:text-sm tracking-[0.25em] uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
