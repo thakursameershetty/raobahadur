@@ -171,8 +171,8 @@ export default function PortraitGenerator({ onBack }) {
 
     try {
       // Compress both images before sending (drastically reduces upload time)
-      const compressedUserFile = await compressImageToPNG(userFile, 1024);
-      const compressedRefFile = await compressImageToPNG(refFile, 1024);
+      const compressedUserFile = await compressImageToPNG(userFile, 768);
+      const compressedRefFile = await compressImageToPNG(refFile, 768);
 
       const formData = new FormData();
       formData.append('prompt', fullPrompt);
@@ -192,8 +192,18 @@ export default function PortraitGenerator({ onBack }) {
         body: formData,
       });
 
-      const data = await res.json();
-      console.log("Raw Azure Response:", data);
+      const responseText = await res.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log("Raw Azure Response:", data);
+      } catch (e) {
+        console.error("Non-JSON Response:", responseText);
+        if (!res.ok) {
+          throw new Error(responseText.substring(0, 100) || `API error ${res.status}`);
+        }
+        throw new Error('Invalid response from server');
+      }
 
       if (!res.ok) {
         const errMsg = data?.error?.message || `API error ${res.status}: ${res.statusText}`;
