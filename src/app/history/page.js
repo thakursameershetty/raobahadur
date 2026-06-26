@@ -91,7 +91,7 @@ export default function HistoryPage() {
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: 'My Royal Portrait',
-          text: 'Check out my Rao Bahadur Royal Portrait!',
+          text: 'Check out my Rao Bahadur Royal Portrait! Generate yours at: https://raobahadur.vercel.app',
           files: [file],
         });
       } else {

@@ -14,8 +14,13 @@
   background-color: var(--ink);
   color: var(--text-primary);
   min-height: 100vh;
-  height: 100vh;
+  position: absolute;
+  inset: 0;
+  height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  z-index: 100;
   padding: 5rem 1.5rem 5rem;
   font-family: 'Inter', system-ui, sans-serif;
 }
