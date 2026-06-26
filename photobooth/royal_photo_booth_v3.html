@@ -548,14 +548,18 @@
       opacity: 0;
       transition: opacity 0.15s;
     }
-    #countdown.visible { opacity: 1; }
+
+    #countdown.visible {
+      opacity: 1;
+    }
+
     #countdown-num {
       font-family: 'Cinzel', serif;
       font-size: clamp(5rem, 25vw, 9rem);
       font-weight: 700;
       color: #fff;
-      text-shadow: 0 0 40px rgba(212,175,55,0.9), 0 4px 24px rgba(0,0,0,0.7);
-      animation: countPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+      text-shadow: 0 0 40px rgba(212, 175, 55, 0.9), 0 4px 24px rgba(0, 0, 0, 0.7);
+      animation: countPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
       font-variant-numeric: lining-nums tabular-nums;
       line-height: 1;
       display: flex;
@@ -564,9 +568,17 @@
       width: 1.2em;
       height: 1.2em;
     }
+
     @keyframes countPop {
-      from { transform: scale(0.4); opacity: 0; }
-      to   { transform: scale(1);   opacity: 1; }
+      from {
+        transform: scale(0.4);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
 
     /* ── TOAST ── */
@@ -997,6 +1009,10 @@
           }
           poseFrameCount++;
 
+          // BG REMOVAL TEMPORARILY DISABLED — just render the plain frame
+          renderFramePlain();
+
+          /* --- Background removal (re-enable when needed) ---
           // Segmentation every frame
           try {
             const result = S.segmenter.segmentForVideo(video, now);
@@ -1005,6 +1021,7 @@
               result.close();
             }
           } catch (_) { }
+          // --- end background removal --- */
 
           S.lastTs = now;
         }
@@ -1012,7 +1029,56 @@
         S.animId = requestAnimationFrame(loop);
       }
 
-      // ── Core compositor ───────────────────────────────────────────────────
+      // ── Core compositor (no background removal) ──────────────────────────
+      function renderFramePlain() {
+        const W = canvas.width, H = canvas.height;
+        const vW = frameCanvas.width, vH = frameCanvas.height;
+
+        // Draw video to frameCanvas (with mirror), fully opaque
+        frameCtx.save();
+        if (S.mirror) { frameCtx.translate(vW, 0); frameCtx.scale(-1, 1); }
+        frameCtx.drawImage(video, 0, 0, vW, vH);
+        frameCtx.restore();
+
+        const videoData = frameCtx.getImageData(0, 0, vW, vH);
+
+        // Calculate cover video box
+        const videoAspect = vW / vH;
+        const canvasAspect = W / H;
+        let drawW, drawH, drawX, drawY;
+        if (videoAspect > canvasAspect) {
+          drawH = H; drawW = H * videoAspect;
+          drawX = (W - drawW) / 2; drawY = 0;
+        } else {
+          drawW = W; drawH = W / videoAspect;
+          drawX = 0; drawY = (H - drawH) / 2;
+        }
+
+        // Fixed wing positions
+        const lx = drawX + 0.22 * drawW; const rx = drawX + 0.78 * drawW;
+        const ly = drawY + (0.50 + S.yShift) * drawH; const ry = ly;
+        const shoulderDist = Math.abs(rx - lx);
+        const wingW = shoulderDist * S.wingScale;
+        const wingH = wingW * (leftImg.naturalHeight / leftImg.naturalWidth);
+        const ATTACH_X_FRAC = 0.08, ATTACH_Y_FRAC = 0.38;
+        const adjY = S.wingYAdj * (H / 100);
+        const adjX = S.wingXAdj * (W / 100);
+        const lxF = lx - adjX, lyF = ly + adjY;
+        const rxF = rx + adjX, ryF = ry + adjY;
+
+        ctx.clearRect(0, 0, W, H);
+        drawCover(ctx, bgImg, W, H);
+
+        const personC = document.createElement('canvas');
+        personC.width = vW; personC.height = vH;
+        personC.getContext('2d').putImageData(videoData, 0, 0);
+        ctx.drawImage(personC, drawX, drawY, drawW, drawH);
+
+        drawLeftWing(ctx, leftImg, lxF, lyF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
+        drawRightWing(ctx, rightImg, rxF, ryF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
+      }
+
+      // ── Core compositor (with background removal) ─────────────────────────
       function renderFrame(mask) {
         const W = canvas.width, H = canvas.height;
         const vW = frameCanvas.width, vH = frameCanvas.height;

@@ -1074,6 +1074,10 @@
           }
           poseFrameCount++;
 
+          // BG REMOVAL TEMPORARILY DISABLED — just render the plain frame
+          renderFramePlain();
+
+          /* --- Background removal (re-enable when needed) ---
           // Segmentation every frame, throttled to ~20fps
           if (now - S.segmentLastTs > 50) {
             try {
@@ -1085,6 +1089,7 @@
             } catch (_) { }
             S.segmentLastTs = now;
           }
+          // --- end background removal --- */
 
           S.lastTs = now;
         }
@@ -1092,7 +1097,49 @@
         S.animId = requestAnimationFrame(loop);
       }
 
-      // ── Core compositor ───────────────────────────────────────────────────
+      // ── Core compositor (no background removal) ─────────────────────────
+      function renderFramePlain() {
+        const W = canvas.width, H = canvas.height;
+        const vW = frameCanvas.width, vH = frameCanvas.height;
+
+        frameCtx.save();
+        if (S.mirror) { frameCtx.translate(vW, 0); frameCtx.scale(-1, 1); }
+        frameCtx.drawImage(video, 0, 0, vW, vH);
+        frameCtx.restore();
+
+        const videoData = frameCtx.getImageData(0, 0, vW, vH);
+
+        const videoAspect = vW / vH;
+        const canvasAspect = W / H;
+        let drawW, drawH, drawX, drawY;
+        if (videoAspect > canvasAspect) {
+          drawH = H; drawW = H * videoAspect;
+          drawX = (W - drawW) / 2; drawY = 0;
+        } else {
+          drawW = W; drawH = W / videoAspect;
+          drawX = 0; drawY = (H - drawH) / 2;
+        }
+
+        const lx = drawX + 0.22 * drawW; const rx = drawX + 0.78 * drawW;
+        const ly = drawY + (0.50 + S.yShift) * drawH; const ry = ly;
+        const shoulderDist = Math.abs(rx - lx);
+        const wingW = shoulderDist * S.wingScale;
+        const wingH = wingW * (leftImg.naturalHeight / leftImg.naturalWidth);
+        const ATTACH_X_FRAC = 0.08, ATTACH_Y_FRAC = 0.38;
+        const adjY = S.wingYAdj * (H / 100);
+        const adjX = S.wingXAdj * (W / 100);
+        const lxF = lx - adjX, lyF = ly + adjY;
+        const rxF = rx + adjX, ryF = ry + adjY;
+
+        ctx.clearRect(0, 0, W, H);
+        drawCover(ctx, bgImg, W, H);
+        personCtx.putImageData(videoData, 0, 0);
+        ctx.drawImage(personC, drawX, drawY, drawW, drawH);
+        drawLeftWing(ctx, leftImg, lxF, lyF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
+        drawRightWing(ctx, rightImg, rxF, ryF, wingW, wingH, ATTACH_X_FRAC, ATTACH_Y_FRAC);
+      }
+
+      // ── Core compositor (with background removal) ─────────────────────────
       function renderFrame(mask) {
         const W = canvas.width, H = canvas.height;
         const vW = frameCanvas.width, vH = frameCanvas.height;
