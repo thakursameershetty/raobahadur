@@ -9,16 +9,27 @@ export default function FloatingPill({ progress, onExpand }) {
       style={{ boxShadow: '0 0 30px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(251,191,36,0.2)' }}
     >
       <div className="flex items-center gap-3">
-        {/* Spinner */}
-        <div className="relative w-6 h-6 flex items-center justify-center">
-          <div className="absolute inset-0 border-2 border-zinc-700 rounded-full"></div>
-          <div
-            className="absolute inset-0 border-2 border-amber-500 rounded-full border-t-transparent animate-spin"
-          ></div>
+        {/* Circular Progress Indicator */}
+        <div className="relative w-7 h-7 flex items-center justify-center">
+          <svg className="absolute inset-0 w-full h-full -rotate-90">
+            <circle cx="14" cy="14" r="12" fill="none" stroke="#27272a" strokeWidth="2.5" />
+            <circle
+              cx="14"
+              cy="14"
+              r="12"
+              fill="none"
+              stroke="#C9A84C"
+              strokeWidth="2.5"
+              strokeDasharray="75.4"
+              strokeDashoffset={75.4 - (75.4 * progress) / 100}
+              className="transition-all duration-300 ease-out"
+              strokeLinecap="round"
+            />
+          </svg>
         </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-semibold text-white tracking-wide">Generating Portrait...</span>
-          <span className="text-[10px] text-zinc-400 font-mono">{progress}% Complete</span>
+        <div className="flex flex-col justify-center">
+          <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: 'italic', fontSize: '16px', color: '#F0E6CC', lineHeight: '1.2' }}>Generating Portrait...</span>
+          <span style={{ fontSize: '10px', color: '#7A7060', letterSpacing: '0.05em' }}>{progress}% Complete</span>
         </div>
       </div>
 

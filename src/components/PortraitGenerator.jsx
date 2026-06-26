@@ -288,7 +288,7 @@ export default function PortraitGenerator({
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: 'My Royal Portrait',
-          text: 'Check out my Rao Bahadur Royal Portrait!',
+          text: 'Check out my Rao Bahadur Royal Portrait! Generate yours at: https://raobahadur.vercel.app',
           files: [file],
         });
       } else {
@@ -319,7 +319,16 @@ export default function PortraitGenerator({
               </button>
             )}
 
-            <Link href="/history" className="pg-history-btn">
+            <Link 
+              href="/history" 
+              className="pg-history-btn"
+              onClick={(e) => {
+                if (isGenerating) {
+                  e.preventDefault();
+                  onMinimize();
+                }
+              }}
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -567,8 +576,8 @@ export default function PortraitGenerator({
                         </div>
                       </div>
 
-                      <div className="pg-loading-msg text-lg text-amber-500 font-serif tracking-widest uppercase">{loadingMsgs[loadingMsgIdx]}</div>
-                      <div className="pg-loading-sub text-sm text-zinc-500 mt-2">Please wait, your portrait is being crafted...</div>
+                      <div className="pg-loading-msg">{loadingMsgs[loadingMsgIdx]}</div>
+                      <div className="pg-loading-sub mt-2">Please wait, your portrait is being crafted...</div>
                     </div>
                   )}
 
