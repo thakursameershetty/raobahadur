@@ -52,7 +52,7 @@ export default function TimberText({ text, fontSize = 78, tracking = 5, glow = t
                       width={g.w}
                       height={g.h}
                       alt={g.ch}
-                      className="block w-auto h-auto align-bottom"
+                      className="block h-auto align-bottom"
                       priority
                       style={{
                         filter: glow ? 'drop-shadow(0 5px 9px rgba(90,55,18,.5)) drop-shadow(0 0 16px rgba(214,170,92,.22))' : 'none'
