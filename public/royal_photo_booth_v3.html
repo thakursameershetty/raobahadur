@@ -1074,10 +1074,6 @@
           }
           poseFrameCount++;
 
-          // BG REMOVAL TEMPORARILY DISABLED — just render the plain frame
-          renderFramePlain();
-
-          /* --- Background removal (re-enable when needed) ---
           // Segmentation every frame, throttled to ~20fps
           if (now - S.segmentLastTs > 50) {
             try {
@@ -1089,7 +1085,6 @@
             } catch (_) { }
             S.segmentLastTs = now;
           }
-          // --- end background removal --- */
 
           S.lastTs = now;
         }

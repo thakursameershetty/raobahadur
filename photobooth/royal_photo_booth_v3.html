@@ -1009,10 +1009,6 @@
           }
           poseFrameCount++;
 
-          // BG REMOVAL TEMPORARILY DISABLED — just render the plain frame
-          renderFramePlain();
-
-          /* --- Background removal (re-enable when needed) ---
           // Segmentation every frame
           try {
             const result = S.segmenter.segmentForVideo(video, now);
@@ -1021,7 +1017,6 @@
               result.close();
             }
           } catch (_) { }
-          // --- end background removal --- */
 
           S.lastTs = now;
         }
