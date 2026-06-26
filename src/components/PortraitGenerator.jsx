@@ -220,7 +220,7 @@ export default function PortraitGenerator({
         throw new Error('Invalid response from server');
       }
 
-      if (!res.ok) {
+      if (!res.ok || data?.error) {
         const errMsg = data?.error?.message || `API error ${res.status}: ${res.statusText}`;
         throw new Error(errMsg);
       }

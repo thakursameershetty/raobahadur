@@ -18,24 +18,42 @@ export async function POST(req) {
   const contentType = req.headers.get('content-type');
   if (contentType) proxyReqHeaders.set('content-type', contentType);
 
-  try {
-    const proxyRes = await fetch(targetUrl, {
-      method: 'POST',
-      headers: proxyReqHeaders,
-      body: req.body,
-      duplex: 'half'
-    });
+  const bodyBuffer = await req.arrayBuffer();
 
-    const headers = new Headers(proxyRes.headers);
-    headers.set('Access-Control-Allow-Origin', '*');
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
+      
+      // Keep alive: send a space every 10 seconds to bypass Vercel's 25s limit
+      const keepAlive = setInterval(() => {
+        controller.enqueue(encoder.encode(" "));
+      }, 10000);
 
-    return new Response(proxyRes.body, {
-      status: proxyRes.status,
-      headers: headers
-    });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: { message: err.message } }), { status: 502 });
-  }
+      try {
+        const proxyRes = await fetch(targetUrl, {
+          method: 'POST',
+          headers: proxyReqHeaders,
+          body: bodyBuffer,
+          duplex: 'half'
+        });
+
+        const data = await proxyRes.text();
+        controller.enqueue(encoder.encode(data));
+      } catch (err) {
+        controller.enqueue(encoder.encode(JSON.stringify({ error: { message: err.message } })));
+      } finally {
+        clearInterval(keepAlive);
+        controller.close();
+      }
+    }
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    }
+  });
 }
 
 export async function OPTIONS() {
