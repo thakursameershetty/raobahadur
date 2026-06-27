@@ -411,7 +411,7 @@ function CameraRig({ onScrollToTop }) {
   return null;
 }
 
-function Milestone({ year, title, desc, position: rawPosition, rotation, image, isClimax }) {
+function Milestone({ year, title, desc, position: rawPosition, rotation, image, isClimax, isWeakNetwork }) {
   const scroll = useScroll();
   const easedOffsetRef = useRef(0);
   const prevOffsetRef = useRef(0);
@@ -428,7 +428,13 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
   }, [rawPosition, isMobile, isClimax]);
 
   // Load the texture using useTexture hook
-  const texture = useTexture(image);
+  const imageUrl = useMemo(() => {
+    if (isWeakNetwork) {
+      return image; // Default is w_512 which is medium quality
+    }
+    return image.replace('c_limit,w_512', 'c_limit,w_1280'); // High quality for good networks
+  }, [image, isWeakNetwork]);
+  const texture = useTexture(imageUrl);
 
   // Create the cloth shader material memoized per milestone
   const material = useMemo(() => {
@@ -693,6 +699,7 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [canvasKey, setCanvasKey] = useState(0);
+  const [isWeakNetwork, setIsWeakNetwork] = useState(false);
 
   // Sync the locked prop into the module-level ref so CameraRig can read it
   // This runs synchronously before the next useFrame, keeping them in sync
@@ -701,6 +708,12 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
   useEffect(() => {
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     setIsMobile(window.innerWidth <= 768 || isTouch);
+
+    if (navigator.connection) {
+      const conn = navigator.connection;
+      setIsWeakNetwork(conn.saveData || conn.effectiveType === '2g' || conn.effectiveType === '3g');
+    }
+
     setIsLoaded(true);
   }, []);
 
@@ -764,7 +777,7 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
           <ScrollControls pages={8} damping={0.2}>
             <CameraRig onScrollToTop={onScrollToTop} />
             {milestones.map((m, index) => (
-              <Milestone key={index} {...m} />
+              <Milestone key={index} {...m} isWeakNetwork={isWeakNetwork} />
             ))}
           </ScrollControls>
 

@@ -100,8 +100,8 @@ After the image generation is complete, in your standard text reply (outside of 
               </div>
 
               <div className="pg-field-group">
-                <label className="pg-field-label">Assets</label>
-                <div style={{ maxWidth: '320px', margin: '0 auto 1.5rem auto' }}>
+                <label className="pg-field-label">Reference Image</label>
+                <div style={{ maxWidth: '380px', margin: '0 auto 1.5rem auto' }}>
                   <div className="pg-upload-panel" style={{ cursor: 'default' }}>
                     <div className="pg-upload-body" style={{ height: 'auto', display: 'block' }}>
                       <img src="/rao_bahadur_poster.jpg" alt="Reference" style={{ width: '100%', height: 'auto', position: 'relative' }} />
