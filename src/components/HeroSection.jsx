@@ -342,7 +342,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
           className="text-amber-400 text-2xl md:text-4xl mb-1 tracking-wider drop-shadow-lg text-center"
           style={{ fontFamily: 'var(--font-raobahadur), serif', textShadow: '0 0 18px rgba(251,191,36,0.55)' }}
         >
-          Support for Satyadev
+          I Root for Satyadev
         </h2>
         <div
           className="mt-1 px-4 py-2 md:px-6 md:py-3 flex flex-col items-center md:items-end rounded-xl"
