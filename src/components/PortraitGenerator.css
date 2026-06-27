@@ -348,8 +348,8 @@
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
+  padding: 10px 20px;
+  border-radius: 40px;
   border: 1px solid var(--border-strong);
   background: var(--ink-3);
   color: var(--text-secondary);
@@ -365,7 +365,7 @@
 }
 
 .portrait-generator-wrapper button:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .portrait-generator-wrapper .pg-btn-primary {
@@ -378,14 +378,18 @@
   background: linear-gradient(135deg, #2A2210, #1E1B0E);
   border: 1px solid var(--gold-dim);
   color: var(--gold-light);
-  border-radius: var(--radius);
+  border-radius: 40px;
   gap: 10px;
+  box-shadow: 0 4px 14px rgba(201, 168, 76, 0.1);
+  transition: all 0.25s ease;
 }
 
 .portrait-generator-wrapper .pg-btn-primary:hover:not(:disabled) {
   background: linear-gradient(135deg, #352C14, #29251A);
   border-color: var(--gold);
   color: var(--gold-light);
+  box-shadow: 0 6px 20px rgba(201, 168, 76, 0.2);
+  transform: translateY(-1px);
 }
 
 .portrait-generator-wrapper .pg-btn-primary:disabled {
@@ -401,6 +405,8 @@
   background: transparent;
   border: 1px solid var(--border-strong);
   color: var(--gold);
+  border-radius: 40px;
+  transition: all 0.25s ease;
 }
 
 .portrait-generator-wrapper .pg-btn-download:hover,
@@ -408,6 +414,7 @@
   background: rgba(201, 168, 76, 0.07);
   border-color: var(--gold);
   color: var(--gold-light);
+  transform: translateY(-1px);
 }
 
 .portrait-generator-wrapper .pg-result-actions {

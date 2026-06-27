@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function CustomCursor() {
   const cursorRef = useRef(null);
-  const positionRef = useRef({ x: 0, y: 0 });
+  const innerRef = useRef(null);
+  const positionRef = useRef({ x: -100, y: -100 });
   const scaleState = useRef({ clicked: false, hovering: false });
   const [visible, setVisible] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -29,11 +30,13 @@ export default function CustomCursor() {
     checkTouch();
 
     const updateTransform = () => {
-      if (cursorRef.current) {
+      if (cursorRef.current && innerRef.current) {
         const { x, y } = positionRef.current;
         const { clicked, hovering } = scaleState.current;
         const scale = clicked ? 0.8 : hovering ? 1.25 : 1.0;
-        cursorRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+
+        cursorRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        innerRef.current.style.transform = `translate(-50%, -50%) scale(${scale})`;
       }
     };
 
@@ -47,12 +50,12 @@ export default function CustomCursor() {
       scaleState.current.clicked = true;
       updateTransform();
     };
-    
+
     const handleMouseUp = () => {
       scaleState.current.clicked = false;
       updateTransform();
     };
-    
+
     const handleMouseLeave = () => setVisible(false);
     const handleMouseEnter = () => setVisible(true);
 
@@ -96,16 +99,22 @@ export default function CustomCursor() {
   return (
     <div
       ref={cursorRef}
-      className="pointer-events-none fixed z-[9999] top-0 left-0 -translate-x-1/2 -translate-y-1/2 transition-transform duration-75 ease-out will-change-transform"
+      className="pointer-events-none fixed z-[9999] top-0 left-0 will-change-transform"
       style={{
-        transform: `translate3d(-100px, -100px, 0) scale(1.0)`
+        transform: `translate3d(-100px, -100px, 0)`
       }}
     >
-      <img
-        src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782114367/satyadev_assets/assets/cursor/cursor.png"
-        alt="Custom Cursor"
-        className="w-10 h-10 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
-      />
+      <div
+        ref={innerRef}
+        className="transition-transform duration-150 ease-out will-change-transform"
+        style={{ transform: `translate(-50%, -50%) scale(1.0)` }}
+      >
+        <img
+          src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782114367/satyadev_assets/assets/cursor/cursor.png"
+          alt="Custom Cursor"
+          className="w-10 h-10 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+        />
+      </div>
     </div>
   );
 }
