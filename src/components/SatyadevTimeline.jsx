@@ -427,13 +427,9 @@ function Milestone({ year, title, desc, position: rawPosition, rotation, image, 
     return adjusted;
   }, [rawPosition, isMobile, isClimax]);
 
-  // Load the texture using useTexture hook
   const imageUrl = useMemo(() => {
-    if (isWeakNetwork) {
-      return image; // Default is w_512 which is medium quality
-    }
     return image.replace('c_limit,w_512', 'c_limit,w_1280'); // High quality for good networks
-  }, [image, isWeakNetwork]);
+  }, [image]);
   const texture = useTexture(imageUrl);
 
   // Create the cloth shader material memoized per milestone
