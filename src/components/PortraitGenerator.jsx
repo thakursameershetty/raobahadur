@@ -180,7 +180,7 @@ After the image generation is complete, in your standard text reply (outside of 
                     onClick={redirectToAI}
                     style={{ background: '#10a37f', borderColor: '#10a37f', color: 'white', fontFamily: "'Inter', sans-serif", letterSpacing: 'normal' }}
                   >
-                    <img src="/chatgpt-logo.png" alt="ChatGPT Logo" style={{ width: '22px', height: '22px', marginRight: '6px', objectFit: 'contain' }} />
+                    <img src="/chatgpt-logo.png" alt="ChatGPT Logo" style={{ width: '22px', height: '22px', marginRight: '6px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
                     Generate with ChatGPT
                   </button>
                 </div>
