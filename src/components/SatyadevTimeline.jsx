@@ -252,6 +252,11 @@ function CameraRig({ onScrollToTop }) {
       state.camera.fov = 60;
       state.camera.updateProjectionMatrix();
 
+      // Reset the actual HTML scroll container so it starts from the top next time
+      if (scroll.el && scroll.el.scrollTop > 0) {
+        scroll.el.scrollTop = 0;
+      }
+
       // Smoothly reset the eased offset and parallax progress back to 0 when returning to Hero
       if (easedOffsetRef.current > 0.0001) {
         easedOffsetRef.current = THREE.MathUtils.lerp(easedOffsetRef.current, 0, 0.15);
