@@ -735,7 +735,7 @@ export default function SatyadevTimeline({ locked = false, onScrollToTop }) {
         camera={{ position: [0, 0, 5], fov: 60 }}
         shadows={!isMobile}
         gl={{ antialias: !isMobile, alpha: false, stencil: false }}
-        dpr={isMobile ? [1, 1] : [1, 1.5]}
+        dpr={isMobile ? [1, 2] : [1, 2]}
         style={{ cursor: 'none' }}
       >
         <ContextHelper onContextLost={handleContextLost} />
