@@ -35,7 +35,7 @@ const films = [
   {
     year: '2026',
     title: 'Rao Bahadur',
-    desc: 'This Friday will be unlike any other. The legend steps into his era.',
+    desc: 'This Friday will be very different from all other fridays',
     frameNo: '05A',
     imgUrl: 'https://res.cloudinary.com/dbn2ye2zo/image/upload/q_auto,f_auto/v1782764107/rao_bhadur_x5olpg.jpg'
   }
@@ -52,7 +52,7 @@ export default function FilmstripTimeline({ locked, onScrollToTop }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       snapSoundRef.current = new Audio('/assets/sounds/snap.ogg');
-      snapSoundRef.current.volume = 0.3;
+      snapSoundRef.current.volume = 0.1;
     }
   }, []);
 
@@ -108,7 +108,7 @@ export default function FilmstripTimeline({ locked, onScrollToTop }) {
 
         // Haptic feedback
         if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          navigator.vibrate([15, 30, 15]);
+          navigator.vibrate(15);
         }
 
         // Sound effect

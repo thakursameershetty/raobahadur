@@ -8,7 +8,7 @@ import CustomCursor from '@/components/CustomCursor';
 
 export default function SupportPage() {
   const router = useRouter();
-  const [visitorCount, setVisitorCount] = useState(0);
+  const [visitorCount, setVisitorCount] = useState(null);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);

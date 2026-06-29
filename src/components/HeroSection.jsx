@@ -383,12 +383,11 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
             Are you rooting for Satyadev ?
           </p>
           <button
-            onClick={async () => {
-              try {
-                await fetch('/api/visits', { method: 'POST' });
-              } catch (err) {
+            onClick={() => {
+              // Fire and forget the visit count increment to ensure instant navigation
+              fetch('/api/visits', { method: 'POST' }).catch(err => {
                 console.error('Error incrementing visit count:', err);
-              }
+              });
               router.push('/support');
             }}
             className="group relative overflow-hidden px-6 py-2 text-base md:px-8 md:py-3 md:text-lg tracking-normal uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap"

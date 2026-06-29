@@ -83,6 +83,14 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
     // For confetti
     setWindowSize({ width: window.innerWidth, height: window.innerHeight });
 
+    // Fast fluctuating animation while waiting for targetCount
+    if (targetCount === null) {
+      const timer = setInterval(() => {
+        setCount(Math.floor(Math.random() * 99999));
+      }, 50);
+      return () => clearInterval(timer);
+    }
+
     // Animate up to the target count
     if (targetCount > 0) {
       let current = 0;
@@ -100,7 +108,7 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
           }
           if (snapSound) {
             const finalSnap = snapSound.cloneNode();
-            finalSnap.volume = 0.5;
+            finalSnap.volume = 0.2;
             finalSnap.play().catch(e => console.warn('Audio play failed:', e));
           }
           if (onComplete) onComplete();
