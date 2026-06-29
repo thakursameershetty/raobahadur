@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import TimberText from './TimberText';
 import { ASSETS } from '@/lib/assets';
+import { ProgressiveBlur } from './ui/progressive-blur';
 
 export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onExpandLoading }) {
   const containerRef = useRef(null);
@@ -181,6 +182,14 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       className="relative w-full h-full flex justify-center items-center overflow-hidden bg-[#030807]"
       onClick={() => { }}
     >
+      <ProgressiveBlur
+        position={isMobile ? "top" : "top-right"}
+        className="z-40"
+        height={isMobile ? "200px" : undefined}
+        backgroundColor="#000000"
+        blurAmount="12px"
+      />
+
       <div
         className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[1]"
         data-speed="0.02"
@@ -344,15 +353,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
         >
           I Root for Satyadev
         </h2>
-        <div
-          className="mt-1 px-4 py-2 md:px-6 md:py-3 flex flex-col items-center md:items-end rounded-xl"
-          style={{
-            background: 'rgba(7,22,27,0.55)',
-            border: '1px solid rgba(201,162,76,0.35)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 0 24px rgba(201,162,76,0.18), inset 0 0 0 1px rgba(201,162,76,0.08)',
-          }}
-        >
+        <div className="mt-1 flex flex-col items-center md:items-end">
           <span className="text-white/60 font-mono text-[10px] md:text-xs tracking-[0.25em] uppercase mb-0.5">Total Visits</span>
           <span
             className="font-mono font-bold text-3xl md:text-5xl text-white"
