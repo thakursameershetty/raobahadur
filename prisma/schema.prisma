@@ -25,3 +25,8 @@ model VisitorCount {
   count Int @default(1)
 }
 
+model UserMessageBox {
+  id        String   @id @default(cuid())
+  message   String
+  createdAt DateTime @default(now())
+}

@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import TimberText from './TimberText';
 import { ASSETS } from '@/lib/assets';
 import { ProgressiveBlur } from './ui/progressive-blur';
 
 export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onExpandLoading }) {
+  const router = useRouter();
   const containerRef = useRef(null);
   const requestRef = useRef();
 
@@ -296,15 +298,14 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
         }}
       ></div>
 
-      {/* The Parallax Title Layer */}
+      {/* The Title Layer */}
       <div
-        className={`absolute flex flex-col parallax-layer pointer-events-none z-30 ${isMobile ? 'bottom-[24%] left-1/2 items-center' : 'top-[8%] left-[5%] items-start'
+        className={`absolute flex flex-col pointer-events-none z-30 ${isMobile ? 'bottom-[24%] left-1/2 items-center' : 'top-[8%] left-[5%] items-start'
           }`}
-        data-speed="0.08"
         style={{
           transform: isMobile
-            ? 'translate3d(calc(var(--x, 0) * 1px - 50%), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 250vh), 0)'
-            : 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 250vh), 0)'
+            ? 'translate3d(-50%, calc(var(--scroll-progress, 0) * -250vh), 0)'
+            : 'translate3d(0, calc(var(--scroll-progress, 0) * -250vh), 0)'
         }}
       >
         <div className={`flex flex-col drop-shadow-2xl ${isMobile ? 'items-center text-center' : 'items-start text-left'}`}>
@@ -337,10 +338,10 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
         </div>
       </div>
 
-      {/* Top Center (Mobile) / Top-right (Desktop): Visitor Count */}
+      {/* Top Center (Mobile) / Top-right (Desktop): Support Text */}
       {/* paddingTop uses safe-area-inset-top so it's never hidden under Safari/iOS chrome */}
       <div
-        className="absolute top-0 left-0 right-0 md:left-auto md:right-8 z-50 flex flex-col items-center md:items-end pointer-events-auto"
+        className="absolute top-0 left-0 right-0 md:left-auto md:right-8 z-50 flex flex-col items-center md:items-end pointer-events-auto gap-1"
         style={{
           paddingTop: isMobile
             ? `calc(${safeAreaTop}px + 1rem)`
@@ -348,36 +349,32 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
         }}
       >
         <h2
-          className="text-amber-400 text-2xl md:text-4xl mb-1 tracking-wider drop-shadow-lg text-center"
+          className="text-amber-400 text-2xl md:text-4xl mb-0 tracking-wider drop-shadow-lg text-center"
           style={{ fontFamily: 'var(--font-raobahadur), serif', textShadow: '0 0 18px rgba(251,191,36,0.55)' }}
         >
           I Root for Satyadev
         </h2>
-        <div className="mt-1 flex flex-col items-center md:items-end">
-          <span className="text-white/60 font-mono text-[10px] md:text-xs tracking-[0.25em] uppercase mb-0.5">Total Visits</span>
-          <span
-            className="font-mono font-bold text-3xl md:text-5xl text-white"
-            style={{ textShadow: '0 0 22px rgba(251,191,36,0.7), 0 0 6px rgba(251,191,36,0.4)', letterSpacing: '0.05em' }}
-          >
-            {visitorCount !== null ? visitorCount.toLocaleString() : '···'}
-          </span>
-        </div>
+        <h3
+          className="text-white/90 text-sm md:text-base tracking-wide drop-shadow-md text-center font-medium"
+          style={{ fontFamily: 'var(--font-inter), sans-serif', textShadow: '0 0 10px rgba(255,255,255,0.3)' }}
+        >
+          Because rare talent deserves loud support
+        </h3>
       </div>
 
-      {/* Bottom Center: Show the Love Button */}
+      {/* Bottom Center: Support Button */}
       {!isWallOpen && (
-        <div className="absolute bottom-28 md:bottom-16 left-1/2 -translate-x-1/2 z-50 pointer-events-auto flex flex-col items-center">
+        <div className="absolute bottom-12 md:bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-auto flex flex-col items-center gap-3">
+          <p className="text-[#e7c879]/90 font-medium text-sm md:text-base tracking-[0.1em] drop-shadow-md text-center uppercase" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+            Are your rooting for Satyadev ?
+          </p>
           <button
             onClick={() => {
-              if (isGenerating) {
-                onExpandLoading();
-              } else {
-                onOpenWall();
-              }
+              router.push('/support');
             }}
-            className="group relative overflow-hidden px-6 py-2.5 text-xs md:px-8 md:py-3.5 md:text-sm tracking-[0.25em] uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap"
+            className="group relative overflow-hidden px-6 py-2 text-base md:px-8 md:py-3 md:text-lg tracking-widest uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap"
             style={{
-              fontFamily: "'Cormorant Garamond', serif",
+              fontFamily: 'var(--font-inter), sans-serif',
               border: '1px solid rgba(201,162,76,0.6)',
               background: 'rgba(7,22,27,0.4)',
               backdropFilter: 'blur(8px)',
@@ -398,8 +395,8 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
               e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            <span className="relative z-10 flex items-center gap-2">
-              Show the Love <span className="text-red-500 animate-pulse">❤️</span>
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              Yes <span className="text-red-500 animate-pulse text-lg drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">❤️</span>
             </span>
           </button>
         </div>
