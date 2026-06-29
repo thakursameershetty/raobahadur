@@ -67,10 +67,9 @@ export default function SupportPage() {
       {/* Floating Back Button */}
       <button
         onClick={() => router.push('/')}
-        className="absolute top-[calc(env(safe-area-inset-top,1rem)+1.5rem)] left-6 md:top-10 md:left-12 z-50 flex items-center gap-2 px-4 py-2 bg-[rgba(7,22,27,0.6)] backdrop-blur-md border border-[rgba(201,162,76,0.3)] text-[#e7c879] text-xs font-mono uppercase tracking-normal rounded-full hover:bg-[rgba(201,162,76,0.15)] hover:border-[rgba(201,162,76,0.6)] transition-all duration-300 hover:scale-105 group shadow-[0_0_15px_rgba(201,162,76,0.1)]"
+        className="absolute top-[calc(env(safe-area-inset-top,1rem)+1.5rem)] left-6 md:top-10 md:left-12 z-50 flex items-center justify-center w-10 h-10 bg-zinc-900/60 backdrop-blur-md border border-zinc-700/50 text-zinc-300 rounded-full hover:bg-zinc-800 hover:text-amber-500 transition-all duration-700 hover:scale-105 group"
       >
-        <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">←</span>
-        Back
+        <span className="material-symbols-rounded transition-transform duration-300 group-hover:-translate-x-0.5">chevron_backward</span>
       </button>
 
       <div className="relative z-10 flex flex-col items-center w-full max-w-2xl mt-4 px-4 h-full">

@@ -16,39 +16,9 @@ export default function ImageWall({ onBack }) {
       {onBack && (
         <button
           onClick={onBack}
-          style={{
-            position: 'absolute',
-            top: '16px',
-            left: '16px',
-            zIndex: 50,
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: '12px',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            border: '1px solid rgba(201,162,76,0.45)',
-            background: 'rgba(6,10,6,0.65)',
-            color: '#e7c879',
-            borderRadius: '9999px',
-            padding: '8px 18px',
-            backdropFilter: 'blur(6px)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            transition: 'background 0.2s, border 0.2s, box-shadow 0.2s',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'rgba(201,162,76,0.18)';
-            e.currentTarget.style.border = '1px solid rgba(201,162,76,0.85)';
-            e.currentTarget.style.boxShadow = '0 0 14px rgba(201,162,76,0.22)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(6,10,6,0.65)';
-            e.currentTarget.style.border = '1px solid rgba(201,162,76,0.45)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
+          className="absolute top-[calc(env(safe-area-inset-top,1rem)+1.5rem)] left-6 md:top-10 md:left-12 z-50 flex items-center justify-center w-10 h-10 bg-zinc-900/60 backdrop-blur-md border border-zinc-700/50 text-zinc-300 rounded-full hover:bg-zinc-800 hover:text-amber-500 transition-all duration-700 hover:scale-105 group"
         >
-          ← Back
+          <span className="material-symbols-rounded transition-transform duration-300 group-hover:-translate-x-0.5">chevron_backward</span>
         </button>
       )}
     </div>

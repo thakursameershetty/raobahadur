@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import ClickSpark from './ClickSpark';
 
 export default function CustomCursor() {
   const cursorRef = useRef(null);
@@ -97,24 +98,27 @@ export default function CustomCursor() {
   if (isTouchDevice || !visible) return null;
 
   return (
-    <div
-      ref={cursorRef}
-      className="pointer-events-none fixed z-[9999] top-0 left-0 will-change-transform"
-      style={{
-        transform: `translate3d(-100px, -100px, 0)`
-      }}
-    >
+    <>
       <div
-        ref={innerRef}
-        className="transition-transform duration-150 ease-out will-change-transform"
-        style={{ transform: `translate(-50%, -50%) scale(1.0)` }}
+        ref={cursorRef}
+        className="pointer-events-none fixed z-[9999] top-0 left-0 will-change-transform"
+        style={{
+          transform: `translate3d(-100px, -100px, 0)`
+        }}
       >
-        <img
-          src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782114367/satyadev_assets/assets/cursor/cursor.png"
-          alt="Custom Cursor"
-          className="w-10 h-10 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
-        />
+        <div
+          ref={innerRef}
+          className="transition-transform duration-150 ease-out will-change-transform"
+          style={{ transform: `translate(-50%, -50%) scale(1.0)` }}
+        >
+          <img
+            src="https://res.cloudinary.com/dbn2ye2zo/image/upload/f_auto,q_auto/v1782114367/satyadev_assets/assets/cursor/cursor.png"
+            alt="Custom Cursor"
+            className="w-10 h-10 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+          />
+        </div>
       </div>
-    </div>
+      <ClickSpark sparkColor="#C8922A" sparkSize={12} sparkRadius={20} sparkCount={8} duration={500} />
+    </>
   );
 }

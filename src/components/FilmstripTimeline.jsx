@@ -177,30 +177,65 @@ export default function FilmstripTimeline({ locked, onScrollToTop }) {
   }, [locked]);
 
   return (
-    <div className={styles.container}>
-      {/* Fixed sprocket holes */}
-      <div className={`${styles.sprockets} ${styles.sprocketsLeft}`}>
-        <svg viewBox="0 0 34 800" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="holeL" x="0" y="0" width="34" height="38" patternUnits="userSpaceOnUse">
-              <rect width="34" height="38" fill="#1a1612" />
-              <rect x="6" y="8" width="22" height="22" rx="3" fill="#080808" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="34" height="800" fill="url(#holeL)" />
-        </svg>
-      </div>
+    <div className={styles.container}>f
+      <div className={styles.filmstripCenter}>
+        {/* Film edges */}
+        <div className={`${styles.filmEdge} ${styles.filmEdgeLeft}`} />
+        <div className={`${styles.filmEdge} ${styles.filmEdgeRight}`} />
 
-      <div className={`${styles.sprockets} ${styles.sprocketsRight}`}>
-        <svg viewBox="0 0 34 800" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="holeR" x="0" y="0" width="34" height="38" patternUnits="userSpaceOnUse">
-              <rect width="34" height="38" fill="#1a1612" />
-              <rect x="6" y="8" width="22" height="22" rx="3" fill="#080808" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="34" height="800" fill="url(#holeR)" />
-        </svg>
+        {/* Fixed sprocket holes */}
+        <div className={`${styles.sprockets} ${styles.sprocketsLeft}`}>
+          <svg viewBox="0 0 34 800" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="holeL" x="0" y="0" width="34" height="38" patternUnits="userSpaceOnUse">
+                <rect width="34" height="38" fill="#1a1612" />
+                <rect x="6" y="8" width="22" height="22" rx="3" fill="#080808" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
+              </pattern>
+            </defs>
+            <rect width="34" height="800" fill="url(#holeL)" />
+          </svg>
+        </div>
+
+        <div className={`${styles.sprockets} ${styles.sprocketsRight}`}>
+          <svg viewBox="0 0 34 800" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="holeR" x="0" y="0" width="34" height="38" patternUnits="userSpaceOnUse">
+                <rect width="34" height="38" fill="#1a1612" />
+                <rect x="6" y="8" width="22" height="22" rx="3" fill="#080808" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
+              </pattern>
+            </defs>
+            <rect width="34" height="800" fill="url(#holeR)" />
+          </svg>
+        </div>
+
+        <div
+          className={styles.reel}
+          ref={reelRef}
+        >
+          <div className={styles.spacer}></div>
+          {films.map((film, i) => (
+            <div key={i} className={styles.slot}>
+              <div
+                className={`${styles.frame} ${i === activeIndex ? styles.isActive : ''}`}
+                style={frameStyles[i] || {}}
+              >
+                <div className={styles.frameCounter}>{film.frameNo} &nbsp;▮</div>
+                <div className={styles.frameImg}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={film.imgUrl} alt={film.title} loading={i === 0 ? 'eager' : 'lazy'} />
+                </div>
+                <div className={styles.lowerThird}>
+                  <div className={styles.metaRow}>
+                    <span className={styles.yearBadge}>{film.year}</span>
+                  </div>
+                  <div className={styles.filmTitle}>{film.title}</div>
+                  <div className={styles.filmDesc}>{film.desc}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+          <div className={styles.spacer}></div>
+        </div>
       </div>
 
       <div className={styles.headerEyebrow}>
@@ -212,32 +247,6 @@ export default function FilmstripTimeline({ locked, onScrollToTop }) {
         {films.map((_, i) => (
           <div key={i} className={`${styles.rollDot} ${i === activeIndex ? styles.rollDotActive : ''}`} />
         ))}
-      </div>
-
-      <div className={styles.reel} ref={reelRef}>
-        <div className={styles.spacer}></div>
-        {films.map((film, i) => (
-          <div key={i} className={styles.slot}>
-            <div
-              className={`${styles.frame} ${i === activeIndex ? styles.isActive : ''}`}
-              style={frameStyles[i] || {}}
-            >
-              <div className={styles.frameCounter}>{film.frameNo} &nbsp;▮</div>
-              <div className={styles.frameImg}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={film.imgUrl} alt={film.title} loading={i === 0 ? 'eager' : 'lazy'} />
-              </div>
-              <div className={styles.lowerThird}>
-                <div className={styles.metaRow}>
-                  <span className={styles.yearBadge}>{film.year}</span>
-                </div>
-                <div className={styles.filmTitle}>{film.title}</div>
-                <div className={styles.filmDesc}>{film.desc}</div>
-              </div>
-            </div>
-          </div>
-        ))}
-        <div className={styles.spacer}></div>
       </div>
     </div>
   );
