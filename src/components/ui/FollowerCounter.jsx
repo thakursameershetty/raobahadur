@@ -87,6 +87,8 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
     if (targetCount > 0) {
       let current = 0;
       const step = Math.max(1, Math.ceil(targetCount / 40));
+      const snapSound = typeof Audio !== 'undefined' ? new Audio('/assets/sounds/snap.ogg') : null;
+
       const timer = setInterval(() => {
         current += step;
         if (current >= targetCount) {
@@ -96,11 +98,21 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
           if (typeof navigator !== 'undefined' && navigator.vibrate) {
             navigator.vibrate([15, 30, 15]); // stronger finish haptic
           }
+          if (snapSound) {
+            const finalSnap = snapSound.cloneNode();
+            finalSnap.volume = 1.0;
+            finalSnap.play().catch(e => console.warn('Audio play failed:', e));
+          }
           if (onComplete) onComplete();
         } else {
           setCount(current);
           if (typeof navigator !== 'undefined' && navigator.vibrate) {
             navigator.vibrate(3); // subtle tick
+          }
+          if (snapSound) {
+            const tickSnap = snapSound.cloneNode();
+            tickSnap.volume = 0.5;
+            tickSnap.play().catch(e => console.warn('Audio play failed:', e));
           }
         }
       }, 15);
