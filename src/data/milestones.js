@@ -107,7 +107,7 @@ export const milestones = [
   {
     year: '2026',
     title: 'Rao Bahadur',
-    desc: 'An upcoming film expected to add another milestone to Satya Dev’s growing filmography.',
+    desc: '',
     position: [0, 0, -188],
     rotation: [0, 0, 0],
     image: 'https://res.cloudinary.com/dbn2ye2zo/image/upload/c_limit,w_512/f_auto,q_auto/v1782114382/satyadev_assets/assets/photos/rao-bahadur.png',
