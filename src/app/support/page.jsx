@@ -67,7 +67,7 @@ export default function SupportPage() {
       {/* Floating Back Button */}
       <button
         onClick={() => router.push('/')}
-        className="absolute top-[calc(env(safe-area-inset-top,1rem)+1.5rem)] left-6 md:top-10 md:left-12 z-50 flex items-center gap-2 px-4 py-2 bg-[rgba(7,22,27,0.6)] backdrop-blur-md border border-[rgba(201,162,76,0.3)] text-[#e7c879] text-xs font-mono uppercase tracking-[0.2em] rounded-full hover:bg-[rgba(201,162,76,0.15)] hover:border-[rgba(201,162,76,0.6)] transition-all duration-300 hover:scale-105 group shadow-[0_0_15px_rgba(201,162,76,0.1)]"
+        className="absolute top-[calc(env(safe-area-inset-top,1rem)+1.5rem)] left-6 md:top-10 md:left-12 z-50 flex items-center gap-2 px-4 py-2 bg-[rgba(7,22,27,0.6)] backdrop-blur-md border border-[rgba(201,162,76,0.3)] text-[#e7c879] text-xs font-mono uppercase tracking-normal rounded-full hover:bg-[rgba(201,162,76,0.15)] hover:border-[rgba(201,162,76,0.6)] transition-all duration-300 hover:scale-105 group shadow-[0_0_15px_rgba(201,162,76,0.1)]"
       >
         <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">←</span>
         Back
@@ -97,9 +97,10 @@ export default function SupportPage() {
                 }}
                 className="w-full flex flex-col items-center"
               >
-                <p className="text-xl md:text-3xl text-center font-medium mb-10 text-[#e7c879]/90 drop-shadow-md italic max-w-2xl mx-auto" style={{ fontFamily: 'var(--font-inter), sans-serif', letterSpacing: '0.02em' }}>
-                  Congratulations, you are among <span className="text-[#e7c879] font-bold px-1 not-italic">{visitorCount}</span> people rooting for Satyadev
-                </p>
+                <div className="flex flex-col items-center gap-2 mb-10 text-xl md:text-3xl text-center font-light text-[#e7c879]/90 drop-shadow-md italic max-w-2xl mx-auto" style={{ fontFamily: 'var(--font-inter), sans-serif', letterSpacing: '0.02em' }}>
+                  <span>Congratulations! You are among</span>
+                  <span><span className="text-[#e7c879] font-medium">{visitorCount}</span> people rooting for Satyadev ❤️</span>
+                </div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
@@ -110,32 +111,33 @@ export default function SupportPage() {
                       navigator.vibrate([5, 10]);
                     }
                   }}
-                  className="w-full bg-[rgba(7,22,27,0.4)] backdrop-blur-md border border-[rgba(201,162,76,0.4)] rounded-2xl p-6 md:p-10 shadow-[0_0_30px_rgba(201,162,76,0.1)] relative overflow-hidden"
+                  className="w-full bg-black/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-8 md:p-12 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden"
                 >
-                  {/* Subtle gold glow inside */}
-                  <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(201,162,76,0.15),transparent_70%)]" />
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-[#e7c879]/30 to-transparent" />
 
-                  <p className="relative text-xl md:text-2xl font-medium mb-8 text-[#e7c879] text-center tracking-wide" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+                  <p className="text-xl md:text-2xl font-light mb-10 text-white/90 tracking-wide" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
                     Why are you rooting for Satyadev?
                   </p>
 
-                  <form onSubmit={handleSubmit} className="relative flex flex-col gap-6">
-                    <textarea
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Write your message here..."
-                      rows={4}
-                      className="w-full bg-[#020504]/60 border border-[rgba(201,162,76,0.3)] rounded-xl p-5 text-[#e7c879] placeholder-[rgba(201,162,76,0.4)] focus:outline-none focus:border-[rgba(201,162,76,0.8)] focus:ring-1 focus:ring-[rgba(201,162,76,0.5)] transition-all resize-none shadow-inner text-base md:text-lg"
-                      style={{ fontFamily: 'var(--font-inter), sans-serif' }}
-                      required
-                    />
+                  <form onSubmit={handleSubmit} className="relative flex flex-col gap-8">
+                    <div className="relative group">
+                      <textarea
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Share your thoughts..."
+                        rows={3}
+                        className="w-full bg-transparent border-b border-white/10 text-[#e7c879] placeholder:text-white/20 focus:outline-none focus:border-[#e7c879]/60 transition-colors py-2 resize-none text-lg md:text-xl font-light"
+                        style={{ fontFamily: 'var(--font-inter), sans-serif' }}
+                        required
+                      />
+                    </div>
 
                     <button
                       type="submit"
                       disabled={isSubmitting || isSubmitted || !message.trim()}
-                      className="group relative overflow-hidden px-10 py-4 text-sm md:text-base tracking-[0.25em] uppercase font-bold transition-all duration-500 ease-out disabled:opacity-50 disabled:cursor-not-allowed rounded-full self-center"
+                      className="group relative overflow-hidden px-10 py-4 text-sm md:text-base tracking-normal uppercase font-bold transition-all duration-500 ease-out disabled:opacity-50 disabled:cursor-not-allowed rounded-full self-center mt-4"
                       style={{
-                        fontFamily: '"Cormorant Garamond", serif',
+                        fontFamily: 'var(--font-inter), sans-serif',
                         background: isSubmitting || isSubmitted ? 'rgba(201,162,76,0.4)' : 'linear-gradient(135deg, #e7c879 0%, #c9a24c 100%)',
                         color: '#020504',
                         boxShadow: isSubmitting || isSubmitted ? 'none' : '0 0 25px rgba(201,162,76,0.4), inset 0 0 10px rgba(255,255,255,0.4)',

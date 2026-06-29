@@ -28,8 +28,8 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
   const [safeAreaTop, setSafeAreaTop] = useState(0);
 
   useEffect(() => {
-    // Increment and fetch the live visitor count on page mount
-    fetch('/api/visits', { method: 'POST' })
+    // Fetch the live visitor count on page mount without incrementing
+    fetch('/api/visits')
       .then(res => res.json())
       .then(data => {
         if (data && typeof data.count === 'number') {
@@ -369,10 +369,15 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
             Are your rooting for Satyadev ?
           </p>
           <button
-            onClick={() => {
+            onClick={async () => {
+              try {
+                await fetch('/api/visits', { method: 'POST' });
+              } catch (err) {
+                console.error('Error incrementing visit count:', err);
+              }
               router.push('/support');
             }}
-            className="group relative overflow-hidden px-6 py-2 text-base md:px-8 md:py-3 md:text-lg tracking-widest uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap"
+            className="group relative overflow-hidden px-6 py-2 text-base md:px-8 md:py-3 md:text-lg tracking-normal uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap"
             style={{
               fontFamily: 'var(--font-inter), sans-serif',
               border: '1px solid rgba(201,162,76,0.6)',
