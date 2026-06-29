@@ -37,7 +37,7 @@ function Number({ mv, number }) {
 
 function Digit({ place, value }) {
   let valueRoundedToPlace = Math.floor(value / place);
-  let animatedValue = useSpring(valueRoundedToPlace, { stiffness: 60, damping: 25 });
+  let animatedValue = useSpring(valueRoundedToPlace, { stiffness: 150, damping: 20 });
 
   useEffect(() => {
     animatedValue.set(valueRoundedToPlace);
@@ -86,7 +86,7 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
     // Animate up to the target count
     if (targetCount > 0) {
       let current = 0;
-      const step = Math.max(1, Math.ceil(targetCount / 80));
+      const step = Math.max(1, Math.ceil(targetCount / 40));
       const timer = setInterval(() => {
         current += step;
         if (current >= targetCount) {
@@ -103,7 +103,7 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
             navigator.vibrate(3); // subtle tick
           }
         }
-      }, 25);
+      }, 15);
       return () => clearInterval(timer);
     }
   }, [targetCount]);
