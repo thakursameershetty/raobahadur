@@ -52,7 +52,7 @@ export default function FilmstripTimeline({ locked, onScrollToTop }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       snapSoundRef.current = new Audio('/assets/sounds/snap.ogg');
-      snapSoundRef.current.volume = 0.4;
+      snapSoundRef.current.volume = 0.3;
     }
   }, []);
 
