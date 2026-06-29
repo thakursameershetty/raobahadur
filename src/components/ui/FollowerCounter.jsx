@@ -85,8 +85,18 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
 
     // Fast fluctuating animation while waiting for targetCount
     if (targetCount === null) {
+      const snapSound = typeof Audio !== 'undefined' ? new Audio('/assets/sounds/snap.ogg') : null;
       const timer = setInterval(() => {
-        setCount(Math.floor(Math.random() * 99999));
+        setCount(Math.floor(Math.random() * 9999));
+
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate(3);
+        }
+        if (snapSound) {
+          const tickSnap = snapSound.cloneNode();
+          tickSnap.volume = 0.05;
+          tickSnap.play().catch(e => console.warn('Audio play failed:', e));
+        }
       }, 50);
       return () => clearInterval(timer);
     }
