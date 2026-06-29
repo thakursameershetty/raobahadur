@@ -108,7 +108,7 @@ export default function FilmstripTimeline({ locked, onScrollToTop }) {
 
         // Haptic feedback
         if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          navigator.vibrate(10);
+          navigator.vibrate([15, 30, 15]);
         }
 
         // Sound effect
@@ -177,7 +177,7 @@ export default function FilmstripTimeline({ locked, onScrollToTop }) {
   }, [locked]);
 
   return (
-    <div className={styles.container}>f
+    <div className={styles.container}>
       <div className={styles.filmstripCenter}>
         {/* Film edges */}
         <div className={`${styles.filmEdge} ${styles.filmEdgeLeft}`} />

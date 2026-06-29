@@ -100,7 +100,7 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
           }
           if (snapSound) {
             const finalSnap = snapSound.cloneNode();
-            finalSnap.volume = 0.6;
+            finalSnap.volume = 0.5;
             finalSnap.play().catch(e => console.warn('Audio play failed:', e));
           }
           if (onComplete) onComplete();
@@ -111,7 +111,7 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
           }
           if (snapSound) {
             const tickSnap = snapSound.cloneNode();
-            tickSnap.volume = 0.2;
+            tickSnap.volume = 0.05;
             tickSnap.play().catch(e => console.warn('Audio play failed:', e));
           }
         }
