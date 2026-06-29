@@ -19,7 +19,7 @@ const raobahadur = localFont({
 });
 
 export const metadata = {
-  title: "Love for Satyadev",
+  title: "I Root for Satyadev",
   description: "Love for Satyadev",
 };
 
