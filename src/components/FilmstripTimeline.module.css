@@ -1,0 +1,308 @@
+.container {
+  position: absolute;
+  inset: 0;
+  background: var(--ink, #080808);
+  overflow: hidden;
+}
+
+/* ── GRAIN OVERLAY ── */
+.container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.6;
+}
+
+/* ── AMBIENT PROJECTOR LIGHT ── */
+.container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 520px;
+  background: radial-gradient(ellipse at center, rgba(200, 146, 42, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s;
+}
+
+/* ── SCROLL CONTAINER ── */
+.reel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+}
+
+.reel::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── CONTINUOUS FILM EDGE LINES ── */
+.reel::before,
+.reel::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 34px;
+  background: #1a1612;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.reel::before {
+  left: 0;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
+}
+
+.reel::after {
+  right: 0;
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ── SPROCKET HOLES (fixed on sides) ── */
+.sprockets {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 34px;
+  z-index: 11;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sprocketsLeft {
+  left: 0;
+}
+
+.sprocketsRight {
+  right: 0;
+}
+
+.sprockets svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── SNAP SLOT ── */
+.slot {
+  width: 100%;
+  padding: 18px 0;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* ── FILM FRAME CARD ── */
+.frame {
+  width: calc(100% - 80px);
+  max-width: 400px;
+  background: #1a1612;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  will-change: transform, filter, opacity;
+  transition: box-shadow 0.3s ease, transform 0.15s ease-out;
+}
+
+/* Top & bottom frame edge strips */
+.frame::before,
+.frame::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(to right,
+      #1a1612 0px,
+      #1a1612 4px,
+      rgba(255, 255, 255, 0.08) 4px,
+      rgba(255, 255, 255, 0.08) 8px);
+  z-index: 5;
+}
+
+.frame::before {
+  top: 0;
+}
+
+.frame::after {
+  bottom: 0;
+}
+
+/* ── FRAME NUMBER BADGE ── */
+.frameCounter {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #7a5718;
+  z-index: 6;
+  line-height: 1;
+}
+
+/* ── IMAGE AREA ── */
+.frameImg {
+  width: 100%;
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+
+.frameImg img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: sepia(0.08) contrast(1.05);
+  transition: filter 0.4s;
+}
+
+/* Vignette on image */
+.frameImg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.65) 100%);
+  pointer-events: none;
+}
+
+/* ── LOWER THIRD ── */
+.lowerThird {
+  padding: 18px 20px 22px;
+  background: linear-gradient(160deg, #141210 0%, #0c0a08 100%);
+  position: relative;
+}
+
+/* Thin amber top-rule */
+.lowerThird::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #7a5718, transparent);
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.yearBadge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #080808;
+  background: #C8922A;
+  padding: 2px 7px;
+  border-radius: 1px;
+  line-height: 1.4;
+}
+
+.filmTitle {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: #D4D0C8;
+  line-height: 1.1;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.filmDesc {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: #6b6560;
+  line-height: 1.55;
+}
+
+/* ── ACTIVE FRAME GLOW ── */
+.isActive {
+  box-shadow:
+    0 0 0 1px rgba(200, 146, 42, 0.2),
+    0 20px 60px rgba(0, 0, 0, 0.95),
+    0 0 40px rgba(200, 146, 42, 0.08);
+}
+
+.isActive .frameImg img {
+  filter: sepia(0.05) contrast(1.08) brightness(1.05);
+}
+
+/* ── TOP + BOTTOM SPACERS ── */
+.spacer {
+  height: 50vh;
+  flex-shrink: 0;
+}
+
+/* ── FILM ROLL INDICATOR ── */
+.rollIndicator {
+  position: fixed;
+  right: calc(34px + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.rollDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #6b6560;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.rollDotActive {
+  background: #C8922A;
+  transform: scale(1.5);
+}
+
+.headerEyebrow {
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  text-align: center;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.headerEyebrow span {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: #C8922A;
+  text-transform: uppercase;
+  display: block;
+  white-space: nowrap;
+}
