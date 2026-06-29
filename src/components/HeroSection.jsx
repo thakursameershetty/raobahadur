@@ -192,6 +192,14 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
         blurAmount="12px"
       />
 
+      <ProgressiveBlur
+        position="bottom"
+        className="z-40 pointer-events-none"
+        height={isMobile ? "200px" : "180px"}
+        backgroundColor="#000000"
+        blurAmount="12px"
+      />
+
       <div
         className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[1]"
         data-speed="0.02"
@@ -310,13 +318,13 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       >
         <div className={`flex flex-col drop-shadow-2xl ${isMobile ? 'items-center text-center' : 'items-start text-left'}`}>
           <h3
-            className={`font-serif text-[18px] tracking-[0.45em] text-[#e5d4ab] uppercase drop-shadow-lg mb-1 ${isMobile ? '' : 'ml-1'}`}
+            className={`font-serif text-[18px] tracking-[0.45em] text-[#e7c879] uppercase drop-shadow-lg mb-1 ${isMobile ? '' : 'ml-1'}`}
             style={{ fontFamily: '"Cormorant Garamond", serif' }}
           >
             Satyadev
           </h3>
           <p
-            className={`font-serif text-[10px] tracking-[0.3em] text-[#c9b282] uppercase mb-4 ${isMobile ? '' : 'ml-1'}`}
+            className={`font-serif text-[10px] tracking-[0.3em] text-[#e7c879] uppercase mb-4 ${isMobile ? '' : 'ml-1'}`}
             style={{ fontFamily: '"Cormorant Garamond", serif' }}
           >
             In & As
@@ -365,8 +373,8 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       {/* Bottom Center: Support Button */}
       {!isWallOpen && (
         <div className="absolute bottom-12 md:bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-auto flex flex-col items-center gap-3">
-          <p className="text-[#e7c879]/90 font-medium text-sm md:text-base tracking-[0.1em] drop-shadow-md text-center uppercase" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-            Are your rooting for Satyadev ?
+          <p className="text-[#e7c879]/90 font-medium text-base md:text-lg tracking-[0.1em] drop-shadow-md text-center uppercase" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
+            Are you rooting for Satyadev ?
           </p>
           <button
             onClick={async () => {
@@ -401,7 +409,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
             }}
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
-              Yes <span className="text-red-500 animate-pulse text-lg drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">❤️</span>
+              Yes <span className="animate-heartbeat text-lg not-italic inline-block">❤️</span>
             </span>
           </button>
         </div>

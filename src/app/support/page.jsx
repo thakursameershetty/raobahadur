@@ -99,7 +99,7 @@ export default function SupportPage() {
               >
                 <div className="flex flex-col items-center gap-2 mb-10 text-xl md:text-3xl text-center font-light text-[#e7c879]/90 drop-shadow-md italic max-w-2xl mx-auto" style={{ fontFamily: 'var(--font-inter), sans-serif', letterSpacing: '0.02em' }}>
                   <span>Congratulations! You are among</span>
-                  <span><span className="text-[#e7c879] font-medium">{visitorCount}</span> people rooting for Satyadev ❤️</span>
+                  <span><span className="text-[#e7c879] font-medium">{visitorCount}</span> people rooting for Satyadev <span className="animate-heartbeat not-italic inline-block">❤️</span></span>
                 </div>
 
                 <motion.div
@@ -115,8 +115,8 @@ export default function SupportPage() {
                 >
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-[#e7c879]/30 to-transparent" />
 
-                  <p className="text-xl md:text-2xl font-light mb-10 text-white/90 tracking-wide" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-                    Why are you rooting for Satyadev?
+                  <p className="text-lg md:text-xl font-light mb-10 text-[#e7c879] tracking-wide" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+                    If Satyadev could read a message from you, what would you say?
                   </p>
 
                   <form onSubmit={handleSubmit} className="relative flex flex-col gap-8">

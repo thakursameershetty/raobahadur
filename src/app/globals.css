@@ -12,9 +12,38 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
+
+  --animate-heartbeat: heartbeat 1.5s ease-in-out infinite;
+
+  @keyframes heartbeat {
+    0% {
+      transform: scale(1);
+    }
+
+    14% {
+      transform: scale(1.25);
+    }
+
+    28% {
+      transform: scale(1);
+    }
+
+    42% {
+      transform: scale(1.25);
+    }
+
+    70% {
+      transform: scale(1);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
 }
 
-html, body {
+html,
+body {
   overscroll-behavior: none;
 }
 
