@@ -100,9 +100,9 @@ export default function Home() {
             transition-all duration-700 ease-in-out
             ${scrollPhase === 'hero' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'}`}
         >
-          <HeroSection 
-            isWallOpen={isWallOpen} 
-            onOpenWall={() => setIsWallOpen(true)} 
+          <HeroSection
+            isWallOpen={isWallOpen}
+            onOpenWall={() => setIsWallOpen(true)}
             isGenerating={isGenerating}
             onExpandLoading={() => {
               setIsWallOpen(true);
@@ -110,6 +110,16 @@ export default function Home() {
             }}
           />
         </div>
+
+        {/* Back to Hero Button - Visible only in timeline phase */}
+        <button
+          onClick={() => setScrollPhase('hero')}
+          className={`absolute top-8 left-6 md:top-10 md:left-12 z-40 flex items-center gap-2 px-4 py-2 bg-zinc-900/60 backdrop-blur-md border border-zinc-700/50 text-zinc-300 text-xs font-mono uppercase tracking-widest rounded-full hover:bg-zinc-800 hover:text-amber-500 transition-all duration-700 hover:scale-105 group ${scrollPhase === 'timeline' ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'
+            }`}
+        >
+          <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">←</span>
+          Back
+        </button>
 
         {/* Cinematic Ambient Overlay Gradient (Vignette) */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.85)_90%)] z-20" />
@@ -158,8 +168,8 @@ export default function Home() {
           }`}
         style={{ pointerEvents: isWallOpen ? 'auto' : 'none' }}
       >
-        <PortraitGenerator 
-          onBack={() => setIsWallOpen(false)} 
+        <PortraitGenerator
+          onBack={() => setIsWallOpen(false)}
           isGenerating={isGenerating}
           setIsGenerating={setIsGenerating}
           generationProgress={generationProgress}
@@ -174,12 +184,12 @@ export default function Home() {
 
       {/* ─── Floating Minimized Loading Pill ─── */}
       {isGenerating && isMinimized && (
-        <FloatingPill 
-          progress={generationProgress} 
+        <FloatingPill
+          progress={generationProgress}
           onExpand={() => {
             setIsMinimized(false);
             setIsWallOpen(true);
-          }} 
+          }}
         />
       )}
 
