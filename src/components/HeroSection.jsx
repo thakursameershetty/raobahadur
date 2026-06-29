@@ -37,6 +37,12 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
         }
       })
       .catch(err => console.error('Error tracking visit:', err));
+
+    // Preload audio to prevent latency on next page
+    if (typeof Audio !== 'undefined') {
+      const preloadAudio = new Audio('/assets/sounds/snap.ogg');
+      preloadAudio.preload = 'auto';
+    }
   }, []);
 
   useEffect(() => {
@@ -364,7 +370,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
         </h2>
         <h3
           className="text-white/90 text-sm md:text-base tracking-wide drop-shadow-md text-center font-medium"
-          style={{ fontFamily: 'var(--font-inter), sans-serif', textShadow: '0 0 10px rgba(255,255,255,0.3)' }}
+          style={{ fontFamily: '"Cormorant Garamond", serif', textShadow: '0 0 10px rgba(255,255,255,0.3)' }}
         >
           Because rare talent deserves loud support
         </h3>
@@ -373,7 +379,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       {/* Bottom Center: Support Button */}
       {!isWallOpen && (
         <div className="absolute bottom-12 md:bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-auto flex flex-col items-center gap-3">
-          <p className="text-[#e7c879]/90 font-medium text-base md:text-lg tracking-[0.1em] drop-shadow-md text-center uppercase" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
+          <p className="text-[#e7c879]/90 font-medium text-base md:text-lg tracking-[0.1em] drop-shadow-md text-center uppercase" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
             Are you rooting for Satyadev ?
           </p>
           <button
