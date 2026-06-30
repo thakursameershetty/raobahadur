@@ -17,6 +17,7 @@ export default function SupportPage() {
   const [showGlobeView, setShowGlobeView] = useState(false);
 
   const hasIncremented = useRef(false);
+  const mainRef = useRef(null);
 
   useEffect(() => {
     // 1. Instantly display the count from local storage + 1 for zero latency
@@ -65,6 +66,11 @@ export default function SupportPage() {
     // Instantly transition for zero latency!
     setIsSubmitted(true);
     setShowGlobeView(true);
+    
+    // Reset scroll position to top instantly so the background doesn't stay scrolled
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
 
     // Fire and forget POST request in the background
     fetch('/api/feedback', {
@@ -76,7 +82,8 @@ export default function SupportPage() {
 
   return (
     <main
-      className="relative h-[100dvh] w-full bg-[#030807] overflow-x-hidden overflow-y-auto flex flex-col items-center justify-start p-6 text-white font-sans pb-24"
+      ref={mainRef}
+      className={`relative h-[100dvh] w-full bg-[#030807] overflow-x-hidden ${showGlobeView ? 'overflow-hidden' : 'overflow-y-auto'} flex flex-col items-center justify-start p-6 text-white font-sans pb-24`}
       style={{ cursor: 'none' }}
     >
       {/* Background Gradient similar to HeroSection */}
