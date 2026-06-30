@@ -350,7 +350,8 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
         const interFontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-inter') || 'sans-serif';
         ctx.font = `italic 400 ${fontSize * 0.65}px ${interFontFamily}`;
         ctx.textAlign = 'right';
-        ctx.fillText(`- ${authorText} ❤️`, canvas.width - padding - 40, canvas.height - padding - 50);
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(`- ${authorText} ❤️`, canvas.width - padding - 40, canvas.height - padding - 40);
       }
 
       return new THREE.CanvasTexture(canvas);
@@ -477,10 +478,10 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
         .then(data => {
           const fetched = (data.messages || []).map(m => m.message);
           if (fetched.length === 0) return;
-          
+
           const newMessages = [message, ...fetched.slice(0, 25), ...DUMMY_MESSAGES].filter(Boolean);
           const newTextures = newMessages.map(msg => createTextTexture(msg, author || "Believer"));
-          
+
           cards.forEach((card, i) => {
             card.material.map = newTextures[i % newTextures.length];
             card.material.needsUpdate = true;
