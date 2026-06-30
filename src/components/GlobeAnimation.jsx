@@ -509,6 +509,19 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
         </button>
       </div>
 
+      {/* Top Header: Wall of Belief */}
+      <div className="absolute top-[calc(env(safe-area-inset-top,1rem)+2rem)] md:top-12 left-0 w-full flex justify-center pointer-events-none z-[9998]">
+        <h1 style={{
+          color: '#e7c879',
+          fontFamily: '"Cormorant Garamond", serif',
+          letterSpacing: '0.3em',
+          textTransform: 'uppercase',
+          textShadow: '0 2px 8px rgba(0,0,0,0.8)'
+        }} className="text-base md:text-lg m-0">
+          Wall of Belief
+        </h1>
+      </div>
+
       {/* Floating Back Button matching the rest of the site */}
       <button
         onClick={onBack}
