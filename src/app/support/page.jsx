@@ -76,7 +76,7 @@ export default function SupportPage() {
 
   return (
     <main
-      className="relative min-h-[100dvh] w-full bg-[#030807] overflow-x-hidden overflow-y-auto flex flex-col items-center justify-start p-6 text-white font-sans pb-24"
+      className="relative h-[100dvh] w-full bg-[#030807] overflow-x-hidden overflow-y-auto flex flex-col items-center justify-start p-6 text-white font-sans pb-24"
       style={{ cursor: 'none' }}
     >
       {/* Background Gradient similar to HeroSection */}
