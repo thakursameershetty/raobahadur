@@ -101,7 +101,7 @@ export default function CustomCursor() {
     <>
       <div
         ref={cursorRef}
-        className="pointer-events-none fixed z-[9999] top-0 left-0 will-change-transform"
+        className="pointer-events-none fixed z-[99999] top-0 left-0 will-change-transform"
         style={{
           transform: `translate3d(-100px, -100px, 0)`
         }}

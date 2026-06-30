@@ -90,11 +90,11 @@ export default function SupportPage() {
         <span className="material-symbols-rounded transition-transform duration-300 group-hover:-translate-x-0.5">chevron_backward</span>
       </button>
 
-      <div className="relative z-10 flex flex-col items-center w-full max-w-2xl mt-4 px-4 h-full">
+      <div className="relative z-10 flex flex-col items-center w-full max-w-2xl pt-24 md:pt-32 px-4 pb-40">
         <motion.div
           className="w-full flex flex-col items-center"
-          initial={{ y: "35vh" }}
-          animate={{ y: isCounterDone ? "5vh" : "35vh" }}
+          initial={{ y: 150 }}
+          animate={{ y: isCounterDone ? 0 : 150 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="scale-[0.85] md:scale-110 mb-8 w-full flex justify-center h-[120px] items-center">
