@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import FollowerCounter from '@/components/ui/FollowerCounter';
@@ -16,6 +16,8 @@ export default function SupportPage() {
   const [isCounterDone, setIsCounterDone] = useState(false);
   const [showGlobeView, setShowGlobeView] = useState(false);
 
+  const hasIncremented = useRef(false);
+
   useEffect(() => {
     // 1. Instantly display the count from local storage + 1 for zero latency
     try {
@@ -23,18 +25,37 @@ export default function SupportPage() {
       if (localCount) {
         setVisitorCount(parseInt(localCount, 10) + 1);
       }
-    } catch(e) {}
+    } catch (e) { }
 
     // 2. Fire and forget POST request to actually increment the database in the background
-    fetch('/api/visits', { method: 'POST' })
-      .then(res => res.json())
-      .then(data => {
-        // Optional: Update to true live count just in case it's drastically different
-        if (data && typeof data.count === 'number') {
-          setVisitorCount(data.count);
-        }
-      })
-      .catch(err => console.error('Error incrementing visit count:', err));
+    // We use a ref to prevent double-increment in React Strict Mode
+    if (!hasIncremented.current) {
+      hasIncremented.current = true;
+      fetch('/api/visits', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          // Optional: Update to true live count just in case it's drastically different
+          if (data && typeof data.count === 'number') {
+            setVisitorCount(data.count);
+          }
+        })
+        .catch(err => console.error('Error incrementing visit count:', err));
+    }
+
+    // 3. Realtime dynamic updates: Poll the server every 3 seconds for live count changes
+    const pollInterval = setInterval(() => {
+      fetch('/api/visits')
+        .then(res => res.json())
+        .then(data => {
+          if (data && typeof data.count === 'number') {
+            // This will trigger the counter flip animation gracefully if the count has increased
+            setVisitorCount(prev => (data.count > prev ? data.count : prev));
+          }
+        })
+        .catch(e => console.error('Error fetching live count:', e));
+    }, 3000);
+
+    return () => clearInterval(pollInterval);
   }, []);
 
   const handleSubmit = (e) => {

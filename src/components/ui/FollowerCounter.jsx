@@ -85,18 +85,8 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
 
     // Fast fluctuating animation while waiting for targetCount
     if (targetCount === null) {
-      const snapSound = typeof Audio !== 'undefined' ? new Audio('/assets/sounds/snap.ogg') : null;
       const timer = setInterval(() => {
         setCount(Math.floor(Math.random() * 9999));
-
-        if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          navigator.vibrate(3);
-        }
-        if (snapSound) {
-          const tickSnap = snapSound.cloneNode();
-          tickSnap.volume = 0.05;
-          tickSnap.play().catch(e => console.warn('Audio play failed:', e));
-        }
       }, 50);
       return () => clearInterval(timer);
     }
@@ -104,7 +94,7 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
     // Animate up to the target count
     if (targetCount > 0) {
       let current = 0;
-      const step = Math.max(1, Math.ceil(targetCount / 40));
+      const step = Math.max(1, Math.ceil(targetCount / 30));
       const snapSound = typeof Audio !== 'undefined' ? new Audio('/assets/sounds/snap.ogg') : null;
 
       const timer = setInterval(() => {
@@ -124,16 +114,9 @@ export default function FollowerCounter({ targetCount, className, onComplete }) 
           if (onComplete) onComplete();
         } else {
           setCount(current);
-          if (typeof navigator !== 'undefined' && navigator.vibrate) {
-            navigator.vibrate(3); // subtle tick
-          }
-          if (snapSound) {
-            const tickSnap = snapSound.cloneNode();
-            tickSnap.volume = 0.05;
-            tickSnap.play().catch(e => console.warn('Audio play failed:', e));
-          }
+          // Removed audio and haptics on every tick to fix extreme lag on mobile devices
         }
-      }, 15);
+      }, 30);
       return () => clearInterval(timer);
     }
   }, [targetCount]);
