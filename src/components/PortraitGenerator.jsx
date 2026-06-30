@@ -69,7 +69,7 @@ After the image generation is complete, in your standard text reply (outside of 
             {onBack && (
               <button
                 onClick={onBack}
-                className="absolute top-[calc(env(safe-area-inset-top,1rem)+1.5rem)] left-6 md:top-10 md:left-12 z-40 flex items-center justify-center w-10 h-10 bg-zinc-900/60 backdrop-blur-md border border-zinc-700/50 text-zinc-300 rounded-full hover:bg-zinc-800 hover:text-amber-500 transition-all duration-700 hover:scale-105 group"
+                className="fixed top-[calc(env(safe-area-inset-top,0.5rem)+1rem)] left-4 md:top-8 md:left-10 z-[100] flex items-center justify-center w-10 h-10 bg-zinc-900/60 backdrop-blur-md border border-zinc-700/50 text-zinc-300 rounded-full hover:bg-zinc-800 hover:text-amber-500 transition-all duration-700 hover:scale-105 group"
               >
                 <span className="material-symbols-rounded transition-transform duration-300 group-hover:-translate-x-0.5">chevron_backward</span>
               </button>

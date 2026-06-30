@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Inner Globe - Perfectly Centered</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0d0603;
+            font-family: 'Georgia', serif;
+            cursor: grab;
+            overscroll-behavior: none;
+            touch-action: none;
+        }
+
+        body:active {
+            cursor: grabbing;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* HTML UI Overlay */
+        #ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(13, 6, 3, 0.85);
+            z-index: 10;
+            transition: opacity 1s ease-out;
+        }
+
+        .input-field {
+            width: 300px;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #E7C26A;
+            border-radius: 8px;
+            background: rgba(20, 20, 20, 0.8);
+            color: #E7C26A;
+            outline: none;
+            margin-bottom: 15px;
+            font-family: 'Georgia', serif;
+        }
+
+        .input-field::placeholder {
+            color: rgba(231, 194, 106, 0.5);
+        }
+
+        textarea.input-field {
+            resize: none;
+            height: 80px;
+        }
+
+        #submit-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0d0603;
+            background: linear-gradient(135deg, #E7C26A, #b8860b);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 15px rgba(231, 194, 106, 0.3);
+            font-family: 'Georgia', serif;
+            width: 332px;
+        }
+
+        #submit-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(231, 194, 106, 0.6);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ui-container">
+        <h2 style="color: #E7C26A; margin-bottom: 20px; text-shadow: 0 2px 10px rgba(231, 194, 106, 0.3);">Offer your
+            Belief</h2>
+        <textarea id="message-input" class="input-field" placeholder="Type your message..." maxlength="150"></textarea>
+        <input type="text" id="author-input" class="input-field" placeholder="Author Name (Optional)"
+            autocomplete="off">
+        <button id="submit-btn">Enter Globe</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // 1. Setup Scene, Camera, Renderer
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0d0603, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // --- FIX: CAMERA IS NOW DEAD CENTER ---
+        camera.position.set(0, 0, 0.1);
+        scene.add(camera);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        // Controls look precisely at the center as well
+        controls.target.set(0, 0, 0);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = false;
+        controls.enablePan = false;
+        controls.rotateSpeed = -0.4;
+        controls.enabled = false;
+
+        // 2. Setup Core Point Image & Royal Aura
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.crossOrigin = 'anonymous';
+        const isMobile = window.innerWidth < 768;
+        const coreImageUrl = isMobile
+            ? 'https://res.cloudinary.com/dbn2ye2zo/image/upload/v1782118968/satyadev_assets/mobile-layers/fourth.png'
+            : 'https://res.cloudinary.com/dbn2ye2zo/image/upload/v1782118963/satyadev_assets/layers/third.png';
+
+        const coreWidth = isMobile ? 18 : 36;
+        const coreHeight = isMobile ? 31 : 21;
+
+        const coreGeometry = new THREE.PlaneGeometry(coreWidth, coreHeight);
+        let coreMesh;
+        textureLoader.load(coreImageUrl, (texture) => {
+            const coreMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide });
+            coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
+            // Place exactly 20 units in front of the camera
+            coreMesh.position.set(0, 0, -20);
+            camera.add(coreMesh);
+        });
+
+        function createAuraTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
+            gradient.addColorStop(0, 'rgba(231, 194, 106, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(139, 69, 19, 0.4)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const auraGeometry = new THREE.PlaneGeometry(40, 40);
+        const auraMaterial = new THREE.MeshBasicMaterial({
+            map: createAuraTexture(), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        const auraMesh = new THREE.Mesh(auraGeometry, auraMaterial);
+        auraMesh.position.set(0, 0, -21);
+        camera.add(auraMesh);
+
+
+        // 3. Build the Elegant Inner Globe inside a Group
+        const globeGroup = new THREE.Group();
+        scene.add(globeGroup);
+
+        const numCards = 300;
+        const globeRadius = 38;
+        const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+
+        let targetCard = null;
+        let minDistanceToTarget = Infinity;
+
+        // --- FIX: Target search coordinates adjusted for the newly centered globe ---
+        const rightSideView = new THREE.Vector3(25, 10, -25);
+
+        const dummyTexture = createTextTexture("Belief...", "");
+
+        for (let i = 0; i < numCards; i++) {
+            const y = 1 - (i / (numCards - 1)) * 2;
+            const radiusAtY = Math.sqrt(1 - y * y);
+            const theta = goldenAngle * i;
+
+            // --- FIX: Pure spherical coordinates centered at (0,0,0) ---
+            const x = Math.cos(theta) * radiusAtY;
+            const z = Math.sin(theta) * radiusAtY;
+
+            const geometry = new THREE.PlaneGeometry(6, 4.5);
+            const material = new THREE.MeshBasicMaterial({
+                map: dummyTexture,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.15
+            });
+
+            const card = new THREE.Mesh(geometry, material);
+            card.position.set(x * globeRadius, y * globeRadius, z * globeRadius);
+
+            // --- FIX: Cards look precisely at the exact center point ---
+            card.lookAt(0, 0, 0);
+            globeGroup.add(card);
+
+            const dist = card.position.distanceTo(rightSideView);
+            if (dist < minDistanceToTarget) {
+                minDistanceToTarget = dist;
+                targetCard = card;
+            }
+        }
+
+        // 4. Glowing Circular Particles Function
+        function createCircleTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+
+            const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.2, 'rgba(231, 194, 106, 1)');
+            gradient.addColorStop(1, 'rgba(231, 194, 106, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(32, 32, 32, 0, Math.PI * 2);
+            ctx.fill();
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 600;
+        const posArray = new Float32Array(particlesCount * 3);
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 100;
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.5,
+            map: createCircleTexture(),
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const sparklesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(sparklesMesh);
+
+        // 5. Infinite Scroll Logic
+        function handleScroll(delta) {
+            if (!controls.enabled) return;
+            globeGroup.rotation.y += delta * 0.002;
+            sparklesMesh.rotation.y += delta * 0.001;
+            sparklesMesh.rotation.x += delta * 0.0005;
+        }
+
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            handleScroll(e.deltaY);
+        }, { passive: false });
+
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touchY = e.touches[0].clientY;
+            handleScroll((touchStartY - touchY) * 2);
+            touchStartY = touchY;
+        }, { passive: false });
+
+        // 6. Elegant Canvas Text Texture
+        function createTextTexture(text, author) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 768;
+            const ctx = canvas.getContext('2d');
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const padding = 60;
+            const radius = 50;
+
+            ctx.shadowColor = 'rgba(231, 194, 106, 0.4)';
+            ctx.shadowBlur = 30;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 10;
+
+            ctx.fillStyle = 'rgba(20, 20, 20, 0.85)';
+            ctx.beginPath();
+            ctx.moveTo(padding + radius, padding);
+            ctx.arcTo(canvas.width - padding, padding, canvas.width - padding, canvas.height - padding, radius);
+            ctx.arcTo(canvas.width - padding, canvas.height - padding, padding, canvas.height - padding, radius);
+            ctx.arcTo(padding, canvas.height - padding, padding, padding, radius);
+            ctx.arcTo(padding, padding, canvas.width - padding, padding, radius);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#E7C26A';
+            ctx.stroke();
+
+            ctx.fillStyle = '#E7C26A';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+
+            const fontSize = isMobile ? 75 : 90;
+            ctx.font = `500 ${fontSize}px Georgia, serif`;
+            const lineHeight = fontSize * 1.4;
+
+            const words = (text || "").split(' ');
+            let line = '';
+            let lineCount = 0;
+            const maxLines = 4;
+            let currentY = padding + 50;
+            const maxWidth = canvas.width - (padding * 2) - 60;
+
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+
+                if (testWidth > maxWidth && n > 0) {
+                    if (lineCount >= maxLines - 1) {
+                        ctx.fillText(line + "...", padding + 40, currentY);
+                        lineCount++;
+                        break;
+                    } else {
+                        ctx.fillText(line, padding + 40, currentY);
+                        line = words[n] + ' ';
+                        currentY += lineHeight;
+                        lineCount++;
+                    }
+                } else {
+                    line = testLine;
+                }
+            }
+            if (lineCount < maxLines) {
+                ctx.fillText(line, padding + 40, currentY);
+            }
+
+            if (author && author.trim() !== "") {
+                ctx.font = `italic 400 ${fontSize * 0.65}px Georgia, serif`;
+                ctx.textAlign = 'right';
+                ctx.fillText(`- ${author} ❤️`, canvas.width - padding - 40, canvas.height - padding - 50);
+            }
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // 7. Animation Variables
+        let specialCard = null;
+        let particle = null;
+        let pathCurve = null;
+        let animPhase = 0;
+        let animationProgress = 0;
+
+        // --- FIX: Animation coordinate offsets to match true center ---
+        const startPt = new THREE.Vector3(0, -15, -10);
+        const centerPt = new THREE.Vector3(0, 0, -20);
+
+        // 8. UI Submission Logic
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            const userInput = document.getElementById('message-input').value;
+            const authorInput = document.getElementById('author-input').value;
+
+            const uiContainer = document.getElementById('ui-container');
+            uiContainer.style.opacity = '0';
+            setTimeout(() => { uiContainer.style.display = 'none'; }, 1000);
+
+            if (targetCard) targetCard.visible = false;
+
+            const particleGeo = new THREE.PlaneGeometry(2, 2);
+            const particleMat = new THREE.MeshBasicMaterial({
+                map: createCircleTexture(),
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            particle = new THREE.Mesh(particleGeo, particleMat);
+            particle.position.copy(startPt);
+            scene.add(particle);
+
+            const textTexture = createTextTexture(userInput, authorInput);
+
+            const geometry = new THREE.PlaneGeometry(6, 4.5);
+            const material = new THREE.MeshBasicMaterial({ map: textTexture, transparent: true });
+            specialCard = new THREE.Mesh(geometry, material);
+            specialCard.visible = false;
+            scene.add(specialCard);
+
+            const targetWorldPos = new THREE.Vector3();
+            targetCard.getWorldPosition(targetWorldPos);
+
+            // Curve swoops out to the right from the hero image
+            const controlPt = new THREE.Vector3(15, 0, -15);
+            pathCurve = new THREE.QuadraticBezierCurve3(centerPt, controlPt, targetWorldPos);
+
+            animPhase = 1;
+        });
+
+        // 9. Render Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            sparklesMesh.rotation.y += 0.0005;
+            sparklesMesh.rotation.x += 0.0002;
+
+            if (animPhase === 1) {
+                animationProgress += 0.02;
+                let p = Math.min(1, animationProgress);
+                const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+
+                particle.position.lerpVectors(startPt, centerPt, ease);
+                particle.lookAt(camera.position);
+
+                if (p >= 1) {
+                    animPhase = 2;
+                    animationProgress = 0;
+                    scene.remove(particle);
+                    specialCard.visible = true;
+                }
+            }
+            else if (animPhase === 2) {
+                animationProgress += 0.015;
+                let p = Math.min(1, animationProgress);
+
+                auraMesh.scale.set(1 + (p * 2), 1 + (p * 2), 1);
+                if (p < 0.3) {
+                    auraMesh.material.opacity = p / 0.3;
+                } else {
+                    auraMesh.material.opacity = 1 - ((p - 0.3) / 0.7);
+                }
+
+                const easeOutQuart = 1 - Math.pow(1 - p, 4);
+                const currentScale = 0.1 + (0.9 * easeOutQuart);
+                specialCard.scale.set(currentScale, currentScale, currentScale);
+
+                const currentPos = pathCurve.getPoint(easeOutQuart);
+                specialCard.position.copy(currentPos);
+
+                // --- FIX: Card faces true center during travel ---
+                specialCard.lookAt(0, 0, 0);
+
+                if (p >= 1) {
+                    animPhase = 0;
+                    auraMesh.material.opacity = 0;
+
+                    scene.remove(specialCard);
+                    globeGroup.add(specialCard);
+
+                    specialCard.position.copy(targetCard.position);
+                    specialCard.rotation.copy(targetCard.rotation);
+                    specialCard.scale.set(1, 1, 1);
+
+                    controls.enabled = true;
+
+                    globeGroup.traverse((child) => {
+                        if (child.isMesh) {
+                            if (child.material) child.material.opacity = 1;
+                        }
+                    });
+                }
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+
+</html>

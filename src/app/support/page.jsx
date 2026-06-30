@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import FollowerCounter from '@/components/ui/FollowerCounter';
 import CustomCursor from '@/components/CustomCursor';
+import GlobeAnimation from '@/components/GlobeAnimation';
 
 export default function SupportPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function SupportPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCounterDone, setIsCounterDone] = useState(false);
+  const [showGlobeView, setShowGlobeView] = useState(false);
 
   useEffect(() => {
     // Fetch current visitor count
@@ -42,10 +44,7 @@ export default function SupportPage() {
 
       if (res.ok) {
         setIsSubmitted(true);
-        // Redirect to ImageWall generator page after a short delay
-        setTimeout(() => {
-          router.push('/?open=generator');
-        }, 1000);
+        setShowGlobeView(true);
       } else {
         console.error('Failed to submit message');
         setIsSubmitting(false);
@@ -163,6 +162,15 @@ export default function SupportPage() {
       </div>
 
       <CustomCursor />
+
+      {showGlobeView && (
+        <GlobeAnimation
+          message={message}
+          author="Believer"
+          onBack={() => setShowGlobeView(false)}
+          onNext={() => router.push('/love')}
+        />
+      )}
     </main>
   );
 }
