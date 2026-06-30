@@ -69,6 +69,15 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
 
     const layers = container.querySelectorAll('.parallax-layer');
 
+    // Check for mobile or touch device to disable heavy parallax animations
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobileDevice = window.innerWidth < 768 || isTouch;
+
+    if (isMobileDevice) {
+      // Do not bind listeners or start requestAnimationFrame on mobile/touch devices
+      return;
+    }
+
     let gyroActive = false;
 
     const handleMouseMove = (e) => {
