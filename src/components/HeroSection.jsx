@@ -69,14 +69,6 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
 
     const layers = container.querySelectorAll('.parallax-layer');
 
-    // Check for mobile or touch device to disable heavy parallax animations
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isMobileDevice = window.innerWidth < 768 || isTouch;
-
-    if (isMobileDevice) {
-      // Do not bind listeners or start requestAnimationFrame on mobile/touch devices
-      return;
-    }
 
     let gyroActive = false;
 
@@ -107,8 +99,9 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
         diffGamma = Math.max(-30, Math.min(30, diffGamma));
 
         // Gamma maps to horizontal (X), Beta maps to vertical (Y)
-        targetX.current = diffGamma * 12;
-        targetY.current = diffBeta * 12;
+        // Inverted to match natural parallax (tilting right moves background left)
+        targetX.current = diffGamma * -20;
+        targetY.current = diffBeta * -20;
       }
     };
 
@@ -165,8 +158,8 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
         const speed = parseFloat(layer.getAttribute('data-speed'));
         const x = currentX.current * speed;
         const y = currentY.current * speed;
-        layer.style.setProperty('--x', x);
-        layer.style.setProperty('--y', y);
+        layer.style.setProperty('--x', x.toFixed(2));
+        layer.style.setProperty('--y', y.toFixed(2));
       });
 
       requestRef.current = requestAnimationFrame(animate);
@@ -207,7 +200,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       />
 
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[1]"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none will-change-transform [backface-visibility:hidden] z-[1]"
         data-speed="0.02"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 20vh), 0)'
@@ -225,7 +218,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       </div>
 
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[2]"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none will-change-transform [backface-visibility:hidden] z-[2]"
         data-speed="0.035"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 50vh), 0)'
@@ -243,7 +236,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       </div>
 
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[3]"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none will-change-transform [backface-visibility:hidden] z-[3]"
         data-speed="0.05"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 90vh), 0)'
@@ -261,7 +254,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       </div>
 
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[4]"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none will-change-transform [backface-visibility:hidden] z-[4]"
         data-speed="0.08"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 140vh), 0)'
@@ -279,7 +272,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       </div>
 
       <div
-        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none z-[5]"
+        className="absolute top-[-5%] -left-[5%] w-[110%] h-[110%] parallax-layer pointer-events-none will-change-transform [backface-visibility:hidden] z-[5]"
         data-speed="0.12"
         style={{
           transform: 'translate3d(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px - var(--scroll-progress, 0) * 200vh), 0)'
