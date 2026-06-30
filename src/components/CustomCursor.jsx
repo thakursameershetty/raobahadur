@@ -95,7 +95,7 @@ export default function CustomCursor() {
     };
   }, []);
 
-  if (isTouchDevice || !visible) return null;
+  if (isTouchDevice) return null;
 
   return (
     <>

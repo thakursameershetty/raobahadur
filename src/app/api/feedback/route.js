@@ -21,3 +21,16 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Failed to save message' }, { status: 500 });
   }
 }
+
+export async function GET() {
+  try {
+    const messages = await prisma.userMessageBox.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 300,
+    });
+    return NextResponse.json({ success: true, messages });
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 });
+  }
+}

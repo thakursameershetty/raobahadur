@@ -34,6 +34,7 @@ export default function HeroSection({ isWallOpen, onOpenWall, isGenerating, onEx
       .then(data => {
         if (data && typeof data.count === 'number') {
           setVisitorCount(data.count);
+          try { localStorage.setItem('satyadev_visitorCount', data.count.toString()); } catch(e) {}
         }
       })
       .catch(err => console.error('Error tracking visit:', err));

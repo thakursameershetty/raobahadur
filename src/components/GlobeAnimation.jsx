@@ -1,11 +1,63 @@
 "use client";
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
+const DUMMY_MESSAGES = [
+  "Anna, Rao Bahadur kosam chala eager ga wait chestunnam. ❤️",
+  "Mee acting ante chala ishtam. All the best! 🙌",
+  "First day first show fix! 🍿",
+  "Trailer chusi goosebumps vachayi. 🔥",
+  "Mee hard work ki super success ravali.",
+  "Blockbuster avvali anna! 💥",
+  "Proud to be your fan. ❤️",
+  "Waiting for another outstanding performance.",
+  "Mee cinema miss avvanu. 🎬",
+  "Wishing the whole team huge success. ✨",
+  "Rao Bahadur release kosam counting days! ⏳",
+  "Mee dedication ki hats off anna. 👏",
+  "Trailer chusi expectations inka perigayi.",
+  "Ee role lo mimmalni chudataniki excited ga unnanu. 🤩",
+  "Another powerful performance loading! 💯",
+  "Rao Bahadur definitely blockbuster avvali. 🚀",
+  "Mee journey maaku inspiration anna.",
+  "Mee movies lo emotion always next level. ❤️",
+  "This movie will surely create magic. ✨",
+  "All the very best to the entire cast and crew!",
+  "Always proud to support your films. 🙌",
+  "Can't wait to experience Rao Bahadur in theatres. 🍿",
+  "Mee screen presence simply outstanding.",
+  "Every frame of the teaser looked amazing. 🔥",
+  "Rooting for your biggest success yet! ❤️",
+  "Rao Bahadur will be worth the wait.",
+  "Wishing you endless success, anna. 🌟",
+  "Mee acting ki eppudu fan ne.",
+  "Theatres lo whistles guarantee! 🎉",
+  "Goosebumps from the very first glimpse. 🔥",
+  "Mass and class performance expect chestunnam.",
+  "Mee hard work definitely pay off avutundi. 💪",
+  "Rao Bahadur history create cheyyali.",
+  "All the best Satyadev anna! ❤️",
+  "This one is going to be special.",
+  "Waiting to witness another masterpiece. 🎥",
+  "Mee script selections eppudu unique untayi.",
+  "Pakka repeat watch movie anipisthundi. 😍",
+  "Blockbuster vibes already! 💥",
+  "Love and support always anna. ❤️",
+  "Mee performance kosam andaroo wait chestunnaru.",
+  "Rooting for Rao Bahadur from day one. 🚩",
+  "Wishing you all the love and success. ❤️",
+  "Proud moment for every Satyadev fan.",
+  "The teaser raised the bar! 🚀",
+  "Hope this becomes your career best. 🤞",
+  "Rao Bahadur will make us proud. ❤️",
+  "Mee talent deserves even bigger recognition.",
+  "See you on First Day First Show! 🍿",
+  "Best wishes to the entire Rao Bahadur team. 🎉"
+];
+
 export default function GlobeAnimation({ message, author, onBack, onNext }) {
   const mountRef = useRef(null);
-
   useEffect(() => {
     const currentMount = mountRef.current;
     if (!currentMount) return;
@@ -124,8 +176,14 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
     // Make the new card appear in the viewing area near the turban
     const topAreaView = new THREE.Vector3(12, 18, -31);
 
-    const dummyTexture = createTextTexture("Belief...", "");
+    // Immediately initialize with user's message and dummy messages for zero latency
+    const initialMessages = [message, ...DUMMY_MESSAGES].filter(Boolean);
+    const textures = initialMessages.map(msg => createTextTexture(msg, author || "Believer"));
+    if (textures.length === 0) {
+      textures.push(createTextTexture("Belief...", "Believer"));
+    }
 
+    const cards = [];
     for (let i = 0; i < numCards; i++) {
       const y = 1 - (i / (numCards - 1)) * 2;
       const radiusAtY = Math.sqrt(1 - y * y);
@@ -137,7 +195,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
 
       const geometry = new THREE.PlaneGeometry(6, 4.5);
       const material = new THREE.MeshBasicMaterial({
-        map: dummyTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.15
+        map: textures[i % textures.length], side: THREE.DoubleSide, transparent: true, opacity: 0.15
       });
 
       const card = new THREE.Mesh(geometry, material);
@@ -146,6 +204,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
       // --- FIX: Cards look precisely at the exact center point ---
       card.lookAt(0, 0, 0);
       globeGroup.add(card);
+      cards.push(card);
 
       const dist = card.position.distanceTo(topAreaView);
       if (dist < minDistanceToTarget) {
@@ -411,9 +470,29 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
 
     animate();
 
+    // Asynchronously fetch real database messages in the background AFTER 3 seconds (so swoop animation isn't stuttered)
+    const bgFetchTimeout = setTimeout(() => {
+      fetch('/api/feedback')
+        .then(r => r.json())
+        .then(data => {
+          const fetched = (data.messages || []).map(m => m.message);
+          if (fetched.length === 0) return;
+          
+          const newMessages = [message, ...fetched.slice(0, 25), ...DUMMY_MESSAGES].filter(Boolean);
+          const newTextures = newMessages.map(msg => createTextTexture(msg, author || "Believer"));
+          
+          cards.forEach((card, i) => {
+            card.material.map = newTextures[i % newTextures.length];
+            card.material.needsUpdate = true;
+          });
+        })
+        .catch(console.error);
+    }, 3000);
+
     // Cleanup on unmount
     return () => {
       clearTimeout(forceStartTimeout);
+      clearTimeout(bgFetchTimeout);
       cancelAnimationFrame(reqId);
       window.removeEventListener('wheel', onWheel);
       window.removeEventListener('touchstart', onTouchStart);

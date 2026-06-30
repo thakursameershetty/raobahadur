@@ -17,47 +17,45 @@ export default function SupportPage() {
   const [showGlobeView, setShowGlobeView] = useState(false);
 
   useEffect(() => {
-    // Fetch current visitor count
-    fetch('/api/visits')
+    // 1. Instantly display the count from local storage + 1 for zero latency
+    try {
+      const localCount = localStorage.getItem('satyadev_visitorCount');
+      if (localCount) {
+        setVisitorCount(parseInt(localCount, 10) + 1);
+      }
+    } catch(e) {}
+
+    // 2. Fire and forget POST request to actually increment the database in the background
+    fetch('/api/visits', { method: 'POST' })
       .then(res => res.json())
       .then(data => {
+        // Optional: Update to true live count just in case it's drastically different
         if (data && typeof data.count === 'number') {
           setVisitorCount(data.count);
         }
       })
-      .catch(err => console.error('Error fetching visit count:', err));
+      .catch(err => console.error('Error incrementing visit count:', err));
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
-    setIsSubmitting(true);
 
-    try {
-      const res = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message }),
-      });
+    // Instantly transition for zero latency!
+    setIsSubmitted(true);
+    setShowGlobeView(true);
 
-      if (res.ok) {
-        setIsSubmitted(true);
-        setShowGlobeView(true);
-      } else {
-        console.error('Failed to submit message');
-        setIsSubmitting(false);
-      }
-    } catch (err) {
-      console.error('Error:', err);
-      setIsSubmitting(false);
-    }
+    // Fire and forget POST request in the background
+    fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    }).catch(err => console.error('Error submitting message:', err));
   };
 
   return (
     <main
-      className="relative min-h-[100dvh] w-full bg-[#030807] overflow-hidden flex flex-col items-center justify-start p-6 text-white font-sans"
+      className="relative min-h-[100dvh] w-full bg-[#030807] overflow-x-hidden overflow-y-auto flex flex-col items-center justify-start p-6 text-white font-sans pb-24"
       style={{ cursor: 'none' }}
     >
       {/* Background Gradient similar to HeroSection */}
