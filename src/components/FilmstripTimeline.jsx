@@ -52,7 +52,7 @@ export default function FilmstripTimeline({ locked, onScrollToTop }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       snapSoundRef.current = new Audio('/assets/sounds/snap.ogg');
-      snapSoundRef.current.volume = 0.1;
+      snapSoundRef.current.volume = 0.4;
     }
   }, []);
 
@@ -108,7 +108,7 @@ export default function FilmstripTimeline({ locked, onScrollToTop }) {
 
         // Haptic feedback
         if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          navigator.vibrate(15);
+          navigator.vibrate(50);
         }
 
         // Sound effect
