@@ -100,7 +100,10 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
     controls.enableZoom = false;
     controls.enablePan = false;
     controls.rotateSpeed = -0.4;
-    controls.enabled = false;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.8;
+    controls.enabled = true;
+    controls.enableRotate = false;
 
     // 2. Setup Core Point Image & Royal Aura
     const textureLoader = new THREE.TextureLoader();
@@ -183,9 +186,10 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
     let targetCard = null;
     let minDistanceToTarget = Infinity;
 
-    // --- FIX: Target search coordinates adjusted for the newly centered globe ---
-    // Make the new card appear in the viewing area near the turban
-    const topAreaView = new THREE.Vector3(12, 18, -31);
+    // --- FIX: Target search coordinates adjusted for mobile so cards don't get cut off on the right or top ---
+    const topAreaView = isMobile
+      ? new THREE.Vector3(3, 14, -31)
+      : new THREE.Vector3(12, 18, -31);
 
     // Immediately initialize with user's message and dummy messages for zero latency
     const initialMessages = [message, ...DUMMY_MESSAGES].filter(Boolean);
@@ -285,7 +289,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
     }
 
     // 6. Elegant Canvas Text Texture
-    function createTextTexture(text, authorText) {
+    function createTextTexture(text, authorText, isHighlighted = false) {
       const canvas = document.createElement('canvas');
       canvas.width = 1024;
       canvas.height = 768;
@@ -295,12 +299,19 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
       const padding = 60;
       const radius = 50;
 
-      ctx.shadowColor = 'rgba(231, 194, 106, 0.4)';
-      ctx.shadowBlur = 30;
+      if (isHighlighted) {
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+        ctx.shadowBlur = 50;
+        ctx.fillStyle = 'rgba(231, 194, 106, 0.9)'; // Golden fill
+      } else {
+        ctx.shadowColor = 'rgba(231, 194, 106, 0.4)';
+        ctx.shadowBlur = 30;
+        ctx.fillStyle = 'rgba(20, 20, 20, 0.85)';
+      }
+
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 10;
 
-      ctx.fillStyle = 'rgba(20, 20, 20, 0.85)';
       ctx.beginPath();
       ctx.moveTo(padding + radius, padding);
       ctx.arcTo(canvas.width - padding, padding, canvas.width - padding, canvas.height - padding, radius);
@@ -314,10 +325,10 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
       ctx.shadowOffsetY = 0;
 
       ctx.lineWidth = 4;
-      ctx.strokeStyle = '#E7C26A';
+      ctx.strokeStyle = isHighlighted ? '#FFFFFF' : '#E7C26A';
       ctx.stroke();
 
-      ctx.fillStyle = '#E7C26A';
+      ctx.fillStyle = isHighlighted ? '#111111' : '#E7C26A';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
 
@@ -374,6 +385,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
     let pathCurve = null;
     let animPhase = 0;
     let animationProgress = 0;
+    let isAnimationFinished = false;
     let reqId;
 
     // --- FIX: Animation coordinate offsets to match true center ---
@@ -391,7 +403,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
     particle.position.copy(startPt);
     scene.add(particle);
 
-    const textTexture = createTextTexture(message, author);
+    const textTexture = createTextTexture(message, author, true);
     const specialCardGeometry = new THREE.PlaneGeometry(6, 4.5);
     const specialCardMat = new THREE.MeshBasicMaterial({ map: textTexture, transparent: true });
     specialCard = new THREE.Mesh(specialCardGeometry, specialCardMat);
@@ -410,9 +422,6 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
       reqId = requestAnimationFrame(animate);
       sparklesMesh.rotation.y += 0.0005;
       sparklesMesh.rotation.x += 0.0002;
-
-      // Auto-rotate the globe slowly for cinematic effect
-      globeGroup.rotation.y += 0.001;
 
       // Ensure we only start phase 1 (the animation) once the core image is actually loaded and visible
       if (isCoreLoaded && !hasStartedAnimation) {
@@ -457,6 +466,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
 
         if (p >= 1) {
           animPhase = 0;
+          isAnimationFinished = true;
           auraMesh.material.opacity = 0;
 
           scene.remove(specialCard);
@@ -466,7 +476,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
           specialCard.rotation.copy(targetCard.rotation);
           specialCard.scale.set(1, 1, 1);
 
-          controls.enabled = true;
+          controls.enableRotate = true;
 
           globeGroup.traverse((child) => {
             if (child.isMesh) {
@@ -482,7 +492,12 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
 
     shareRef.current = async () => {
       return new Promise((resolve) => {
+        // --- FIX: Reset camera so the golden card is perfectly in the viewport ---
+        camera.position.set(0, 0, 0.1);
+        camera.lookAt(0, 0, 0);
+        controls.update();
         renderer.render(scene, camera);
+
         const webglCanvas = renderer.domElement;
 
         const canvas = document.createElement('canvas');
@@ -536,23 +551,6 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
         ctx.shadowBlur = 4 * pixelRatio;
         ctx.fillText('I ROOT FOR SATYADEV ❤️', width / 2, pBaseY);
 
-        // --- DRAW THE USER'S CARD AS A 2D OVERLAY ---
-        const cardTexture = createTextTexture(message, author);
-        if (cardTexture && cardTexture.image) {
-          const cardCanvas = cardTexture.image;
-          const cardAspect = cardCanvas.width / cardCanvas.height;
-
-          // Make the card very small
-          const cardWidth = Math.min(width * (isMobile ? 0.35 : 0.18), 180 * pixelRatio);
-          const cardHeight = cardWidth / cardAspect;
-
-          // Position below the text
-          const cardX = (width - cardWidth) / 2;
-          const cardY = pBaseY + (isMobile ? 24 : 32) * pixelRatio;
-
-          ctx.drawImage(cardCanvas, cardX, cardY, cardWidth, cardHeight);
-        }
-
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 
         try {
@@ -561,7 +559,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
               navigator.share({
                 title: 'Satyadev - Wall of Belief',
-                text: 'I rooted for Satyadev... You can also root for Satyadev here: irootforsatyadev.com',
+                text: 'I shared why I root for Satyadev.\\nYou can share yours too: irootforsatyadev.com',
                 files: [file]
               }).finally(() => resolve());
             } else {
