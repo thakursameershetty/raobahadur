@@ -559,7 +559,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
               navigator.share({
                 title: 'Satyadev - Wall of Belief',
-                text: 'I shared why I root for Satyadev.\\nYou can share yours too: irootforsatyadev.com',
+                text: `I shared why I root for Satyadev.\nYou can share yours too: irootforsatyadev.com`,
                 files: [file]
               }).finally(() => resolve());
             } else {
