@@ -149,11 +149,15 @@ export default function SupportPage() {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Share your thoughts..."
+                        maxLength={100}
                         rows={3}
                         className="w-full bg-transparent border-b border-white/10 text-[#e7c879] placeholder:text-white/20 focus:outline-none focus:border-[#e7c879]/60 transition-colors py-2 resize-none text-lg md:text-xl font-light"
                         style={{ fontFamily: 'var(--font-inter), sans-serif' }}
                         required
                       />
+                      <div className="absolute bottom-[-24px] right-0 text-xs font-mono text-white/40 group-hover:text-[#e7c879]/60 transition-colors">
+                        {message.length}/100
+                      </div>
                     </div>
 
                     <button

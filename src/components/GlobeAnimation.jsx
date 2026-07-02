@@ -58,6 +58,17 @@ const DUMMY_MESSAGES = [
 
 export default function GlobeAnimation({ message, author, onBack, onNext }) {
   const mountRef = useRef(null);
+  const shareRef = useRef(null);
+  const [isSharing, setIsSharing] = useState(false);
+
+  const handleShare = async () => {
+    if (shareRef.current && !isSharing) {
+      setIsSharing(true);
+      await shareRef.current();
+      setIsSharing(false);
+    }
+  };
+
   useEffect(() => {
     const currentMount = mountRef.current;
     if (!currentMount) return;
@@ -68,7 +79,7 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     // EXACT MATCH to globe.html (no alpha: true) to prevent double CSS blending
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 
     // EXACT MATCH to Three.js r128 legacy color handling (prevents overexposure/brightness)
     renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
@@ -469,6 +480,105 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
       renderer.render(scene, camera);
     }
 
+    shareRef.current = async () => {
+      return new Promise((resolve) => {
+        renderer.render(scene, camera);
+        const webglCanvas = renderer.domElement;
+
+        const canvas = document.createElement('canvas');
+        const width = webglCanvas.width;
+        const height = webglCanvas.height;
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        ctx.drawImage(webglCanvas, 0, 0);
+
+        const gradHeight = height * 0.45;
+        const gradTop = height - gradHeight;
+        const gradient = ctx.createLinearGradient(0, gradTop, 0, height);
+        gradient.addColorStop(0, 'rgba(13,6,3,0)');
+        gradient.addColorStop(0.4, 'rgba(13,6,3,0.85)');
+        gradient.addColorStop(1, 'rgba(13,6,3,1)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, gradTop, width, gradHeight);
+
+        const isMobile = window.innerWidth < 768;
+        const cormorant = '"Cormorant Garamond", serif';
+        ctx.textAlign = 'center';
+
+        const pixelRatio = window.devicePixelRatio || 1;
+        const vhPixel = window.innerHeight * pixelRatio;
+
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 8 * pixelRatio;
+        ctx.shadowOffsetY = 2 * pixelRatio;
+        ctx.fillStyle = '#e7c879';
+        const topFontSize = (isMobile ? 16 : 18) * pixelRatio;
+        ctx.font = `500 ${topFontSize}px ${cormorant}`;
+        if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0.3em';
+        const topPos = 64 * pixelRatio;
+        ctx.fillText('WALL OF BELIEF', width / 2, topPos);
+
+        let h2FontSize = Math.max(24, Math.min(window.innerWidth * 0.06, 36)) * pixelRatio;
+        ctx.font = `500 ${h2FontSize}px ${cormorant}`;
+        if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0.2em';
+        const buttonsHeight = 40 * pixelRatio;
+        const pFontSize = 16 * pixelRatio;
+        const pBaseY = height - (vhPixel * 0.12) - buttonsHeight - (24 * pixelRatio);
+        const h2BaseY = pBaseY - pFontSize - (16 * pixelRatio);
+
+        ctx.fillText('TOGETHER WE RISE.', width / 2, h2BaseY);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = `400 ${pFontSize}px ${cormorant}`;
+        if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0.1em';
+        ctx.shadowBlur = 4 * pixelRatio;
+        ctx.fillText('I ROOT FOR SATYADEV ❤️', width / 2, pBaseY);
+
+        // --- DRAW THE USER'S CARD AS A 2D OVERLAY ---
+        const cardTexture = createTextTexture(message, author);
+        if (cardTexture && cardTexture.image) {
+          const cardCanvas = cardTexture.image;
+          const cardAspect = cardCanvas.width / cardCanvas.height;
+
+          // Make the card very small
+          const cardWidth = Math.min(width * (isMobile ? 0.35 : 0.18), 180 * pixelRatio);
+          const cardHeight = cardWidth / cardAspect;
+
+          // Position below the text
+          const cardX = (width - cardWidth) / 2;
+          const cardY = pBaseY + (isMobile ? 24 : 32) * pixelRatio;
+
+          ctx.drawImage(cardCanvas, cardX, cardY, cardWidth, cardHeight);
+        }
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+        try {
+          fetch(dataUrl).then(response => response.blob()).then(blob => {
+            const file = new File([blob], 'wall_of_belief.jpg', { type: 'image/jpeg' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              navigator.share({
+                title: 'Satyadev - Wall of Belief',
+                text: 'I rooted for Satyadev... You can also root for Satyadev here: irootforsatyadev.com',
+                files: [file]
+              }).finally(() => resolve());
+            } else {
+              const a = document.createElement('a');
+              a.href = dataUrl;
+              a.download = 'wall_of_belief.jpg';
+              a.click();
+              resolve();
+            }
+          });
+        } catch (e) {
+          console.error("Error sharing:", e);
+          resolve();
+        }
+      });
+    };
+
     animate();
 
     // Asynchronously fetch real database messages in the background AFTER 3 seconds (so swoop animation isn't stuttered)
@@ -556,37 +666,74 @@ export default function GlobeAnimation({ message, author, onBack, onNext }) {
           I root for Satyadev ❤️
         </p>
 
-        <button
-          onClick={onNext}
-          className="group relative overflow-hidden px-8 py-2 text-sm md:text-base tracking-[0.15em] uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap pointer-events-auto"
-          style={{
-            fontFamily: 'var(--font-inter), sans-serif',
-            border: '1px solid rgba(201,162,76,0.6)',
-            background: 'rgba(7,22,27,0.4)',
-            backdropFilter: 'blur(8px)',
-            color: '#e7c879',
-            borderRadius: '9999px',
-            boxShadow: '0 0 20px rgba(201,162,76,0.15), inset 0 0 0 1px rgba(201,162,76,0.1)',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'rgba(201,162,76,0.22)';
-            e.currentTarget.style.border = '1px solid rgba(201,162,76,0.95)';
-            e.currentTarget.style.boxShadow = '0 0 35px rgba(201,162,76,0.45), inset 0 0 0 1px rgba(201,162,76,0.3)';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(7,22,27,0.4)';
-            e.currentTarget.style.border = '1px solid rgba(201,162,76,0.6)';
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(201,162,76,0.15), inset 0 0 0 1px rgba(201,162,76,0.1)';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
-        >
-          <span className="relative z-10 flex items-center justify-center gap-2">
-            Next
-            <span className="material-symbols-rounded text-[18px] normal-case tracking-normal" style={{ textTransform: 'none' }}>chevron_right</span>
-          </span>
-        </button>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <button
+            onClick={handleShare}
+            disabled={isSharing}
+            className="group relative overflow-hidden px-8 py-2 text-sm md:text-base tracking-[0.15em] uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap pointer-events-auto disabled:opacity-50"
+            style={{
+              fontFamily: 'var(--font-inter), sans-serif',
+              border: '1px solid rgba(201,162,76,0.6)',
+              background: 'rgba(7,22,27,0.4)',
+              backdropFilter: 'blur(8px)',
+              color: '#e7c879',
+              borderRadius: '9999px',
+              boxShadow: '0 0 20px rgba(201,162,76,0.15), inset 0 0 0 1px rgba(201,162,76,0.1)',
+              cursor: isSharing ? 'wait' : 'pointer'
+            }}
+            onMouseEnter={e => {
+              if (isSharing) return;
+              e.currentTarget.style.background = 'rgba(201,162,76,0.22)';
+              e.currentTarget.style.border = '1px solid rgba(201,162,76,0.95)';
+              e.currentTarget.style.boxShadow = '0 0 35px rgba(201,162,76,0.45), inset 0 0 0 1px rgba(201,162,76,0.3)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={e => {
+              if (isSharing) return;
+              e.currentTarget.style.background = 'rgba(7,22,27,0.4)';
+              e.currentTarget.style.border = '1px solid rgba(201,162,76,0.6)';
+              e.currentTarget.style.boxShadow = '0 0 20px rgba(201,162,76,0.15), inset 0 0 0 1px rgba(201,162,76,0.1)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <span className="material-symbols-rounded text-[18px] normal-case tracking-normal" style={{ textTransform: 'none' }}>share</span>
+              {isSharing ? 'Sharing...' : 'Share'}
+            </span>
+          </button>
+
+          <button
+            onClick={onNext}
+            className="group relative overflow-hidden px-8 py-2 text-sm md:text-base tracking-[0.15em] uppercase font-semibold transition-all duration-500 ease-out whitespace-nowrap pointer-events-auto"
+            style={{
+              fontFamily: 'var(--font-inter), sans-serif',
+              border: '1px solid rgba(201,162,76,0.6)',
+              background: 'rgba(7,22,27,0.4)',
+              backdropFilter: 'blur(8px)',
+              color: '#e7c879',
+              borderRadius: '9999px',
+              boxShadow: '0 0 20px rgba(201,162,76,0.15), inset 0 0 0 1px rgba(201,162,76,0.1)',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(201,162,76,0.22)';
+              e.currentTarget.style.border = '1px solid rgba(201,162,76,0.95)';
+              e.currentTarget.style.boxShadow = '0 0 35px rgba(201,162,76,0.45), inset 0 0 0 1px rgba(201,162,76,0.3)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(7,22,27,0.4)';
+              e.currentTarget.style.border = '1px solid rgba(201,162,76,0.6)';
+              e.currentTarget.style.boxShadow = '0 0 20px rgba(201,162,76,0.15), inset 0 0 0 1px rgba(201,162,76,0.1)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              Next
+              <span className="material-symbols-rounded text-[18px] normal-case tracking-normal" style={{ textTransform: 'none' }}>chevron_right</span>
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Top Header: Wall of Belief */}

@@ -51,23 +51,26 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  overflow: hidden;
   margin: 0;
   padding: 0;
 }
 
-/* Hide default cursor globally to use custom HTML cursor */
-html,
-body,
-*,
-*::before,
-*::after,
-*:hover,
-*:active,
-*:focus,
-::-webkit-scrollbar,
-::-webkit-scrollbar-track,
-::-webkit-scrollbar-thumb {
+body:not(.admin-mode) {
+  overflow: hidden;
+}
+
+/* Hide default cursor globally unless in admin mode */
+html:not(.admin-mode),
+html:not(.admin-mode) body,
+html:not(.admin-mode) *:not(.admin-mode-keep-cursor),
+html:not(.admin-mode) *:not(.admin-mode-keep-cursor)::before,
+html:not(.admin-mode) *:not(.admin-mode-keep-cursor)::after,
+html:not(.admin-mode) *:not(.admin-mode-keep-cursor):hover,
+html:not(.admin-mode) *:not(.admin-mode-keep-cursor):active,
+html:not(.admin-mode) *:not(.admin-mode-keep-cursor):focus,
+html:not(.admin-mode) ::-webkit-scrollbar,
+html:not(.admin-mode) ::-webkit-scrollbar-track,
+html:not(.admin-mode) ::-webkit-scrollbar-thumb {
   cursor: none !important;
 }
 
